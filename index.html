@@ -793,10 +793,7 @@
             white-space: pre-wrap; /* Wrap text in pre tag */
             word-break: break-all; /* Break long words */
         }
-        #quizDebugScores.hidden {
-            opacity: 0;
-            pointer-events: none; /* Disable interaction when hidden */
-        }
+        /* Removed .hidden class default opacity, now controlled by JS */
     </style>
 </head>
 <body class="bg-gradient-to-br from-green-100 via-blue-100 to-purple-100 min-h-screen flex items-center justify-center p-4">
@@ -942,7 +939,7 @@
         </div>
 
         <!-- Live Debug Scores during Quiz -->
-        <div id="quizDebugScores" class="hidden">
+        <div id="quizDebugScores">
             <h5>คะแนนปัจจุบัน:</h5>
             <pre id="quizScoresDisplay"></pre>
         </div>
@@ -1557,7 +1554,9 @@
 
                 for (const element in selectedAnswerScores) {
                     if (scores.hasOwnProperty(element)) {
+                        console.log(`    [Q${currentQuestionIndex + 1}] Updating ${element}: From ${scores[element]} + ${selectedAnswerScores[element]}`);
                         scores[element] += selectedAnswerScores[element];
+                        console.log(`    [Q${currentQuestionIndex + 1}] ${element} new value: ${scores[element]}`);
                     }
                 }
 
