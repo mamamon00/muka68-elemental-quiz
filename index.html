@@ -1465,21 +1465,28 @@
              * Updates the debug score display and applies a visual flash.
              */
             function updateDebugScoresDisplay() {
-                let scoreText = '';
-                for (const element of allElements) {
-                    // Ensure the score is a number and format to 1 decimal place
-                    scoreText += `${element.split(' ')[0]}: ${(scores[element] !== undefined ? scores[element] : 0).toFixed(1)} คะแนน\n`; 
-                }
-                quizScoresDisplay.textContent = scoreText;
-                console.log(`Updated quizScoresDisplay content: \n${scoreText}`);
+                // Ensure the element exists before trying to update it
+                if (quizScoresDisplay) { 
+                    let scoreText = '';
+                    for (const element of allElements) {
+                        // Ensure the score is a number and format to 1 decimal place
+                        scoreText += `${element.split(' ')[0]}: ${(scores[element] !== undefined ? scores[element] : 0).toFixed(1)} คะแนน\n`; 
+                    }
+                    quizScoresDisplay.textContent = scoreText;
+                    console.log(`Updated quizScoresDisplay content: \n${scoreText}`);
 
-                // Visual flash effect
-                quizDebugScores.style.transition = 'none'; // Disable transition for immediate flash
-                quizDebugScores.style.backgroundColor = 'rgba(255, 255, 0, 0.8)'; // Bright yellow for flash
-                setTimeout(() => {
-                    quizDebugScores.style.transition = 'background-color 0.3s ease-in-out'; // Re-enable transition
-                    quizDebugScores.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; // Return to original color
-                }, 100);
+                    // Visual flash effect on quizDebugScores container
+                    if (quizDebugScores) { // Ensure the container also exists
+                        quizDebugScores.style.transition = 'none'; // Disable transition for immediate flash
+                        quizDebugScores.style.backgroundColor = 'rgba(255, 255, 0, 0.8)'; // Bright yellow for flash
+                        setTimeout(() => {
+                            quizDebugScores.style.transition = 'background-color 0.3s ease-in-out'; // Re-enable transition
+                            quizDebugScores.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; // Return to original color
+                        }, 100);
+                    }
+                } else {
+                    console.warn('quizScoresDisplay or quizDebugScores element not found for updating debug scores.');
+                }
             }
 
             /**
@@ -1521,7 +1528,10 @@
                     });
                 });
                 updateProgressBar();
-                quizDebugScores.classList.remove('hidden'); // Ensure debug scores are visible during quiz
+                // Check if quizDebugScores exists before trying to manipulate its class
+                if (quizDebugScores) {
+                    quizDebugScores.classList.remove('hidden'); // Ensure debug scores are visible during quiz
+                }
                 updateDebugScoresDisplay(); // Update debug scores for the new question
             }
 
@@ -1562,7 +1572,10 @@
                     displayQuestion();
                 } else {
                     quizScreen.classList.add('hidden');
-                    quizDebugScores.classList.add('hidden'); // Hide debug scores when going to loading/result
+                    // Check if quizDebugScores exists before trying to manipulate its class
+                    if (quizDebugScores) {
+                        quizDebugScores.classList.add('hidden'); // Hide debug scores when going to loading/result
+                    }
                     loadingScreen.classList.remove('hidden');
                     
                     gameApp.classList.remove('intro-active');
@@ -1749,7 +1762,10 @@
                 loadingScreen.classList.add('hidden');
                 introScreen.classList.remove('hidden');
                 
-                quizDebugScores.classList.add('hidden'); // Hide debug scores at start of game
+                // Check if quizDebugScores exists before trying to manipulate its class
+                if (quizDebugScores) {
+                    quizDebugScores.classList.add('hidden'); // Hide debug scores at start of game
+                }
 
                 gameApp.classList.add('intro-active');
                 introPagesContainer.classList.remove('transparent-frame');
