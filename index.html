@@ -3,29 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ดินแดนศักดิ์สิทธิ์มู่คา: ค้นหาธาตุประจำตัวคุณ</title>
+    <title>ดินแดนศักดิ์สิทธิ์มู่คา: ค้นหาธาตุประจำตัวคุณ (เวอร์ชันล่าสุด)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for Noto Sans Thai -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts for Thai (Noto Sans Thai) and Chinese style fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Custom styles for the game */
         body {
-            font-family: 'Noto Sans Thai', sans-serif;
-            background-color: #f7fafc; /* Light gray background */
+            font-family: 'Noto Sans Thai', sans-serif; /* Default for body to ensure Thai readability */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
             box-sizing: border-box;
+            /* Base background for the whole app (default, or when quiz/result is active) */
             background: linear-gradient(to bottom right, #e0f2f7, #e8eaf6, #e0f2f7); /* Soft yellowish-greenish-bluish gradient */
+            transition: background 1s ease-in-out; /* Smooth transition for background changes */
+            position: relative; /* Needed for ::before */
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        /* Specific body backgrounds for intro pages 0-3 (subtle variations) */
+        body.intro-bg-0 { background: linear-gradient(to bottom right, #e0f7f9, #d0eff4, #e0f7f9); } /* Light Cyan Blue */
+        body.intro-bg-1 { background: linear-gradient(to bottom right, #dff0f5, #d2e4eb, #dff0f5); } /* Slightly Greener Blue */
+        body.intro-bg-2 { background: linear-gradient(to bottom right, #d8e6eb, #c8dee4, #d8e6eb); } /* Muted Grey-Blue */
+        body.intro-bg-3 { background: linear-gradient(to bottom right, #eafbff, #e1f5fe, #eafbff); } /* Pale Blue */
+
+        /* Element-specific background gradients - ADJUSTED FOR SOFTER COLORS */
+        body.bg-earth { background: linear-gradient(to bottom right, #FDFDF7, #EFEBE0, #FFFFFF); } /* ดิน: Very Light Cream, Light Beige, White */
+        body.bg-wind { background: linear-gradient(to bottom right, #F8F8F8, #EFEFEF, #FFFFFF); } /* ลม: Very Light Gray, Off-White, White */
+        body.bg-fire { background: linear-gradient(to bottom right, #FFF5EB, #FFF8F0, #FFFFFF); } /* ไฟ: Very Light Peach/Orange, Lighter, White */
+        body.bg-water { background: linear-gradient(to bottom right, #F0F8FF, #F5FFFF, #FFFFFF); } /* น้ำ: AliceBlue, Very Light Cyan, White */
+        body.bg-lightning { background: linear-gradient(to bottom right, #FFFCE0, #FFFDF0, #FFFFFF); } /* สายฟ้า: Very Pale Yellow, Almost White, White */
+        body.bg-light { background: linear-gradient(to bottom right, #FFFDE0, #FFFEE0, #FFFFFF); } /* แสง: Very Very Pale Yellow, Almost White, White */
+        body.bg-darkness { background: linear-gradient(to bottom right, #EFE0F5, #F5EBF8, #FFFFFF); } /* ความมืด: Very Pale Lavender/Grey-Purple, Nearly White, White */
+        body.bg-nature { background: linear-gradient(to bottom right, #F0FFF0, #F8FFF8, #FFFFFF); } /* พฤกษา: HoneyDew, Lighter Green, Very Light Green */
+        body.bg-psychic { background: linear-gradient(to bottom right, #FFEFF5, #FFF9EB, #EAFBF5, #EBF5FF, #EFEBFD); } /* พลังจิต: Very Pale Pink, Pale Yellow, Pale Green, Pale Blue, Pale Purple */
+        body.bg-metal { background: linear-gradient(to bottom right, #E0E8EF, #EBF0F5, #FFFFFF); } /* โลหะ: Very Light Blue-Gray, Lighter Blue-Gray, White */
+
+        /* Overlay for the final intro page (body background is still light, but this darkens it) */
+        body.final-intro-overlay-active::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* 70% black overlay */
+            z-index: -1; /* Behind game-container, but on top of body's own background */
+            transition: background-color 1.5s ease-in-out;
+            pointer-events: none;
         }
 
         .game-container {
-            background-color: #ffffff;
+            background-color: transparent; /* Changed to transparent by default for dynamic background */
             border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: none; /* Removed default shadow, handled by content frames */
             max-width: 800px;
             width: 100%;
             padding: 30px;
@@ -33,6 +68,15 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow: hidden; /* Prevent content overflow during animations */
+            transition: background-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out, padding 0.5s ease-in-out;
+        }
+
+        /* Game container styles during intro */
+        .game-container.intro-active {
+            background-color: transparent;
+            box-shadow: none;
+            padding: 0; /* No padding around the intro content */
         }
 
         .button-primary {
@@ -57,6 +101,10 @@
             background-image: linear-gradient(to right, #3B82F6, #6EE7B7);
         }
 
+        .button-primary.pulsate {
+            animation: pulseGlow 1.5s infinite ease-in-out;
+        }
+
         .button-secondary {
             background-color: #e2e8f0;
             color: #4a5568;
@@ -77,33 +125,63 @@
             transform: translateY(-1px);
         }
 
+        /* Intro Page Specific Styles */
+        #introScreen {
+            position: relative; /* For the title animation and tap-to-continue text */
+            width: 100%;
+        }
+        
+        #introTitle {
+            font-family: 'Ma Shan Zheng', cursive, 'Noto Sans Thai', sans-serif; /* Chinese-style font for title */
+            transition: opacity 0.5s ease-out; /* Smooth fade for title */
+        }
+        #introTitle.hidden-title {
+            opacity: 0;
+            pointer-events: none; /* Make it unclickable/uninteractable */
+        }
+
         .intro-page-content {
+            font-family: 'Noto Serif SC', serif, 'Noto Sans Thai', sans-serif; /* Chinese-style serif for intro content */
             display: none; /* Hidden by default */
+            width: 100%; /* Ensure it fills parent */
+            box-sizing: border-box; /* Include padding in width calculation */
+            position: relative; /* For text styling and z-index */
+            opacity: 0; /* Initial state for fade-in */
+            transition: opacity 0.5s ease-out; /* Fade out when inactive */
+            z-index: 2; /* Ensure intro content is above the game-container's background and body background */
         }
         .intro-page-content.active {
             display: block; /* Shown when active */
+            opacity: 1; /* Fully visible */
         }
 
-        /* Specific background for intro pages 0 and 1 */
-        .intro-page-0-bg {
-            background-image: url('2.jpg'); /* The image from the user */
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            padding: 20px; /* Add padding to prevent text from touching edges */
-            border-radius: 15px;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.2); /* Subtle inner shadow for depth */
+        /* Specific animations for elements inside intro pages */
+        .intro-page-content p {
+            opacity: 0;
+            /* Removed translateY for fade-in effect */
+            transition: opacity 1.5s ease-out; /* Smooth transition for reveal (increased speed) */
+            will-change: opacity; /* Optimize for animation */
         }
-        /* Make sure the image is covering the full page for the intro section */
-        #introScreen {
-            background-color: transparent; /* Make intro screen background transparent to show image */
+        .intro-page-content p.show {
+            opacity: 1;
         }
+
+        /* The container for intro pages text */
         #introPagesContainer {
-            background-color: rgba(255, 255, 255, 0.85); /* Slightly transparent white background for text readability */
+            background-color: rgba(255, 255, 255, 0.8); /* 80% opaque white background for text readability (default) */
             padding: 25px;
             border-radius: 15px;
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            cursor: pointer; /* Indicate that the container is clickable */
+            transition: all 0.5s ease-in-out; /* Fade for container when switching content + color change */
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        /* Text color for standard intro pages (inside the semi-transparent white container) */
+        .intro-page-content p {
+            color: #4a5568; /* Softened color (gray-700) */
         }
 
         /* Custom color for intro highlights */
@@ -111,17 +189,55 @@
             color: #6092b1; /* Custom color as requested, assuming #6092b1 */
         }
 
+        /* Styles for the last intro page's container when it turns transparent */
+        #introPagesContainer.transparent-frame {
+            background-color: transparent; /* Make it transparent */
+            box-shadow: none; /* Remove shadow */
+            padding: 0; /* Remove padding for page 5 */
+            margin-bottom: 0; /* Remove margin for page 5 */
+        }
 
-        .next-intro-button {
+        /* Text color inside the transparent frame on page 5 */
+        #introPagesContainer.transparent-frame .intro-page-content p { /* Target paragraphs inside the black-frame container */
+            color: white;
+            animation: flicker 1.0s infinite alternate; /* Subtle opacity flicker */
+        }
+        #introPagesContainer.transparent-frame .intro-page-content .text-intro-highlight {
+            color: #92e0f7; /* Lighter highlight for dark background */
+        }
+
+        /* Tap to continue text */
+        .tap-to-continue-text {
+            font-size: 0.9rem;
+            color: #a0aec0; /* Light gray for subtle text */
+            margin-top: 15px; /* Space from intro container */
             opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            pointer-events: none; /* Prevents clicks when hidden */
+            transition: opacity 0.5s ease-out;
         }
-        .next-intro-button.visible {
+        .tap-to-continue-text.show {
             opacity: 1;
-            pointer-events: auto; /* Allows clicks when visible */
         }
 
+        /* Keyframes for animations */
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transform: scale(1); }
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 4px 15px rgba(0, 0, 0, 0.2); transform: scale(1.02); }
+            100% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transform: scale(1); }
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; } /* Slight fade in opacity for flicker effect */
+        }
+
+        /* Hourglass animation */
+        @keyframes hourglassTilt {
+            0% { transform: rotateZ(-10deg) scale(1); }
+            50% { transform: rotateZ(10deg) scale(1.05); }
+            100% { transform: rotateZ(-10deg) scale(1); }
+        }
+
+        /* Quiz Section Styles */
         .question-card {
             background-color: #f0f9ff; /* Light blue background for questions */
             border-radius: 15px;
@@ -129,6 +245,13 @@
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             text-align: left;
+            opacity: 0; /* Hidden for fade in */
+            transform: translateY(-20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        .question-card.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .question-text {
@@ -136,6 +259,13 @@
             font-weight: bold;
             color: #4a5568; /* Softened color (gray-700) */
             margin-bottom: 20px;
+            opacity: 0; /* Controlled by JS and .show class */
+            transform: translateY(-20px); /* Controlled by JS and .show class */
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .question-text.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .answer-option {
@@ -147,25 +277,86 @@
             padding: 15px;
             margin-bottom: 12px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease; /* Increased transition duration */
+            opacity: 0; /* Controlled by JS and .show class */
+            transform: translateY(20px); /* Controlled by JS and .show class */
+            position: relative; /* For radio button positioning */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
         .answer-option:hover {
             border-color: #6EE7B7;
             background-color: #f0fdf4; /* Light green hover */
-            transform: translateY(-2px);
+            transform: translateY(-3px); /* More pronounced hover effect */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .answer-option.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .answer-option.selected {
+            border-color: #3B82F6; /* Blue border for selected */
+            background-color: #e0f2fe; /* Lighter blue background */
+            transform: translateY(-1px); /* Slight lift on select */
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
         }
 
         .answer-option input[type="radio"] {
-            margin-right: 15px;
-            transform: scale(1.5); /* Larger radio button */
-            accent-color: #3B82F6; /* Blue accent color */
+            /* Visually hide the actual radio button but keep it functional */
+            position: absolute;
+            left: 15px; /* Align with padding */
+            top: 50%;
+            transform: translateY(-50%) scale(1.5);
+            opacity: 0; /* Hide the radio button */
+            pointer-events: none; /* Make it not interfere with click on label */
+            width: 0;
+            height: 0;
+            margin: 0;
         }
 
         .answer-option span {
             font-size: 1.125rem; /* text-lg */
             color: #718096; /* Softened color (gray-600) */
+            flex-grow: 1; /* Allow text to take available space */
+            text-align: left; /* Align text left within the card */
+            padding-left: 20px; /* Space for a custom radio indicator if desired */
         }
+        .answer-option.selected span {
+            color: #3B82F6; /* Blue text for selected option */
+            font-weight: bold;
+        }
+        /* Custom Radio Indicator */
+        .answer-option::before {
+            content: '';
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #94a3b8; /* Border color for unselected */
+            margin-right: 15px;
+            display: inline-block;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+        .answer-option.selected::before {
+            border-color: #3B82F6; /* Border color for selected */
+            background-color: #3B82F6; /* Fill color for selected */
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); /* Outer glow for selected */
+        }
+        .answer-option.selected::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: white;
+            position: absolute;
+            left: 24px; /* Adjust based on ::before position */
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.2s ease;
+        }
+
 
         .progress-bar-container {
             width: 100%;
@@ -186,138 +377,257 @@
 
         /* Result Section Styling */
         .result-section {
-            background-color: #ecfdf5; /* Light green background for results */
-            border-radius: 15px;
-            padding: 25px; /* Reduced padding for compactness */
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            background-color: transparent; /* Make result section transparent to reveal body background */
+            border-radius: 15px; /* Keep border radius */
+            padding: 0; /* Remove internal padding, let main-result-content handle it */
+            box-shadow: none; /* Remove box shadow, let main-result-content handle it if needed */
             display: flex;
             flex-direction: column;
-            gap: 15px; /* Reduced gap between result frames */
+            gap: 10px; /* Reduced */
         }
 
-        .result-frame {
-            background-color: #ffffff;
-            border-radius: 15px;
-            padding: 20px; /* Reduced padding for compactness */
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        .main-result-content {
+            background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+            backdrop-filter: blur(8px); /* Frosted glass effect */
+            border-radius: 15px; /* Match result-section border-radius */
+            padding: 25px; /* Add padding here */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Add shadow here */
+            display: flex;
+            flex-direction: column;
+            gap: 12px; /* Reduced from 15px to bring sections closer */
+            text-align: left; /* Align text within this frame */
+        }
+
+        .element-summary {
             text-align: center;
+            margin-bottom: 8px; /* Reduced from 10px */
+            padding-bottom: 8px; /* Reduced from 10px */
+            border-bottom: 1px dashed #e2e8f0; /* Separator */
         }
 
         .element-title {
-            font-size: 2.25rem; /* text-4xl */
+            font-size: 2rem; /* Reduced */
             font-weight: bold;
-            color: #065F46; /* Dark green - kept for elemental distinction */
-            margin-bottom: 15px;
+            color: var(--element-dynamic-title-color); /* Dynamic color based on element */
+            margin-bottom: 8px; /* Reduced from 10px */
+        }
+        /* Style for the element's title/subtitle line 2 */
+        .element-subtitle {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: bold;
+            color: #3B82F6; /* A matching blue */
+            margin-top: -5px; /* Pull it closer to the main title */
+            margin-bottom: 8px; /* Reduced from 10px */
         }
 
+
         .element-description {
-            font-size: 1rem; /* Slightly reduced for compactness */
-            color: #718096; /* Softened color (gray-600) */
-            line-height: 1.6; /* Reduced line height */
-            text-align: justify;
-            margin-bottom: 10px; /* Reduced margin */
+            font-family: 'Noto Serif SC', serif, 'Noto Sans Thai', sans-serif; /* Chinese-style serif for description */
+            font-size: 0.95rem; /* Reduced */
+            color: #333333; /* Darker grey for better contrast */
+            line-height: 1.6;
+            text-align: justify; /* Justify text for better readability */
+            margin-bottom: 4px; /* Reduced from 5px */
+            font-weight: 700; /* Increased boldness */
+            text-indent: 2em; /* Added indentation */
         }
 
         .element-icon-container {
-            width: 100px; /* Slightly smaller icon */
-            height: 100px; /* Slightly smaller icon */
-            background-color: #e0f2f7; /* Light blue background for icon */
+            width: 80px; /* Reduced */
+            height: 80px; /* Reduced */
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 15px; /* Reduced margin */
+            margin: 0 auto 8px; /* Reduced from 10px */
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--element-dynamic-title-color); /* Border color based on element */
         }
 
         .element-icon {
-            font-size: 3.5rem; /* Slightly smaller emoji size */
-            animation: bounce 2s infinite ease-in-out; /* Basic animation */
+            font-size: 3rem; /* Reduced */
+            color: var(--element-dynamic-title-color); /* Icon color based on element */
+            animation: bounce 2s infinite ease-in-out, glowEffectCustom 1.5s infinite alternate; /* Combined animations */
+        }
+        @keyframes glowEffectCustom {
+            0% { text-shadow: 0 0 5px rgba(255,255,255,0.7); }
+            100% { text-shadow: 0 0 15px var(--element-dynamic-title-color), 0 0 25px rgba(59, 130, 246, 0.6); } /* Glow color matches title */
         }
 
         @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .keywords-container {
+            margin-top: 5px; /* Added margin-top to bring it closer to description */
+            margin-bottom: 8px; /* Reduced from 10px */
+            padding-bottom: 8px; /* Reduced from 10px */
+            border-bottom: 1px dashed #e2e8f0; /* Separator */
+            text-align: center; /* Center keywords within this container */
+        }
+
+        .keywords-grid {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px; /* Reduced gap */
-            margin-top: 0px; /* Removed top top margin */
+            gap: 8px; /* Slightly increased from 6px for larger boxes */
+            justify-content: center; /* Center keywords */
         }
 
         .keyword-box {
-            background-color: #d1fae5; /* Light green - kept for pastel feel */
+            background-color: rgba(255, 255, 255, 0.7); /* White with transparency - General soft */
             color: #065f46; /* Dark green - kept for elemental distinction */
-            padding: 6px 12px; /* Reduced padding */
+            padding: 8px 16px; /* Increased from 6px 14px for larger boxes */
             border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.9rem; /* Slightly smaller font */
+            font-weight: 700; /* Increased boldness */
+            font-size: 1rem; /* Increased from 0.95rem */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05); /* Subtle border */
         }
-
-        .compatibility-section {
+        
+        /* New two-column layout for result details */
+        .two-column-result-section {
             display: flex;
+            flex-wrap: wrap; /* Allows columns to wrap on smaller screens */
+            gap: 20px; /* Space between columns */
+            margin-top: 10px; /* Space from keywords */
+            margin-bottom: 10px; /* Space before final message */
+            justify-content: center; /* Center content horizontally if it doesn't fill the width */
+        }
+        .two-column-result-section > div { /* Target direct children which are columns */
+            flex: 1; /* Allow columns to grow and shrink */
+            min-width: 280px; /* Minimum width before wrapping */
+            background-color: #ffffff; /* White background for each column frame */
+            border-radius: 15px;
+            padding: 15px; /* Padding inside each column frame */
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            display: flex; /* Make content inside column flex to align header and list */
             flex-direction: column;
-            gap: 8px; /* Reduced gap */
-            text-align: left;
         }
 
-        .compatibility-item {
+        /* Adjustments for Pros/Cons and Compatibility sections to fit in columns */
+        .pros-cons-section {
+            margin-top: 0; /* Remove top margin as it's now inside a column container */
+            margin-bottom: 0; /* Remove bottom margin */
+            padding-bottom: 0; /* Remove bottom padding as separator will be on parent */
+            border-bottom: none; /* Remove separator, handled by parent column structure if needed */
+        }
+        .pros-cons-section h4 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 4px; /* Reduced from 6px */
+            text-align: center; /* Center Pros/Cons heading */
+        }
+        .pros-cons-list-item {
+            font-family: 'Noto Serif SC', serif, 'Noto Sans Thai', sans-serif; /* Chinese-style serif for pros/cons */
             display: flex;
-            align-items: flex-start; /* Align icon to top of text */
-            gap: 8px; /* Reduced gap */
-            font-size: 0.95rem; /* Slightly smaller font */
-            color: #718096; /* Softened general compatibility text */
-            line-height: 1.4; /* For multi-line descriptions */
+            align-items: flex-start;
+            gap: 6px;
+            font-size: 0.88rem; /* Slightly reduced */
+            color: #333333; /* Darker grey for better contrast */
+            line-height: 1.4;
+            margin-bottom: 2px; /* Reduced from 4px */
+            font-weight: 700; /* Increased boldness */
+            text-indent: 1em; /* Added indentation for list items */
+        }
+        .pros-cons-list-item strong {
+            font-weight: 700; /* Make strong tags even bolder */
+            color: #1a202c; /* Even darker for emphasis */
+            flex-shrink: 0;
+            margin-right: 4px; /* Space between label and description */
+        }
+        .pros-icon {
+            font-size: 1rem;
+            color: #10B981; /* Green check */
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .cons-icon {
+            font-size: 1rem;
+            color: #EF4444; /* Red x */
+            flex-shrink: 0;
+            margin-top: 2px;
         }
 
-        .compatibility-item.positive {
-            color: #065f46; /* Green for compatible - kept for distinction */
+
+        .compatibility-section-group {
+            margin-top: 0; /* Remove top margin as it's now inside a column container */
+            gap: 6px; /* Reduced from 8px */
         }
-        .compatibility-item.negative {
-            color: #dc2626; /* Red for conflicting - kept for distinction */
+        .compatibility-section-group h4 {
+            font-size: 1.1rem; /* Reduced */
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 4px; /* Reduced from 6px */
+            text-align: center; /* Center compatibility heading */
+        }
+
+        .compatibility-list-item {
+            font-family: 'Noto Serif SC', serif, 'Noto Sans Thai', sans-serif; /* Chinese-style serif for compatibility */
+            display: flex;
+            align-items: flex-start;
+            gap: 6px; /* Reduced */
+            font-size: 0.88rem; /* Slightly reduced */
+            color: #333333; /* Darker grey for better contrast */
+            line-height: 1.3; /* More compact line height */
+            font-weight: 700; /* Increased boldness */
+            text-indent: 1em; /* Added indentation for list items */
+        }
+
+        .compatibility-list-item.positive {
+            color: #065f46;
+        }
+        .compatibility-list-item.negative {
+            color: #dc2626;
         }
 
         .compatibility-icon {
-            font-size: 1.1rem; /* Slightly smaller icon */
-            flex-shrink: 0; /* Prevent icon from shrinking */
-            margin-top: 2px; /* Adjust vertical alignment */
+            font-size: 1rem; /* Reduced */
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        /* Specific header list items adjustments */
+        .compatibility-list-item.font-semibold.text-green-700.mb-2 {
+            margin-bottom: 4px; /* Reduced from 8px (mb-2 default) */
+            text-indent: 0; /* No indent for headers */
+        }
+        .compatibility-list-item.font-semibold.text-red-700.mb-2.mt-4 {
+            margin-top: 6px; /* Keep some separation */
+            margin-bottom: 4px; /* Reduced from 8px (mb-2 default) */
+            text-indent: 0; /* No indent for headers */
         }
 
         .enrollment-link-frame {
-            background-color: #e0f2f7; /* Light blue for enrollment frame */
+            background-color: rgba(240, 248, 255, 0.7); /* AliceBlue with transparency - Softened */
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px; /* Reduced */
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
             text-align: center;
-            margin-top: 15px; /* Add some margin from previous frame */
+            margin-top: 10px; /* Reduced */
         }
         .enrollment-link-frame h4 {
-            font-size: 1.8rem;
+            font-size: 1.6rem; /* Reduced */
             font-weight: bold;
-            color: #5a7d9f; /* Softened blue */
-            margin-bottom: 10px;
+            color: #5a7d9f;
+            margin-bottom: 8px; /* Reduced */
         }
         .enrollment-link-frame p {
-            font-size: 0.95rem;
-            color: #829db7; /* Softened blue-gray */
-            margin-bottom: 15px;
+            font-size: 0.9rem; /* Reduced */
+            color: #829db7;
+            margin-bottom: 12px; /* Reduced */
         }
         .enrollment-link-frame a {
-            display: inline-block;
-            background-image: linear-gradient(to right, #3B82F6, #8B5CF6); /* Blue to Purple */
+            display: block;
+            width: fit-content;
+            margin: 0 auto;
+            background-image: linear-gradient(to right, #3B82F6, #8B5CF6);
             color: white;
-            padding: 10px 24px;
+            padding: 8px 20px; /* Reduced */
             border-radius: 9999px;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.95rem; /* Reduced */
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             text-decoration: none;
@@ -338,63 +648,83 @@
             min-height: 300px;
         }
 
-        .spinner {
-            border: 8px solid #f3f3f3; /* Light grey */
-            border-top: 8px solid #3B82F6; /* Blue */
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
+        .spinner-icon { /* New spinner style (hourglass) */
+            font-size: 4rem; /* Large enough */
+            color: #3B82F6; /* Blue, matching primary button */
+            display: inline-block; /* Essential for proper display */
+            animation: hourglassTilt 2s infinite ease-in-out; /* Apply animation */
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        /* Removed old .spinner styles */
 
         /* Responsive adjustments */
         @media (max-width: 640px) {
             .game-container {
-                padding: 15px; /* More compact on small screens */
+                padding: 15px;
             }
             .question-text {
-                font-size: 1.15rem; /* text-xl on small screens */
+                font-size: 1.15rem;
             }
             .answer-option {
-                padding: 10px; /* More compact */
+                padding: 10px;
             }
             .answer-option span {
-                font-size: 0.95rem; /* text-base on small screens */
+                font-size: 0.95rem;
             }
             .element-title {
-                font-size: 1.5rem; /* Smaller for mobile */
+                font-size: 1.5rem;
+            }
+            .element-subtitle {
+                font-size: 1rem;
             }
             .element-description {
-                font-size: 0.9rem; /* Smaller for mobile */
+                font-size: 0.9rem;
+                text-indent: 1.5em; /* Smaller indent for mobile */
             }
             .element-icon-container {
-                width: 80px;
-                height: 80px;
+                width: 70px; /* Further reduced for mobile */
+                height: 70px; /* Further reduced for mobile */
             }
             .element-icon {
                 font-size: 2.5rem;
             }
             .keyword-box {
-                font-size: 0.8rem;
-                padding: 5px 10px;
+                font-size: 0.9rem; /* Adjusted for mobile */
+                padding: 6px 14px; /* Adjusted for mobile */
             }
-            .compatibility-item {
+            .compatibility-list-item, .pros-cons-list-item {
                 font-size: 0.85rem;
+                text-indent: 0.8em; /* Smaller indent for mobile */
             }
             .enrollment-link-frame h4 {
-                font-size: 1.5rem;
+                font-size: 1.4rem; /* Further reduced for mobile */
             }
             .enrollment-link-frame p {
-                font-size: 0.85rem;
+                font-size: 0.8rem; /* Further reduced for mobile */
             }
             .enrollment-link-frame a {
-                padding: 8px 20px;
-                font-size: 0.9rem;
+                padding: 6px 18px; /* Further reduced for mobile */
+                font-size: 0.85rem; /* Further reduced for mobile */
+            }
+            .intro-page-content p.indent-text {
+                text-indent: 1.5em; /* Smaller indent for mobile */
+            }
+            .loading-screen p:first-of-type { /* First paragraph in loading screen */
+                font-size: 1.5rem; /* Adjust for mobile */
+            }
+            .loading-screen p:last-of-type { /* Second paragraph in loading screen */
+                font-size: 1rem; /* Adjust for mobile */
+            }
+            .tap-to-continue-text {
+                font-size: 0.8rem;
+            }
+            .two-column-result-section {
+                flex-direction: column; /* Stack columns on small screens */
+                gap: 15px; /* Space between stacked columns */
+            }
+            .two-column-result-section > div {
+                min-width: auto; /* Remove min-width when stacking */
+                width: 100%; /* Take full width when stacked */
             }
         }
         /* New style for indented paragraphs in intro */
@@ -406,53 +736,53 @@
 </head>
 <body class="bg-gradient-to-br from-green-100 via-blue-100 to-purple-100 min-h-screen flex items-center justify-center p-4">
     <div id="gameApp" class="game-container">
-        <!-- Introduction Section -->
         <div id="introScreen" class="space-y-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-700 mb-4">
-                ยินดีต้อนรับสู่ <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-blue-600">ดินแดนศักดิ์สิทธิ์มู่คา</span>
-            </h1>
+            <h1 id="introTitle" class="text-3xl md:text-4xl font-bold text-gray-700 mb-4">
+                </h1>
 
-            <!-- Intro Pages -->
             <div id="introPagesContainer">
-                <div class="intro-page-content active intro-page-0-bg" data-page="0">
+                <div class="intro-page-content" data-page="0">
                     <p class="text-lg text-gray-600 mb-4 indent-text">
                         ณ ดินแดนศักดิ์สิทธิ์ มู่คา (木霞) หุบเขาเวทมนตร์เร้นลับ ที่แสงอรุณแรกจะทอดผ่านยอดไม้ใหญ่เฉพาะยามรุ่งสาง ราวกับสวรรค์ซ่อนอยู่ในโลกมนุษย์ ทุกสรรพสิ่งในผืนแผ่นดินนี้ล้วนดำรงอยู่ด้วย <span class="font-semibold text-intro-highlight">พลังวิญญาณ</span> ซึ่งไหลเวียนเป็นหนึ่งเดียวกับธรรมชาติ
                     </p>
+                </div>
+                <div class="intro-page-content" data-page="1">
                     <p class="text-lg text-gray-600 mb-4 indent-text">
                         ทุกชีวิตที่ถือกำเนิด ณ แดนนี้ ล้วนผูกพันกับ “ธาตุประจำตัว” ซึ่งสะท้อนจิตวิญญาณแท้จริงในก้นบึ้งของตนเอง ธาตุทั้งสิบได้แก่ <span class="font-semibold text-intro-highlight">ดิน น้ำ ลม ไฟ สายฟ้า แสง ความมืด พฤกษา โลหะ และพลังจิต</span> ธาตุประจำตัวนี้คือแก่นกลางของตัวตน ไม่ว่าใครจะฝึกฝนวิชา ณ สำนักใด ก็ไม่อาจเปลี่ยนแปลงสิ่งนี้ได้
                     </p>
                 </div>
-                <div class="intro-page-content intro-page-0-bg" data-page="1">
+                <div class="intro-page-content" data-page="2">
                     <p class="text-lg text-gray-600 mb-4 indent-text">
                         เมื่อกาลเวลาผันผ่าน วิถีเซียนแห่งดินแดนมู่คาได้ผลิดอกออกผล กลายเป็น<span class="font-semibold text-intro-highlight">"สิบสำนักใหญ่"</span> ซึ่งแต่ละสำนักสืบทอดศาสตร์ลึกล้ำแห่งธาตุที่ตนเชี่ยวชาญ สำนักทั้งสิบเป็นดั่งเสาหลักของยุทธภพและเป็นที่พึ่งของผู้แสวงหาพลัง.
                     </p>
+                </div>
+                <div class="intro-page-content" data-page="3">
                     <p class="text-lg text-gray-600 mb-4 indent-text">
                         ในทุกปีเมื่อยามเดือนเจ็ดมาถึง จะมีการจัด <span class="font-semibold text-intro-highlight">“เทศกาลท้าประลองแห่งยุทธภพ”</span> เพื่อเปิดโอกาสให้เหล่าผู้ฝึกวิชา ไม่ว่าจะศิษย์จากสำนักใหญ่หรือพเนจรจากแดนไกล ก็สมัครเข้าร่วมการประลองด้วยตนเอง หากผ่านการคัดกรองจากเหล่าผู้อาวุโส ก็จะได้รับสิทธิ์เป็น <span class="font-semibold text-intro-highlight">“ผู้แทนแห่งธาตุ”</span> และขึ้นประลองต่อหน้าชาวยุทธภพ เพื่อแสดงให้เห็นว่าพลังแห่งธาตุใดจะส่องประกายที่สุดในห้วงปี.
                     </p>
                 </div>
-                <div class="intro-page-content" data-page="2">
-                    <p class="text-xl font-bold text-black mb-4">
+                <div class="intro-page-content" data-page="4">
+                    <p class="text-xl font-bold mb-4">
                         ทว่าปีนี้กลับแตกต่างออกไป...
                     </p>
-                    <p class="text-xl font-bold text-black mb-4">
+                    <p class="text-xl font-bold mb-4">
                         สายลมแห่งโชคชะตาเริ่มส่งสัญญาณถึงจุดเปลี่ยน
                     </p>
-                    <p class="text-xl font-bold text-black mb-4">
+                    <p class="text-xl font-bold mb-4">
                         พลังวิญญาณที่เคยสงบนิ่งในผืนป่าและผืนฟ้าเริ่มสั่นไหว
                     </p>
-                    <p class="text-xl font-bold text-black mb-4">
+                    <p class="text-xl font-bold mb-4">
                         ในห้วงยามแห่งความเปลี่ยนแปลง
                     </p>
-                    <p class="text-xl font-bold text-black mb-10">
+                    <p class="text-xl font-bold mb-10">
                         ตำนานบทใหม่ ได้เริ่มต้นขึ้นแล้ว!
                     </p>
                 </div>
             </div>
-            <button id="nextIntroPageButton" class="button-secondary next-intro-button">ต่อไป</button>
+            <p id="tapToContinueText" class="tap-to-continue-text hidden">แตะที่หน้าจอเพื่อไปต่อ...</p>
             <button id="startButton" class="button-primary hidden">เริ่มต้นการค้นหาธาตุประจำตัวของคุณ</button>
         </div>
 
-        <!-- Quiz Section -->
         <div id="quizScreen" class="hidden w-full">
             <div class="progress-bar-container">
                 <div id="progressBar" class="progress-bar"></div>
@@ -460,60 +790,64 @@
             <div id="questionCard" class="question-card">
                 <p id="questionText" class="question-text"></p>
                 <div id="answerOptions" class="space-y-3">
-                    <!-- Answer options will be injected here by JavaScript -->
-                </div>
+                    </div>
             </div>
             <button id="nextButton" class="button-primary">ต่อไป</button>
         </div>
 
-        <!-- Loading Screen -->
         <div id="loadingScreen" class="hidden loading-screen">
-            <div class="spinner"></div>
-            <p class="text-2xl font-bold text-gray-700">กำลังประมวลผลธาตุประจำตัวอันลึกล้ำของคุณ...</p>
+            <span class="spinner-icon">⌛</span>
+            <p class="text-2xl font-bold text-gray-700 text-center">คุณได้ค้นพบพลังภายในที่หลับใหลอยู่แล้ว!</p>
+            <p class="text-xl text-gray-600 text-center">กำลังประมวลผลแก่นแท้แห่งธาตุของท่าน...</p>
         </div>
 
-        <!-- Result Section -->
         <div id="resultScreen" class="hidden w-full result-section">
             <h2 class="text-4xl font-bold text-center mb-6 text-gray-800">
                 ธาตุประจำตัวของคุณคือ:
             </h2>
 
-            <!-- Frame 1: Dominant Element & Description -->
-            <div class="result-frame">
-                <div class="element-icon-container">
-                    <span id="elementIcon" class="element-icon"></span>
-                </div>
-                <h3 id="elementTitle" class="element-title"></h3>
-                <p id="elementDescription" class="element-description"></p>
-            </div>
-
-            <!-- Frame 2: Keywords -->
-            <div class="result-frame">
-                <div id="elementKeywords" class="keywords-container">
-                    <!-- Keywords will be injected here -->
-                </div>
-            </div>
-
-            <!-- Frame 3: Compatible & Conflicting Elements -->
-            <div class="result-frame">
-                <h4 class="text-2xl font-bold text-gray-700 mb-4">ความสัมพันธ์กับธาตุอื่น:</h4>
-                <div class="compatibility-section">
-                    <div id="compatibleElements">
-                        <p class="font-semibold text-green-700 mb-2"><span class="compatibility-icon">✅</span> ธาตุที่เข้ากันได้:</p>
-                        <ul id="compatibleList" class="list-disc list-inside text-gray-700">
-                            <!-- Compatible elements will be injected here -->
-                        </ul>
+            <div id="mainResultFrame" class="result-frame">
+                <div class="main-result-content">
+                    <div class="element-summary">
+                        <div class="element-icon-container">
+                            <span id="elementIcon" class="element-icon"></span>
+                        </div>
+                        <h3 id="elementTitle" class="element-title"></h3>
+                        <p id="elementSubtitle" class="element-subtitle"></p>
+                        <p id="elementDescription" class="element-description"></p>
                     </div>
-                    <div id="conflictingElements">
-                        <p class="font-semibold text-red-700 mb-2"><span class="compatibility-icon">❌</span> ธาตุที่ขัดแย้ง:</p>
-                        <ul id="conflictingList" class="list-disc list-inside text-gray-700">
-                            <!-- Conflicting elements will be injected here -->
-                        </ul>
+
+                    <div class="keywords-container">
+                        <div id="elementKeywords" class="keywords-grid">
+                            </div>
                     </div>
+
+                    <div class="two-column-result-section">
+                        <div class="column-left">
+                            <div class="pros-cons-section">
+                                <h4>จุดดี:</h4>
+                                <ul id="elementPros" class="list-none">
+                                    </ul>
+                                <h4>จุดด้อย:</h4>
+                                <ul id="elementCons" class="list-none">
+                                    </ul>
+                            </div>
+                        </div>
+                        <div class="column-right">
+                            <div class="compatibility-section-group">
+                                <h4>ความสัมพันธ์:</h4>
+                                <ul id="compatibleList" class="list-none mb-4">
+                                    </ul>
+                                <ul id="conflictingList" class="list-none">
+                                    </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Final message moved here to ensure it's inside mainResultFrame's content -->
+                    <p id="finalResultText" class="text-base text-gray-700 mt-4 text-center font-bold"></p>
                 </div>
             </div>
 
-            <!-- New Frame: Enrollment Form Link -->
             <div class="enrollment-link-frame">
                 <h4 class="text-2xl md:text-3xl font-extrabold">
                     โชคชะตาแห่งมู่คา... กำลังเรียกหาท่าน!
@@ -529,7 +863,6 @@
             <button id="restartButton" class="button-secondary mt-8">เล่นอีกครั้ง</button>
         </div>
 
-        <!-- Custom Alert/Message Box -->
         <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
             <div class="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm w-full">
                 <p id="messageText" class="text-xl font-semibold text-gray-800 mb-6"></p>
@@ -542,225 +875,277 @@
         // Define elements, their descriptions, keywords, compatible, and conflicting elements
         const elements = {
             "ดิน (Earth)": {
-                description: "จากรากฐานแห่งปฐพีอันเป็นนิรันดร์ ผู้มีธาตุดินคือดั่งเสาหลักแห่งความมั่นคง ไม่เคยสั่นคลอนต่อพายุโหมกระหน่ำใดๆ ด้วยความอดทนดุจขุนเขา พวกเขาคือผู้พิทักษ์แห่งสมดุลย์ ผู้สร้างสรรค์ทุกสิ่งจากผืนดินอันอุดม และเป็นผู้นำที่ไม่อาจปฏิเสธได้! พลังแห่งพวกเขาคือแรงโน้มถ่วงที่ดึงดูดทุกสรรพชีวิตให้รวมเป็นหนึ่ง!",
-                icon: "🌍", // Changed icon
+                title: "ปฐพีอันนิรันดร์ รากฐานแห่งจักรวาล",
+                description: "ท่านเปรียบดั่งปฐพีอันหนักแน่น ดุจภูผาแก่นสารที่หยั่งรากลึก จิตวิญญาณท่านเปี่ยมด้วยความอดทน ไม่หวั่นไหว เป็นที่พึ่งพิงอันมั่นคง ดุจรากฐานแห่งจักรวาลที่รองรับสรรพสิ่ง คุณเป็นคนที่มีความรับผิดชอบสูง พึ่งพาได้ และมักจะเป็นที่พึ่งพาของผู้อื่นเสมอ ทุกการตัดสินใจของคุณมาจากรากฐานของเหตุผลและตรรกะอันแข็งแกร่ง คุณเป็นนักวางแผนที่รอบคอบและเป็นผู้สร้างสรรค์ที่ไม่เคยละทิ้งความพยายาม ดุจภูผาที่ตระหง่านและไม่อาจโค่นล้มได้! หากได้รับมอบหมายสิ่งใด คุณจะทุ่มเทจนงานสำเร็จลุล่วงอย่างงดงาม พวกเขาเป็นผู้ที่ยึดมั่นในคำพูดและคุณค่าที่แท้จริง ไม่ว่าพายุใดจะโหมกระหน่ำ คุณก็ยังคงยืนหยัดด้วยความอดทนอันเป็นนิรันดร์ ทว่าความมุ่งมั่นนี้อาจแปรเป็นความดื้อรั้น แข็งกระด้าง หรือบางครั้งก็อาจดูเชื่องช้า ขาดความยืดหยุ่น",
+                icon: "🌍",
                 keywords: ["มั่นคง", "อดทน", "รากฐาน"],
+                pros: ["มั่นคง เชื่อถือได้", "อดทน หนักแน่น"],
+                cons: ["ดื้อรั้น ปรับยาก", "เชื่องช้า ขาดความยืดหยุ่น"],
                 compatible: {
-                    "โลหะ": "ดินเป็นแหล่งกำเนิดโลหะ ทำให้ธาตุโลหะได้รับความแข็งแกร่งและรูปทรง",
-                    "พฤกษา": "ดินหล่อเลี้ยงพฤกษาให้เติบโตอย่างมั่นคง",
-                    "น้ำ": "น้ำช่วยให้ดินอ่อนนุ่มและอุดมสมบูรณ์"
+                    "พฤกษา": "บำรุงพืช",
+                    "โลหะ": "เป็นแหล่งกำเนิด"
                 },
                 conflicting: {
-                    "ลม": "ลมพัดพาดินให้กระจัดกระจายและไร้ทิศทาง",
-                    "สายฟ้า": "สายฟ้าผ่าลงมาทำให้ดินแตกแยกและเสียหาย"
-                }
+                    "น้ำ": "น้ำท่วมพังทลาย",
+                    "ลม": "ลมพัดกระจัดกระจาย"
+                },
+                bgClass: "bg-earth",
+                elementTitleColor: "#A0522D" // Earth: Sienna (softened)
             },
             "น้ำ (Water)": {
-                description: "จิตวิญญาณแห่งวารี... ผู้ที่ไหลลื่นดุจกระแสน้ำอันไร้ขอบเขต ปรับเปลี่ยนรูปทรงได้ทุกเมื่อแต่ยังคงไว้ซึ่งพลังทำลายล้างที่ไม่อาจหยั่งถึง! พวกเขาคือผู้เยียวยาแห่งโลกใบนี้ ผู้เข้าใจในทุกห้วงอารมณ์ และเป็นผู้พัดพานำพาชีวิตไปสู่การเปลี่ยนแปลงอันยิ่งใหญ่! อย่าได้ดูแคลนความอ่อนโยน เพราะใต้ผิวน้ำนั้นซ่อนเร้นพลังอันมหาศาล!",
+                title: "วารีทิพย์ สายธารแห่งปัญญาไร้สิ้นสุด",
+                description: "ท่านเปรียบดั่งกระแสธาราอันไร้ขอบเขต ไหลรินปรับตัวเป็นเลิศไปตามรูปทรงของภาชนะที่รองรับ จิตใจอ่อนโยน เปี่ยมด้วยเมตตาและสัญชาตญาณอันล้ำลึก มีความคิดสร้างสรรค์และศิลปะในการดำเนินชีวิต ทว่าความอ่อนไหวอาจทำให้จมดิ่งในห้วงอารมณ์ที่แปรปรวน และมักเก็บซ่อนความลับส่วนตัวไว้ภายในใจ ดุจมหาสมุทรอันลึกล้ำที่ซ่อนเร้นพลังอันมหาศาลไว้ภายใน! คุณคือผู้ที่มองโลกด้วยความเข้าใจ และสามารถหาสมดุลในทุกสถานการณ์ได้อย่างเป็นธรรมชาติ",
                 icon: "💧",
                 keywords: ["ยืดหยุ่น", "สงบ", "เห็นอกเห็นใจ"],
+                pros: ["ปรับตัวเก่ง เห็นอกเห็นใจ", "สัญชาตญาณแม่นยำ สร้างสรรค์"],
+                cons: ["อารมณ์แปรปรวน อ่อนไหว", "ไม่เด็ดขาด เก็บกดอารมณ์"],
                 compatible: {
-                    "พฤกษา": "น้ำเป็นสิ่งจำเป็นต่อการเจริญเติบโตของพฤกษา",
-                    "ลม": "ลมช่วยพัดพาน้ำ ทำให้เกิดเมฆและฝน",
-                    "ดิน": "น้ำช่วยให้ดินอ่อนนุ่มและอุดมสมบูรณ์"
+                    "พฤกษา": "หล่อเลี้ยงพืช",
+                    "โลหะ": "กักเก็บได้"
                 },
                 conflicting: {
-                    "ไฟ": "น้ำดับไฟ ทำให้พลังแห่งไฟมอดลง",
-                    "สายฟ้า": "น้ำเป็นสื่อนำไฟฟ้า ทำให้สายฟ้ามีพลังทำลายรุนแรงขึ้นเมื่อสัมผัส"
-                }
+                    "ไฟ": "ดับไฟ",
+                    "ดิน": "ดินกั้นน้ำ"
+                },
+                bgClass: "bg-water",
+                elementTitleColor: "#4682B4" // Water: SteelBlue (softened from Teal)
             },
             "ลม (Wind)": {
-                description: "โบยบินอย่างอิสระดุจสายลมแห่งทวยเทพ! ผู้มีธาตุลมคือผู้ปลดปล่อยแห่งการเปลี่ยนแปลง ผู้ซึ่งความคิดสร้างสรรค์ทะลุขอบฟ้า และไม่เคยหยุดนิ่งในเส้นทางใด! พวกเขาคือผู้ส่งสารแห่งโชคชะตา ผู้ปลุกปั่นพายุแห่งการปฏิวัติ ที่จะพัดพาทุกสิ่งให้ก้าวข้ามสู่ยุคใหม่! อย่าพยายามจับต้องพวกเขา เพราะพวกเขาจะหายไปในพริบตา!",
-                icon: "🌪️", // Changed icon
+                title: "วายุเทพ พลังแห่งเสรีภาพอันมิอาจกักขัง",
+                description: "ท่านเปรียบดั่งวายุอันบริสุทธิ์ ที่พัดผ่านไปในทุกหนแห่งด้วยจิตใจที่กระหายอิสระ ไม่ผูกมัด มีความคิดสร้างสรรค์ ฉลาดเฉลียว ว่องไว และมักจะนำพาไอเดียสดใหม่มาสู่ทุกสถานการณ์ คุณมีเสน่ห์ดึงดูดใจผู้คนด้วยความเบิกบานและมองโลกในแง่ดี แต่ก็สามารถแปรเปลี่ยนเป็นพายุแห่งการปฏิวัติได้เมื่อถึงคราวจำเป็น ดุจสายลมที่พัดผ่านทุกสิ่งอย่างรวดเร็วและไม่อาจคาดเดาได้! ทว่าความรักในอิสระอาจนำมาซึ่งความไม่มั่นคง เปลี่ยนแปลงง่าย และอาจดูไม่จริงจังในบางสถานการณ์ คุณคือผู้ที่ไม่เคยหยุดนิ่งในการเรียนรู้และพัฒนาตนเอง พร้อมที่จะนำพาทุกสิ่งไปสู่ยุคสมัยใหม่ที่สดใสกว่าเดิม",
+                icon: "🌪️",
                 keywords: ["อิสระ", "สร้างสรรค์", "เปลี่ยนแปลง"],
+                pros: ["รักอิสระ ปรับตัวเก่ง", "ฉับไว มีไหวพริบ"],
+                cons: ["ไม่มั่นคง เปลี่ยนแปลงง่าย", "ใจร้อน ขาดความอดทน"],
                 compatible: {
-                    "ไฟ": "ลมช่วยโหมกระหน่ำไฟให้ลุกโชนยิ่งขึ้น",
-                    "สายฟ้า": "ลมช่วยพัดพากระแสสายฟ้า ทำให้พลังทำลายรุนแรงขึ้น",
-                    "น้ำ": "ลมช่วยพัดพาน้ำ ทำให้เกิดเมฆและฝน"
+                    "ไฟ": "โหมกระพือไฟ",
+                    "สายฟ้า": "พาสายฟ้า"
                 },
                 conflicting: {
-                    "ดิน": "ลมพัดพาดินให้กระจัดกระจายและไร้ทิศทาง",
-                    "โลหะ": "ลมไม่สามารถส่งผลกระทบต่อโลหะได้โดยตรง ทำให้เกิดความเฉยเมย"
-                }
+                    "ดิน": "ดินต้านลม",
+                    "โลหะ": "โลหะต้านลม"
+                },
+                bgClass: "bg-wind",
+                elementTitleColor: "#607B8B" // Wind: Darker Slate Gray (softened)
             },
             "ไฟ (Fire)": {
-                description: "เปลวเพลิงอันโชติช่วง! ผู้มีธาตุไฟคือผู้ที่เต็มเปี่ยมด้วยความมุ่งมั่นอันเร่าร้อนราวลาวาจากใจกลางพิภพ ความหลงใหลที่เผาผลาญทุกอุปสรรค และพลังงานอันล้นเหลือที่จะจุดประกายโลกทั้งใบ! พวกเขาคือผู้กล้าหาญที่นำทางความมืดมิด เป็นแรงบันดาลใจที่ไม่มีวันมอดดับ! ผู้ใดขวางทางพวกเขา ผู้นั้นจะมอดไหม้เป็นเถ้าธุลี!",
+                title: "อัคคีศักดิ์สิทธิ์ เปลวเพลิงแห่งชีวิตและจิตวิญญาณ",
+                description: "ท่านเปรียบดั่งเปลวเพลิงอันลุกโชน มีพลังงานล้นเหลือ เปี่ยมด้วยความกระตือรือร้นและแรงขับเคลื่อนอันไม่มีที่สิ้นสุด เป็นผู้นำโดยธรรมชาติ กล้าหาญ มุ่งมั่น และพร้อมที่จะเผชิญหน้ากับความท้าทายทุกรูปแบบ คุณมักจะเป็นผู้นำที่จุดประกายความหวังและแรงบันดาลใจให้กับผู้อื่นเสมอ ด้วยพลังที่ลุกโชนราวกับลาวาจากใจกลางพิภพ คุณสามารถเปลี่ยนแปลงสิ่งต่างๆ ให้เกิดขึ้นได้อย่างรวดเร็วและทรงพลัง แต่ก็ต้องระวังหากขาดการควบคุมจะเผาผลาญทุกอย่าง และนำมาซึ่งความใจร้อน หุนหันพลันแล่น! คุณคือผู้ที่ไม่ยอมแพ้ต่ออุปสรรค และพร้อมที่จะต่อสู้เพื่อสิ่งที่เชื่อมั่นอย่างไม่ลดละ",
                 icon: "🔥",
                 keywords: ["มุ่งมั่น", "หลงใหล", "กล้าหาญ"],
+                pros: ["พลังงานสูง กระตือรือท้น", "เป็นผู้นำ กล้าหาญ"],
+                cons: ["ใจร้อน หุนหันพลันแล่น", "ชอบแข่งขัน เผาผลาญตนเอง"],
                 compatible: {
-                    "ลม": "ลมช่วยโหมกระหน่ำไฟให้ลุกโชนยิ่งขึ้น",
-                    "สายฟ้า": "ไฟและสายฟ้าเป็นพลังงานบริสุทธิ์ที่ส่งเสริมกัน",
-                    "แสง": "ไฟเป็นแหล่งกำเนิดแสง ทำให้แสงสว่างไสวขึ้น"
+                    "ลม": "โหมกระพือไฟ",
+                    "พฤกษา": "เป็นเชื้อเพลิง"
                 },
                 conflicting: {
-                    "น้ำ": "น้ำดับไฟ ทำให้พลังแห่งไฟมอดลง",
-                    "ดิน": "ดินสามารถกักเก็บหรือกลบไฟให้มอดดับได้"
-                }
+                    "น้ำ": "ดับไฟ",
+                    "ความมืด": "แสงขับไล่ความมืด"
+                },
+                bgClass: "bg-fire",
+                elementTitleColor: "#FF7F50" // Fire: Coral (softened)
             },
             "สายฟ้า (Lightning)": {
-                description: "อัสนีบาตแห่งสวรรค์! ผู้มีธาตุสายฟ้าคือผู้ที่มีความรวดเร็วดุจอัสนีบาต เฉียบคมราวคมดาบแห่งเทพ และการตัดสินใจที่เด็ดขาดราวฟ้าผ่า! พวกเขานำมาซึ่งการเปลี่ยนแปลงอย่างฉับพลัน เป็นพลังทั้งในการทำลายล้างเพื่อสร้างสรรค์ และการนำทางด้วยวิสัยทัศน์ที่ก้าวไกลเกินกว่าใครจะหยั่งถึง! ผู้ใดขัดขวาง ย่อมต้องพบกับหายนะสายฟ้า!",
+                title: "อัสนีบาตแห่งสวรรค์ พลังแห่งการเปลี่ยนแปลงพลิกฟ้า",
+                description: "ท่านเปรียบดั่งอัสนีบาตอันเจิดจ้า ที่ฟาดฟันลงมาด้วยความรวดเร็ว ฉับไว มีไหวพริบปฏิภาณดีเยี่ยม สามารถแก้ไขสถานการณ์ได้ในพริบตา มีพลังในการเปลี่ยนแปลงและสร้างสรรค์สิ่งใหม่ๆ อย่างทรงพลัง ทว่าความรวดเร็วนี้อาจนำมาซึ่งความคาดเดาไม่ได้ และสร้างความตื่นตระหนกให้กับผู้คนรอบข้าง! ด้วยพลังอันบริสุทธิ์และรุนแรง คุณเป็นผู้ที่มีวิสัยทัศน์ก้าวไกล มองเห็นโอกาสและสามารถสร้างสรรค์สิ่งใหม่ๆ ได้อย่างรวดเร็ว แต่ก็ต้องระวังพลังที่รุนแรงนี้ไม่ให้ทำลายสิ่งดีๆ รอบตัว! คุณคือผู้ที่จะไม่ปล่อยให้โอกาสหลุดมือ และพร้อมที่จะพุ่งทะยานไปข้างหน้าอย่างไม่หยุดยั้ง",
                 icon: "⚡",
                 keywords: ["รวดเร็ว", "เฉียบคม", "เด็ดขาด"],
+                pros: ["รวดเร็ว มีประสิทธิภาพ", "มีไหวพริบ ทรงพลัง"],
+                cons: ["คาดเดาไม่ได้ ไม่แน่นอน", "อาจทำลายล้าง ใจร้อน"],
                 compatible: {
-                    "ลม": "ลมช่วยพัดพากระแสสายฟ้า ทำให้พลังทำลายรุนแรงขึ้น",
-                    "ไฟ": "ไฟและสายฟ้าเป็นพลังงานบริสุทธิ์ที่ส่งเสริมกัน",
-                    "โลหะ": "โลหะเป็นสื่อนำไฟฟ้าที่ดี ทำให้พลังสายฟ้าไหลผ่านได้อย่างทรงพลัง"
+                    "ลม": "พาสายฟ้า",
+                    "โลหะ": "นำไฟฟ้าได้ดี"
                 },
                 conflicting: {
-                    "ดิน": "ดินสามารถดูดซับพลังงานสายฟ้า ทำให้สายฟ้าอ่อนกำลังลง",
-                    "น้ำ": "น้ำเป็นสื่อนำไฟฟ้า ทำให้สายฟ้ามีพลังทำลายรุนแรงขึ้นเมื่อสัมผัส (ในทางกลับกันก็เป็นอันตรายต่อผู้ใช้เช่นกัน)"
-                }
+                    "ดิน": "ดูดซับพลังงาน",
+                    "น้ำ": "น้ำนำไฟฟ้า (อันตราย)"
+                },
+                bgClass: "bg-lightning",
+                elementTitleColor: "#FFEB8A" // Lightning: Light Gold (softened)
             },
             "แสง (Light)": {
-                description: "แสงสว่างอันบริสุทธิ์ดุจดวงอาทิตย์! ผู้มีธาตุแสงคือผู้ที่เปี่ยมด้วยสติปัญญาอันไร้ขีดจำกัด และความหวังที่ส่องสว่างนำทางในความมืดมิด! พวกเขาคือผู้เยียวยาแห่งโลก ผู้เปิดเผยความจริงอันเป็นนิรันดร์! ไม่มีเงามืดใดจะหลบซ่อนจากสายตาแห่งแสงอันบริสุทธิ์ของพวกเขาได้!",
+                title: "แสงอรุณ ปัญญาแห่งการชี้นำอันศักดิ์สิทธิ์",
+                description: "ท่านเปรียบดั่งรัศมีแห่งรุ่งอรุณ ที่ส่องสว่างนำทางในความมืดมิด จิตใจบริสุทธิ์ผุดผ่อง มองโลกในแง่ดี เปี่ยมด้วยปัญญาอันไร้ขีดจำกัด และเป็นแรงบันดาลใจให้กับผู้อื่นเสมอ คุณสามารถมองเห็นความจริงที่ซ่อนอยู่เบื้องหลังสิ่งลวงตา และพร้อมที่จะเปิดเผยความจริงเพื่อความถูกต้อง ดุจดวงประทีปที่ส่องนำทางผู้หลงทาง! ทว่าความสว่างไสวนี้ก็อาจทำให้พวกเขาอ่อนไหวต่อเงามืด และปรารถนาความสมบูรณ์แบบในทุกสิ่งจนบางครั้งอาจสร้างแรงกดดัน คุณคือผู้ที่นำพาความชัดเจนและความกระจ่างมาสู่ทุกสถานการณ์ และเป็นแรงบันดาลใจให้ผู้อื่นก้าวเดินต่อไปด้วยความหวัง",
                 icon: "✨",
                 keywords: ["สติปัญญา", "ความหวัง", "ยุติธรรม"],
+                pros: ["มองโลกในแง่ดี บริสุทธิ์ใจ", "มีปัญญา เป็นแรงบันดาลใจ"],
+                cons: ["อ่อนไหวต่อด้านลบ โลกสวย", "คาดหวังความสมบูรณ์แบบ"],
                 compatible: {
-                    "พลังจิต": "แสงช่วยเสริมสร้างการหยั่งรู้และพลังจิตให้ชัดเจนยิ่งขึ้น",
-                    "พฤกษา": "แสงเป็นสิ่งจำเป็นต่อการเจริญเติบโตของพฤกษา",
-                    "ไฟ": "ไฟเป็นแหล่งกำเนิดแสง ทำให้แสงสว่างไสวขึ้น"
+                    "พลังจิต": "เสริมการหยั่งรู้",
+                    "พฤกษา": "จำเป็นต่อการเติบโต",
+                    "ไฟ": "เป็นแหล่งกำเนิด"
                 },
                 conflicting: {
-                    "ความมืด": "แสงและความมืดเป็นขั้วตรงข้ามที่คอยหักล้างกัน"
-                }
+                    "ความมืด": "ขับไล่กันและกัน"
+                },
+                bgClass: "bg-light",
+                elementTitleColor: "#FFED8A" // Light: Light Gold (softened)
             },
             "ความมืด (Darkness)": {
-                description: "ห้วงรัตติกาลอันลึกล้ำ... ผู้มีธาตุความมืดคือผู้ที่มีความลึกลับดุจจักรวาลอันไร้สิ้นสุด มีสัญชาตญาณที่เฉียบคม และมักจะเป็นผู้เฝ้ามองจากเบื้องหลัง พวกเขามีพลังแห่งการเปลี่ยนแปลงที่ซ่อนเร้น สามารถมองเห็นสิ่งที่ผู้อื่นไม่อาจเห็น เป็นจิตวิญญาณแห่งเงาที่ทรงพลังและไม่อาจคาดเดาได้!",
+                title: "เงามืดอเวจี ห้วงลึกแห่งปริศนาไร้ก้นบึ้ง",
+                description: "ท่านเปรียบดั่งเงามืดอันเร้นลับ ห้วงรัตติกาลอันลึกล้ำที่ซ่อนเร้นพลังอำนาจและปัญญาที่ยากจะหยั่งถึง มีจิตใจลึกลับซับซ้อน สัญชาตญาณแข็งแกร่ง มองเห็นในสิ่งที่ผู้อื่นมองไม่เห็น และชอบเก็บตัว ใคร่ครวญสิ่งต่างๆ ด้วยความลึกซึ้ง คุณมีพลังในการเปลี่ยนแปลงที่สงบนิ่งแต่ทรงประสิทธิภาพ ดุจเงามืดที่สามารถกลืนกินทุกสิ่งแต่ก็เป็นส่วนหนึ่งที่สร้างความสมดุล! ทว่าความลึกลับนี้อาจนำมาซึ่งความโดดเดี่ยว และมีด้านที่คาดเดาไม่ได้ซึ่งอาจทำให้ผู้อื่นหวาดกลัว คุณคือผู้ที่เข้าใจในธรรมชาติของทุกสิ่งอย่างลึกซึ้ง และมักจะค้นพบความจริงที่ผู้อื่นมองข้ามไปเสมอ",
                 icon: "🌑",
                 keywords: ["ลึกลับ", "สัญชาตญาณ", "ซับซ้อน"],
+                pros: ["ลึกซึ้ง สัญชาตญาณแข็งแกร่ง", "เป็นอิสระ พึ่งพาตนเอง"],
+                cons: ["โดดเดี่ยว เข้าใจยาก", "มีด้านมืด คาดเดาไม่ได้"],
                 compatible: {
-                    "พลังจิต": "ความมืดช่วยเสริมสร้างสัญชาตญาณและพลังจิตในด้านการหยั่งรู้",
-                    "น้ำ": "ความมืดช่วยปกป้องน้ำจากการระเหยและสร้างบรรยากาศลึกลับ",
-                    "ดิน": "ความมืดทำให้ดินสงบและเป็นแหล่งซ่อนเร้น"
+                    "พลังจิต": "เชื่อมมิติที่มองไม่เห็น",
+                    "น้ำ": "น้ำลึกยากหยั่งถึง"
                 },
                 conflicting: {
-                    "แสง": "แสงและความมืดเป็นขั้วตรงข้ามที่คอยหักล้างกัน",
-                    "ไฟ": "ไฟเผาผลาญความมืดให้จางหายไป"
-                }
+                    "แสง": "แสงขับไล่ความมืด",
+                    "ไฟ": "ไฟส่องความมืด"
+                },
+                bgClass: "bg-darkness",
+                elementTitleColor: "#6A1A9E" // Darkness: Muted Purple (softened)
             },
             "พฤกษา (Nature)": {
-                description: "จิตวิญญาณแห่งผืนป่าอันยิ่งใหญ่! ผู้มีธาตุพฤกษาคือผู้ที่สื่อถึงการเติบโตอันไม่สิ้นสุด ความอุดมสมบูรณ์ราวป่าศักดิ์สิทธิ์ และการเชื่อมโยงกับทุกสิ่งมีชีวิต! พวกเขาเป็นผู้มีเมตตาที่หล่อเลี้ยงทุกสรรพสิ่ง และเป็นพลังแห่งการฟื้นฟูที่สามารถเยียวยาบาดแผลของโลกใบนี้ได้! ชีวิตและความตายอยู่ในกำมือของพวกเขา!",
-                icon: "🍃", // Changed icon
+                title: "พฤกษาเทวะ วิญญาณแห่งการเติบโตอันเป็นนิรันดร์",
+                description: "ท่านเปรียบดั่งไม้ยืนต้นอันหยั่งรากลึก ที่สื่อถึงการเติบโตอันไม่สิ้นสุด ความอุดมสมบูรณ์ และการเชื่อมโยงกับทุกสิ่งมีชีวิต จิตใจสงบเยือกเย็น มีความอดทนสูง เอื้อเฟื้อเผื่อแผ่ รักธรรมชาติ เปี่ยมด้วยชีวิตชีวา และฟื้นตัวเร็ว คุณมักจะเป็นผู้สร้างความสงบสุขและร่มเย็นให้กับสิ่งรอบข้าง ดุจต้นไม้ใหญ่ที่แผ่กิ่งก้านสาขาให้ร่มเงาและออกผล! ทว่าความสงบนี้อาจทำให้ดูเชื่องช้า ขาดความกระตือรือร้นในบางครั้ง และอ่อนไหวต่อสภาพแวดล้อมโดยรอบมากเกินไป คุณคือผู้ที่ให้ความสำคัญกับการอยู่ร่วมกันอย่างกลมกลืน และเชื่อมั่นในพลังแห่งการเติบโตที่ไม่เคยหยุดนิ่ง",
+                icon: "🍃",
                 keywords: ["เติบโต", "เมตตา", "ชีวิตชีวา"],
+                pros: ["อดทนสูง ใจเย็น", "เป็นผู้ให้ ฟื้นตัวดี"],
+                cons: ["เชื่องช้า ขาดความกระตือรือร้น", "อ่อนไหว ไม่ชอบเผชิญหน้า"],
                 compatible: {
-                    "ดิน": "ดินหล่อเลี้ยงพฤกษาให้เติบโตอย่างมั่นคง",
-                    "น้ำ": "น้ำเป็นสิ่งจำเป็นต่อการเจริญเติบโตของพฤกษา",
-                    "แสง": "แสงเป็นสิ่งจำเป็นต่อการเจริญเติบโตของพฤกษา"
+                    "น้ำ": "หล่อเลี้ยงพืช",
+                    "ดิน": "เป็นรากฐานและอาหาร"
                 },
                 conflicting: {
-                    "ไฟ": "ไฟเผาผลาญพฤกษาให้มอดไหม้",
-                    "โลหะ": "โลหะสามารถตัดโค่นพฤกษาได้"
-                }
+                    "ไฟ": "ไฟเผาทำลาย",
+                    "โลหะ": "โลหะตัดโค่น"
+                },
+                bgClass: "bg-nature",
+                elementTitleColor: "#5CB85C" // Nature: Medium Sea Green (softened)
             },
             "โลหะ (Metal)": {
-                description: "พลังแห่งโลหะกล้า! ผู้มีธาตุโลหะคือผู้ที่มีความแข็งแกร่งดุจภูผาเหล็กกล้า ความแม่นยำราวคมมีดแห่งความยุติธรรม และความเด็ดขาดที่ไม่มีใครเทียบได้ พวกเขามีวินัยสูงสุด เป็นผู้ปกป้องอันทรงพลัง และยึดมั่นในหลักการอย่างไม่สั่นคลอน! ผู้ใดต่อต้าน ย่อมต้องเผชิญหน้ากับคมดาบที่ไร้ปรานี!",
-                icon: "🗡️", // Changed icon
+                title: "โลหันต์เกราะทอง คมดาบแห่งระเบียบศักดิ์สิทธิ์",
+                description: "ท่านเปรียบดั่งคมดาบศักดิ์สิทธิ์ ที่เฉียบคม เด็ดขาด และเปี่ยมด้วยระเบียบวินัย ยึดมั่นความถูกต้องและยุติธรรมเป็นที่ตั้ง สามารถวิเคราะห์สิ่งต่างๆ ได้อย่างเป็นระบบและแม่นยำ คุณเป็นนักปกป้องที่ทรงพลัง และพร้อมที่จะต่อสู้เพื่อความยุติธรรมอย่างไม่หวั่นเกรง ดุจคมดาบที่ส่องประกายและฟาดฟันทุกอุปสรรค! ทว่าความเด็ดขาดอาจนำมาซึ่งความแข็งกระด้าง ขาดความยืดหยุ่น และขาดความเห็นอกเห็นใจในบางสถานการณ์ คุณคือผู้ที่มุ่งมั่นและไม่ยอมประนีประนอมในสิ่งที่เชื่อมั่น และสามารถนำพาทุกสิ่งให้เป็นไปตามกฎเกณฑ์ที่วางไว้",
+                icon: "🗡️",
                 keywords: ["แข็งแกร่ง", "แม่นยำ", "มีวินัย"],
+                pros: ["ยุติธรรม มีระเบียบวินัย", "เด็ดขาด แข็งแกร่ง"],
+                cons: ["แข็งกระด้าง ยืดหยุ่นน้อย", "ขาดความเห็นอกเห็นใจ"],
                 compatible: {
-                    "ดิน": "ดินเป็นแหล่งกำเนิดโลหะ ทำให้ธาตุโลหะได้รับความแข็งแกร่งและรูปทรง",
-                    "สายฟ้า": "โลหะเป็นสื่อนำไฟฟ้าที่ดี ทำให้พลังสายฟ้าไหลผ่านได้อย่างทรงพลัง"
+                    "ดิน": "เกิดจากดิน",
+                    "สายฟ้า": "นำไฟฟ้าดี"
                 },
                 conflicting: {
-                    "ไฟ": "ไฟหลอมละลายโลหะ ทำให้สูญเสียรูปร่างและความแข็งแกร่ง",
-                    "น้ำ": "น้ำสามารถทำให้โลหะเกิดสนิมและผุกร่อนได้"
-                }
+                    "ไฟ": "หลอมละลาย",
+                    "น้ำ": "กัดกร่อนสนิม"
+                },
+                bgClass: "bg-metal",
+                elementTitleColor: "#6A8EAB" // Metal: Muted Blue (softened)
             },
             "พลังจิต (Psychic)": {
-                description: "ดวงตาแห่งเทพ! ผู้มีธาตุพลังจิตคือผู้ที่มีการหยั่งรู้สูงดุจดวงตาแห่งเทพ มีพลังความคิดที่สร้างสรรค์ และความเข้าใจในสัจธรรมอันลึกล้ำ พวกเขาสามารถเชื่อมโยงกับสิ่งเหนือธรรมชาติและมองเห็นความจริงที่ซ่อนอยู่ เป็นพลังแห่งจิตวิญญาณที่ไร้ขีดจำกัด!",
+                title: "มโนธาตุ วิญญาณผู้หยั่งรู้แห่งจักรวาล",
+                description: "ท่านเปรียบดั่งจิตวิญญาณผู้หยั่งรู้ ที่มีสัญชาตญาณคมกล้า สามารถเข้าถึงและเข้าใจความรู้สึกผู้อื่นได้อย่างลึกซึ้ง มีความคิดซับซ้อน ชอบวิเคราะห์ และสามารถควบคุมและเปลี่ยนแปลงสิ่งต่างๆ ได้ด้วยพลังจิตอันไร้ขีดจำกัด คุณมีจินตนาการกว้างไกล และสามารถสร้างสรรค์สิ่งใหม่ๆ จากความคิดนามธรรมได้อย่างน่าทึ่ง ดุจดวงตาแห่งเทพที่ไร้ขีดจำกัดและสามารถเข้าถึงห้วงความรู้แห่งจักรวาล! ทว่าความอ่อนไหวอาจทำให้รับภาระทางอารมณ์มากเกินไป และอาจดูแยกตัวออกจากสังคมในบางครั้ง คุณคือผู้ที่ใช้ปัญญาญาณนำทางชีวิต และสามารถไขปริศนาที่ซับซ้อนที่สุดได้อย่างง่ายดาย",
                 icon: "🧠",
                 keywords: ["หยั่งรู้", "ความคิดสร้างสรรค์", "สัจธรรม"],
+                pros: ["เข้าใจผู้อื่นลึกซึ้ง มีปัญญา", "ความสามารถพิเศษ นักแก้ปัญหา"],
+                cons: ["อ่อนไหว เครียดง่าย", "โดดเดี่ยว เข้าใจยาก"],
                 compatible: {
-                    "แสง": "แสงช่วยเสริมสร้างการหยั่งรู้และพลังจิตให้ชัดเจนยิ่งขึ้น",
-                    "ความมืด": "ความมืดช่วยเสริมสร้างสัญชาตญาณและพลังจิตในด้านการหยั่งรู้"
+                    "ความมืด": "เชื่อมมิติที่มองไม่เห็น",
+                    "ลม": "ส่งผ่านความคิดรวดเร็ว"
                 },
                 conflicting: {
-                    "โลหะ": "โลหะที่บริสุทธิ์และแข็งแกร่งสามารถสกัดกั้นพลังจิตได้",
-                    "ดิน": "ดินมีความหนักแน่นและมั่นคง ทำให้พลังจิตยากที่จะแทรกซึม"
-                }
+                    "โลหะ": "จำกัดพลังจิต",
+                    "ดิน": "ดินต้านจิต"
+                },
+                bgClass: "bg-psychic",
+                elementTitleColor: "#9370DB" // Psychic: MediumPurple (softened)
             }
         };
 
-        // Quiz questions and their scoring
+        // Quiz questions and their scoring - UPDATED FOR BALANCE
         const questions = [
             {
-                question: "คุณจะตอบสนองอย่างไรเมื่อตำนานโบราณถูกปลุกให้ตื่นขึ้น และพลังวิญญาณเริ่มแปรปรวน?",
+                question: "1. คุณจะตอบสนองอย่างไรเมื่อตำนานโบราณถูกปลุกให้ตื่นขึ้น และพลังวิญญาณเริ่มแปรปรวน?",
                 options: [
-                    { text: "วิเคราะห์สถานการณ์และวางแผนรับมืออย่างรอบคอบ", scores: { "ดิน": 1, "แสง": 1, "โลหะ": 1 } },
-                    { text: "พุ่งเข้าสู่ใจกลางความปั่นป่วนด้วยความกล้าหาญ", scores: { "ไฟ": 1, "สายฟ้า": 1 } },
-                    { text: "ปรับตัวตามกระแสพลัง ค้นหาสมดุลใหม่", scores: { "น้ำ": 1, "ลม": 1, "พฤกษา": 1 } },
-                    { text: "ซุ่มสังเกตการณ์จากเงามืด รอจังหวะที่เหมาะสม", scores: { "ความมืด": 1, "พลังจิต": 1 } }
+                    { text: "วิเคราะห์สถานการณ์อย่างรอบคอบ วางแผนการรับมืออย่างละเอียด", scores: { "ดิน": 2.5, "โลหะ": 1.5, "พลังจิต": 1 } },
+                    { text: "พุ่งเข้าสู่ใจกลางความปั่นป่วนด้วยความกล้าหาญและพลังทั้งหมด", scores: { "ไฟ": 2.5, "สายฟ้า": 2.5, "ลม": 1.5 } },
+                    { text: "ปรับตัวตามกระแสแห่งพลังที่เปลี่ยนแปลง ค้นหาสมดุลใหม่", scores: { "น้ำ": 3.0, "ลม": 2.0, "พฤกษา": 1 } }, // Adjusted Water score for testing
+                    { text: "ซุ่มสังเกตการณ์จากเงามืด รอจังหวะที่เหมาะสมที่สุดในการลงมือ", scores: { "ความมืด": 2.5, "พลังจิต": 1.5 } }
                 ]
             },
             {
-                question: "ในยามที่โลกมู่คาเข้าสู่จุดเปลี่ยน คุณจะใช้เวลาว่างไปกับสิ่งใด?",
+                question: "2. ในยามที่โลกมู่คาเข้าสู่จุดเปลี่ยน คุณจะใช้เวลาว่างไปกับสิ่งใด?",
                 options: [
-                    { text: "บำเพ็ญเพียรและขัดเกลาจิตวิญญาณให้บริสุทธิ์", scores: { "แสง": 1, "พลังจิต": 1, "ความมืด": 1 } },
-                    { text: "ออกสำรวจดินแดนที่เปลี่ยนแปลงไป ค้นหาความลับ", scores: { "ไฟ": 1, "สายฟ้า": 1, "ลม": 1 } },
-                    { text: "ฟื้นฟูธรรมชาติ หรือทำสมาธิในป่าลึก", scores: { "พฤกษา": 1, "ดิน": 1, "น้ำ": 1 } },
-                    { text: "หลอมสร้างอาวุธหรืออุปกรณ์เวทมนตร์ใหม่", scores: { "โลหะ": 1, "ลม": 1, "ไฟ": 1 } }
+                    { text: "บำเพ็ญเพียรในถ้ำศักดิ์สิทธิ์ ขัดเกลาจิตวิญญาณให้บริสุทธิ์ยิ่งขึ้น", scores: { "แสง": 2.5, "พลังจิต": 1.5, "ความมืด": 1 } },
+                    { text: "ออกสำรวจดินแดนที่เปลี่ยนแปลงไป ค้นหาความลับที่ซ่อนอยู่", scores: { "ลม": 2.5 } },
+                    { text: "ฟื้นฟูธรรมชาติที่ร่วงโรยไป หรือทำสมาธิในป่าลึก", scores: { "พฤกษา": 2.5, "ดิน": 1.5, "น้ำ": 1.5 } },
+                    { text: "หลอมสร้างอาวุธหรืออุปกรณ์เวทมนตร์ชิ้นใหม่เพื่อรับมือกับภัย", scores: { "โลหะ": 2.5, "ไฟ": 1, "สายฟ้า": 0.5 } }
                 ]
             },
             {
-                question: "สิ่งใดที่คุณยึดมั่นถือมั่นมากที่สุดในเส้นทางแห่งเซียน?",
+                question: "3. สิ่งใดที่คุณยึดมั่นถือมั่นมากที่สุดในเส้นทางแห่งเซียน?",
                 options: [
-                    { text: "ความมั่นคงของสำนักและรากฐานที่แข็งแกร่ง", scores: { "ดิน": 1, "โลหะ": 1 } },
-                    { text: "การพัฒนาตนเองสู่จุดสูงสุด และการหยั่งรู้ถึงแก่นแท้ด้วยปัญญา", scores: { "พฤกษา": 1, "แสง": 1, "พลังจิต": 1, "ความมืด": 1 } }, // Merged option
-                    { text: "อิสระในการแสวงหาสัจธรรม และความสามารถในการปรับเปลี่ยน", scores: { "ลม": 1, "น้ำ": 1 } },
-                    { text: "การสร้างตำนานอันยิ่งใหญ่ที่จะถูกจดจำไปชั่วกาล", scores: { "ไฟ": 1, "สายฟ้า": 1 } }
+                    { text: "ความมั่นคงของสำนักและรากฐานวิชาที่แข็งแกร่ง", scores: { "ดิน": 2.5, "โลหะ": 1.5 } },
+                    { text: "การข้ามผ่านขีดจำกัดตนเอง และพัฒนาสู่จุดสูงสุดอย่างต่อเนื่อง", scores: { "พลังจิต": 2.5, "แสง": 2.5, "พฤกษา": 1 } },
+                    { text: "อิสระในการแสวงหาสัจธรรม และความสามารถในการปรับเปลี่ยนตามสถานการณ์", scores: { "ลม": 2.5, "น้ำ": 1.5 } },
+                    { text: "การสร้างตำนานอันยิ่งใหญ่ที่จะถูกจดจำไปชั่วกาล", scores: { "ไฟ": 2.5, "สายฟ้า": 1.5, "ความมืด": 1 } }
                 ]
             },
             {
-                question: "เมื่อมิตรสหายแห่งเซียนตกอยู่ในอันตราย คุณจะตอบสนองอย่างไร?",
+                question: "4. เมื่อมิตรสหายแห่งเซียนตกอยู่ในอันตราย คุณจะตอบสนองอย่างไร?",
                 options: [
-                    { text: "ค้นหาสาเหตุและวางแผนช่วยอย่างรอบคอบ", scores: { "แสง": 1, "พลังจิต": 1, "ดิน": 1 } },
-                    { text: "พุ่งทะยานเข้าช่วยเหลือด้วยพลังทั้งหมด", scores: { "ไฟ": 1, "สายฟ้า": 1 } },
-                    { text: "เข้าประชิดตัวอย่างนุ่มนวล หลบหลีกการโจมตี และพยุงมิตรออกมา", scores: { "น้ำ": 1, "พฤกษา": 1 } },
-                    { text: "ใช้พลังอำนาจที่เฉียบคม จัดการภัยคุกคามให้สิ้นซาก", scores: { "โลหะ": 1, "ความมืด": 1 } }
+                    { text: "ค้นหาสาเหตุของอันตรายอย่างถ่องแท้ และวางแผนช่วยอย่างรอบคอบ", scores: { "ดิน": 2.5, "แสง": 2.0, "พลังจิต": 1 } },
+                    { text: "พุ่งทะยานเข้าช่วยเหลือด้วยพลังทั้งหมด ไม่ลังเลแม้เสี้ยววินาที", scores: { "ไฟ": 2.5, "สายฟ้า": 2.5 } },
+                    { text: "เข้าประชิดตัวอย่างนุ่มนวล หลบหลีกการโจมตี และหาช่องทางพยุงมิตรออกมา", scores: { "น้ำ": 2.5, "พฤกษา": 2.5 } },
+                    { text: "ใช้พลังอำนาจที่เฉียบคม จัดการภัยคุกคามให้สิ้นซากในพริบตา", scores: { "โลหะ": 2.5, "ความมืด": 1.5, "ลม": 1.5 } }
                 ]
             },
             {
-                question: "คุณรับมือกับการเปลี่ยนแปลงที่ไม่คาดฝันในวิถีเซียนอย่างไร?",
+                question: "5. คุณรับมือกับการเปลี่ยนแปลงที่ไม่คาดฝันในวิถีเซียนอย่างไร?",
                 options: [
-                    { text: "ปรับตัวตามกระแสโชคชะตา ค้นหาสิ่งใหม่ๆ", scores: { "น้ำ": 1, "ลม": 1, "พฤกษา": 1 } },
-                    { text: "ยึดมั่นในวิถีเดิม เสริมสร้างความแข็งแกร่งภายใน", scores: { "ดิน": 1, "โลหะ": 1 } },
-                    { text: "มองว่านี่คือการท้าทาย และโอกาสในการปลดปล่อยพลังที่แท้จริง", scores: { "ไฟ": 1, "สายฟ้า": 1 } },
-                    { text: "มองเห็นนิมิตหมายหรือความหมายที่ซ่อนอยู่เบื้องหลัง", scores: { "แสง": 1, "ความมืด": 1, "พลังจิต": 1 } }
+                    { text: "ปรับตัวตามกระแสแห่งโชคชะตา ค้นหาสิ่งใหม่ๆ ที่จะเรียนรู้", scores: { "น้ำ": 2.5, "ลม": 2.0, "พฤกษา": 1.5 } },
+                    { text: "ยึดมั่นในวิถีเดิมให้มากที่สุด และเสริมสร้างความแข็งแกร่งภายใน", scores: { "ดิน": 2.5, "โลหะ": 1.5 } },
+                    { text: "มองว่านี่คือการท้าทายครั้งใหม่ และโอกาสในการปลดปล่อยพลังที่แท้จริง", scores: { "ไฟ": 2.5, "สายฟ้า": 2.5 } },
+                    { text: "มองเห็นนิมิตหมายหรือความหมายที่ซ่อนอยู่เบื้องหลังการเปลี่ยนแปลงนั้น", scores: { "แสง": 2.5, "ความมืด": 1.5, "พลังจิต": 1.5 } }
                 ]
             },
             {
-                question: "ในการรวมพลังเพื่อเผชิญหน้ากับภัยคุกคาม คุณมีบทบาทแบบใดมากที่สุด?",
+                question: "6. ในการรวมพลังเพื่อเผชิญหน้ากับภัยคุกคาม คุณมีบทบาทแบบใดมากที่สุด?",
                 options: [
-                    { text: "เป็นแกนหลักในการจัดระเบียบทัพและวางกลยุทธ์", scores: { "ดิน": 1, "โลหะ": 1 } },
-                    { text: "เป็นผู้จุดประกายความหวังและกระตุ้นขวัญกำลังใจ", scores: { "ไฟ": 1, "สายฟ้า": 1 } },
-                    { text: "เป็นผู้เชื่อมโยงจิตใจของทุกคน และนำพาสู่ความสามัคคี", scores: { "น้ำ": 1, "ลม": 1 } },
-                    { text: "เป็นผู้หยั่งรู้ถึงจุดอ่อนศัตรู และกำหนดทิศทางพิชิต", scores: { "แสง": 1, "พลังจิต": 1 } }
+                    { text: "เป็นแกนหลักในการจัดระเบียบทัพและวางกลยุทธ์", scores: { "ดิน": 2.5, "โลหะ": 1.5 } },
+                    { text: "เป็นผู้จุดประกายความหวังและกระตุ้นขวัญกำลังใจของเหล่าเซียน", scores: { "ไฟ": 2.5, "สายฟ้า": 1.5 } },
+                    { text: "เป็นผู้เชื่อมโยงจิตใจของทุกคน และนำพาสู่ความสามัคคี", scores: { "น้ำ": 2.5, "ลม": 2.0, "พฤกษา": 1.5 } },
+                    { text: "เป็นผู้หยั่งรู้ถึงจุดอ่อนของศัตรู และกำหนดทิศทางในการพิชิต", scores: { "แสง": 2.5, "พลังจิต": 2.5, "ความมืด": 1.5 } }
                 ]
             },
             {
-                question: "สถานที่ใดในดินแดนมู่คาที่ทำให้คุณรู้สึกเชื่อมโยงกับพลังวิญญาณมากที่สุด?",
+                question: "7. สถานที่ใดในดินแดนมู่คาที่ทำให้คุณรู้สึกเชื่อมโยงกับพลังวิญญาณมากที่สุด?",
                 options: [
-                    { text: "ยอดเขาลึกลับ หรือวิหารโบราณอันเงียบสงบ", scores: { "แสง": 1, "พลังจิต": 1, "ความมืด": 1 } },
-                    { text: "ป่าทึบ หรือน้ำตกที่ซ่อนอยู่ในหุบเหว", scores: { "พฤกษา": 1, "น้ำ": 1, "ดิน": 1 } },
-                    { text: "ลานประลองที่กึกก้อง หรือท้องฟ้าที่เต็มไปด้วยเมฆฝนคำราม", scores: { "ลม": 1, "ไฟ": 1, "สายฟ้า": 1 } },
-                    { text: "ห้องคลังศิลาเวท หรือโรงหลอมที่เต็มไปด้วยประกายไฟ", scores: { "โลหะ": 1, "ไฟ": 1 } }
+                    { text: "ยอดเขาลึกลับที่ปกคลุมด้วยหมอกยามเช้า หรือวิหารโบราณอันเงียบสงบ", scores: { "ความมืด": 2.5, "แสง": 2.0, "พลังจิต": 1.5 } },
+                    { text: "ป่าทึบที่ยังไม่ถูกสำรวจ หรือน้ำตกที่ซ่อนอยู่ในหุบเหว", scores: { "พฤกษา": 2.5, "น้ำ": 1.5, "ดิน": 1.5 } },
+                    { text: "ลานประลองที่กึกก้องด้วยเสียงคำราม หรือท้องฟ้าที่เต็มไปด้วยเมฆฝนคำราม", scores: { "สายฟ้า": 2.5, "ลม": 2.0, "ไฟ": 1.5 } },
+                    { text: "ห้องคลังศิลาเวท หรือโรงหลอมที่เต็มไปด้วยประกายไฟ", scores: { "โลหะ": 2.5, "ไฟ": 1.5 } }
                 ]
             },
             {
-                question: "คุณมีปฏิกิริยาอย่างไรเมื่อเผชิญหน้ากับการทรยศหักหลังในหมู่เซียน?",
+                question: "8. คุณมีปฏิกิริยาอย่างไรเมื่อเผชิญหน้ากับการทรยศหักหลังในหมู่เซียน?",
                 options: [
-                    { text: "พยายามทำความเข้าใจแรงจูงใจ และแสวงหาสัจธรรม", scores: { "แสง": 1, "พลังจิต": 1 } },
-                    { text: "ตอบโต้ด้วยความรวดเร็วและเด็ดขาด ปกป้องความยุติธรรม", scores: { "ไฟ": 1, "สายฟ้า": 1, "โลหะ": 1 } },
-                    { text: "โอบรับความเจ็บปวด และเยียวยาบาดแผลในจิตใจ", scores: { "น้ำ": 1, "พฤกษา": 1 } },
-                    { text: "เก็บงำความโกรธไว้ในเงามืด รอเวลาที่เหมาะสม", scores: { "ความมืด": 1, "ดิน": 1 } }
+                    { text: "พยายามทำความเข้าใจแรงจูงใจที่ซับซ้อน และแสวงหาสัจธรรมเบื้องหลัง", scores: { "พลังจิต": 2.5, "แสง": 2.0 } },
+                    { text: "ตอบโต้ด้วยความรวดเร็วและเด็ดขาด ปกป้องความยุติธรรมอันศักดิ์สิทธิ์", scores: { "ไฟ": 2.5, "สายฟ้า": 2.5, "โลหะ": 1.5 } },
+                    { text: "โอบรับความเจ็บปวด และหาวิธีเยียวยาบาดแผลในจิตใจของทุกคน", scores: { "น้ำ": 2.5, "พฤกษา": 1.5 } },
+                    { text: "เก็บงำความโกรธไว้ในเงามืด และรอเวลาที่เหมาะสมเพื่อชำระแค้น", scores: { "ความมืด": 2.5, "ดิน": 1.5 } }
                 ]
             },
             {
-                question: "หากคุณสามารถควบคุมพลังวิญญาณแห่งธาตุได้ คุณอยากให้มันเกี่ยวกับอะไร?",
+                question: "9. หากคุณสามารถควบคุมพลังวิญญาณแห่งธาตุได้ คุณอยากให้มันเกี่ยวกับอะไร?",
                 options: [
-                    { text: "ควบคุมสรรพชีวิตและธรรมชาติให้เติบโตงดงาม", scores: { "พฤกษา": 1, "ดิน": 1, "น้ำ": 1 } },
-                    { text: "ควบคุมมิติเวลาและห้วงอวกาศเพื่อมองเห็นอนาคต", scores: { "พลังจิต": 1, "แสง": 1, "ความมืด": 1 } },
-                    { text: "ปลดปล่อยพลังทำลายล้างที่สามารถเปลี่ยนแปลงโลก", scores: { "ไฟ": 1, "สายฟ้า": 1, "โลหะ": 1 } },
-                    { text: "เคลื่อนที่ไปในทุกหนแห่งได้อย่างอิสระและรวดเร็ว", scores: { "ลม": 1, "สายฟ้า": 1 } }
+                    { text: "ควบคุมสรรพชีวิตและธรรมชาติให้เติบโตอย่างงดงาม", scores: { "พฤกษา": 2.5, "ดิน": 1.5, "น้ำ": 1.5 } },
+                    { text: "ควบคุมมิติเวลาและห้วงอวกาศเพื่อมองเห็นอนาคต", scores: { "พลังจิต": 2.5, "แสง": 2.0, "ความมืด": 1.5 } },
+                    { text: "ปลดปล่อยพลังทำลายล้างที่สามารถเปลี่ยนแปลงโลกได้ในพริบตา", scores: { "ไฟ": 2.5, "สายฟ้า": 2.5, "โลหะ": 1.5 } },
+                    { text: "เคลื่อนที่ไปในทุกหนแห่งได้อย่างอิสระและรวดเร็วไร้ขีดจำกัด", scores: { "ลม": 2.5, "สายฟ้า": 1.5 } }
+                ]
+            },
+            {
+                question: "10. เมื่อต้องสร้างสรรค์สิ่งใหม่ๆ ในดินแดนศักดิ์สิทธิ์มู่คา คุณจะเริ่มต้นอย่างไร?",
+                options: [
+                    { text: "วางแผนอย่างละเอียดจากข้อมูลพื้นฐานและโครงสร้างที่แข็งแรง", scores: { "ดิน": 2.5, "โลหะ": 1.5 } },
+                    { text: "ปล่อยให้ความคิดสร้างสรรค์ไหลลื่นตามสัญชาตญาณและแรงบันดาลใจ", scores: { "น้ำ": 2.5, "พฤกษา": 1.5, "ลม": 2.0 } },
+                    { text: "จุดประกายไอเดียด้วยความกล้าหาญและไม่กลัวความล้มเหลว", scores: { "ไฟ": 2.5, "สายฟ้า": 1.5, "ลม": 2.0 } },
+                    { text: "ค้นหาความจริงที่ซ่อนอยู่ เพื่อสร้างสรรค์สิ่งที่เหนือความคาดหมาย", scores: { "แสง": 2.5, "ความมืด": 1.5, "พลังจิต": 1.5 } }
                 ]
             }
         ];
@@ -769,6 +1154,7 @@
         let currentQuestionIndex = 0;
         let scores = {}; // To store scores for each element
         const allElements = Object.keys(elements); // Get all element names
+        let introAnimationTimeout; // To store intro animation timeout ID
 
         // Initialize scores to 0 for all elements
         allElements.forEach(element => {
@@ -777,31 +1163,72 @@
 
         // Get DOM elements
         const introScreen = document.getElementById('introScreen');
+        const introTitle = document.getElementById('introTitle'); // Get the intro title element
         const introPagesContainer = document.getElementById('introPagesContainer');
-        const introPages = document.querySelectorAll('.intro-page-content');
-        const nextIntroPageButton = document.getElementById('nextIntroPageButton');
+        let introPages; // Declared here, will be updated in resetGame
+        const tapToContinueText = document.getElementById('tapToContinueText'); // Get the tap to continue text
 
         const quizScreen = document.getElementById('quizScreen');
         const progressBar = document.getElementById('progressBar');
+        const questionCard = document.getElementById('questionCard'); // Get question card for animation
         const questionText = document.getElementById('questionText');
         const answerOptionsDiv = document.getElementById('answerOptions');
         const nextButton = document.getElementById('nextButton');
 
         const loadingScreen = document.getElementById('loadingScreen');
+        const spinnerIcon = document.querySelector('.spinner-icon'); // Get the hourglass icon
+        const loadingText1 = loadingScreen.querySelector('p:first-of-type');
+        const loadingText2 = loadingScreen.querySelector('p:last-of-type');
 
         const resultScreen = document.getElementById('resultScreen');
         const elementIcon = document.getElementById('elementIcon');
         const elementTitle = document.getElementById('elementTitle');
+        const elementSubtitle = document.getElementById('elementSubtitle'); // New subtitle element
         const elementDescription = document.getElementById('elementDescription');
         const elementKeywordsDiv = document.getElementById('elementKeywords');
+        const elementProsList = document.getElementById('elementPros'); // New pros list
+        const elementConsList = document.getElementById('elementCons'); // New cons list
         const compatibleList = document.getElementById('compatibleList');
         const conflictingList = document.getElementById('conflictingList');
         const restartButton = document.getElementById('restartButton');
+        const mainResultFrame = document.getElementById('mainResultFrame'); // New combined frame
+        const finalResultText = document.getElementById('finalResultText'); // Get the final result text element
 
         const messageBox = document.getElementById('messageBox');
         const messageText = document.getElementById('messageText');
         const closeMessageBox = document.getElementById('closeMessageBox');
-        const startButton = document.getElementById('startButton'); // The original start button, now hidden until last intro page
+        const startButton = document.getElementById('startButton');
+        const gameApp = document.getElementById('gameApp'); // Get the main game container
+
+        // Body background classes for intro pages 0-3
+        // Note: The index here directly corresponds to data-page attribute
+        const bodyBgClasses = [
+            'intro-bg-0', // data-page="0" - Light Cyan Blue
+            'intro-bg-1', // data-page="1" - Slightly Greener Blue
+            'intro-bg-2', // data-page="2" - Muted Grey-Blue
+            'intro-bg-3'  // data-page="3" - Pale Blue
+        ];
+
+        // Main Title "Typing" Effect
+        const fullIntroTitle = 'ยินดีต้อนรับสู่ ดินแดนศักดิ์สิทธิ์มู่คา';
+        function typeIntroTitle() {
+            let charIndex = 0;
+            introTitle.textContent = ''; // Clear previous text
+            const textSpan = document.createElement('span');
+            textSpan.className = 'text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-blue-600';
+            introTitle.appendChild(textSpan);
+
+            const typeInterval = setInterval(() => {
+                if (charIndex < fullIntroTitle.length) {
+                    textSpan.textContent += fullIntroTitle.charAt(charIndex);
+                    charIndex++;
+                } else {
+                    clearInterval(typeInterval);
+                    // After typing, immediately display the first intro page content
+                    displayIntroPage();
+                }
+            }, 50); // Typing speed
+        }
 
         /**
          * Shows a custom message box.
@@ -822,40 +1249,148 @@
         closeMessageBox.addEventListener('click', hideMessageBox);
 
         /**
+         * Animates paragraphs in the current intro page.
+         */
+        function animateIntroElements(pageElement) {
+            const paragraphs = pageElement.querySelectorAll('p');
+            clearTimeout(introAnimationTimeout); // Clear previous timeout
+
+            // Hide all elements initially
+            paragraphs.forEach(p => p.classList.remove('show'));
+
+            // Staggered reveal for each paragraph (fade-in only)
+            let delay = 100;
+            paragraphs.forEach((p, pIndex) => {
+                setTimeout(() => {
+                    p.classList.add('show');
+                }, delay + (pIndex * 800)); // Increased stagger delay for slower text reveal
+            });
+
+            // Set a timeout to allow clicks after the last element animation finishes
+            const totalAnimationDuration = delay + ((paragraphs.length - 1) * 800) + 1500; // Max delay + transition duration
+            introAnimationTimeout = setTimeout(() => {
+                if (currentIntroPageIndex === introPages.length - 1) {
+                    startButton.classList.add('pulsate'); // Add pulsate effect
+                } else {
+                    tapToContinueText.classList.add('show'); // Show tap to continue text
+                }
+                introPagesContainer.style.pointerEvents = 'auto'; // Re-enable clicks
+            }, totalAnimationDuration);
+        }
+
+        /**
          * Displays the current introduction page.
          */
         function displayIntroPage() {
-            introPages.forEach((page, index) => {
-                if (index === currentIntroPageIndex) {
-                    page.classList.add('active');
-                    // Add background class for pages 0 and 1
-                    if (index === 0 || index === 1) {
-                        page.classList.add('intro-page-0-bg');
-                    } else {
-                        page.classList.remove('intro-page-0-bg');
-                    }
-                } else {
-                    page.classList.remove('active');
+            introPages = document.querySelectorAll('.intro-page-content');
+            
+            // Fade out the current container content before changing pages
+            introPagesContainer.style.opacity = '0';
+            tapToContinueText.classList.remove('show'); // Hide tap to continue text immediately
+
+            // Reset title visibility and body overlay
+            introTitle.classList.remove('hidden-title');
+            document.body.classList.remove('final-intro-overlay-active'); // Ensure body overlay is off
+            
+            // Remove all element-specific background classes
+            Object.values(elements).forEach(el => {
+                if (el.bgClass) {
+                    document.body.classList.remove(el.bgClass);
                 }
             });
 
-            // Show or hide buttons based on current page
-            if (currentIntroPageIndex < introPages.length - 1) {
-                nextIntroPageButton.classList.add('visible');
-                nextIntroPageButton.classList.remove('hidden');
-                startButton.classList.add('hidden'); // Hide actual start button
-            } else {
-                nextIntroPageButton.classList.remove('visible');
-                nextIntroPageButton.classList.add('hidden');
-                startButton.classList.remove('hidden'); // Show actual start button on last page
+
+            setTimeout(() => { // Delay the content change slightly for fade out effect
+                introPages.forEach((page, index) => {
+                    page.classList.remove('active'); 
+                    page.style.display = 'none'; // Explicitly hide non-active pages
+                    // Ensure all child elements are hidden for new animation
+                    page.querySelectorAll('p').forEach(p => p.classList.remove('show'));
+                });
+
+                const currentPageElement = introPages[currentIntroPageIndex];
+                if (currentPageElement) {
+                    currentPageElement.classList.add('active');
+                    currentPageElement.style.display = 'block'; // Show current page
+
+                    // Apply dynamic body background based on page index
+                    document.body.className = ''; // Clear all existing body classes
+                    if (currentIntroPageIndex < bodyBgClasses.length) { // For pages 0-3 (which are data-page 0-3)
+                        document.body.classList.add(bodyBgClasses[currentIntroPageIndex]);
+                        gameApp.classList.add('intro-active'); // Make game-container transparent for these pages
+                        introPagesContainer.classList.remove('transparent-frame'); // Ensure container is opaque for 0-3
+                        // Reset introPagesContainer default padding/margin for pages 0-3
+                        introPagesContainer.style.padding = '25px';
+                        introPagesContainer.style.marginBottom = '20px';
+
+                    } else if (currentIntroPageIndex === introPages.length - 1) { // For the last intro page (data-page 4)
+                        // Use a consistent base background for the final page before overlay
+                        document.body.classList.add('intro-bg-0'); 
+                        document.body.classList.add('final-intro-overlay-active'); // Add the 70% dark overlay
+                        gameApp.classList.add('intro-active'); // Keep game-container transparent
+                        introPagesContainer.classList.add('transparent-frame'); // Make introPagesContainer transparent and no shadow
+                        // For page 5, remove padding/margin of introPagesContainer
+                        introPagesContainer.style.padding = '0';
+                        introPagesContainer.style.marginBottom = '0';
+                    }
+                    
+                    // Modify introPagesContainer appearance for the LAST intro page
+                    if (currentIntroPageIndex === introPages.length - 1) {
+                        introTitle.classList.add('hidden-title'); // Hide main title for dramatic effect
+                    } else {
+                        introTitle.classList.remove('hidden-title'); // Show main title
+                    }
+
+                    // Animate elements (paragraphs) for the active page
+                    introPagesContainer.style.pointerEvents = 'none'; // Temporarily disable clicks during animation
+                    animateIntroElements(currentPageElement);
+                }
+
+                // Show start button only on the very last intro page
+                if (currentIntroPageIndex === introPages.length - 1) {
+                    startButton.classList.remove('hidden');
+                    startButton.classList.remove('pulsate'); // Remove pulsate until animation is done
+                    tapToContinueText.classList.add('hidden'); // Ensure hidden
+                    introPagesContainer.style.cursor = 'default'; 
+                } else {
+                    startButton.classList.add('hidden');
+                    startButton.classList.remove('pulsate');
+                    tapToContinueText.classList.remove('hidden'); // Show for normal intro pages
+                    introPagesContainer.style.cursor = 'pointer';
+                }
+
+                // Fade in the container after content change
+                introPagesContainer.style.opacity = '1';
+            }, 500); // Match this delay with introPagesContainer fade-out transition
+        }
+
+        /**
+         * Handles advancing to the next intro page when clicking anywhere on the container.
+         */
+        function handleNextIntroPage() {
+            // Prevent clicks during animation by checking pointer-events
+            if (introPagesContainer.style.pointerEvents === 'none') {
+                return;
             }
+
+            // If on the last intro page, clicking on container should trigger startButton click
+            if (currentIntroPageIndex === introPages.length - 1) {
+                startButton.click();
+                return;
+            }
+
+            // Proceed to next intro page
+            currentIntroPageIndex++;
+            displayIntroPage();
         }
 
         /**
          * Updates the progress bar based on the current question index.
          */
         function updateProgressBar() {
-            const progress = (currentQuestionIndex / questions.length) * 100;
+            // Total questions including the new one
+            const totalQuestions = questions.length; 
+            const progress = (currentQuestionIndex / totalQuestions) * 100;
             progressBar.style.width = `${progress}%`;
         }
 
@@ -863,11 +1398,20 @@
          * Displays the current question and its answer options.
          */
         function displayQuestion() {
-            const q = questions[currentQuestionIndex];
-            questionText.textContent = `${currentQuestionIndex + 1}. ${q.question}`;
-            answerOptionsDiv.innerHTML = ''; // Clear previous options
+            // Animate question card itself
+            questionCard.classList.remove('show');
+            questionText.classList.remove('show');
+            answerOptionsDiv.innerHTML = ''; // Clear options instantly for new animation
 
-            q.options.forEach((option, index) => {
+            setTimeout(() => { // Delay for card fade-out
+                questionCard.classList.add('show'); // Fade in card
+
+                // Animate question text inside the card
+                questionText.textContent = `${questions[currentQuestionIndex].question}`;
+                questionText.classList.add('show');
+            }, 100); // Small delay to sync with card animation
+
+            questions[currentQuestionIndex].options.forEach((option, index) => {
                 const label = document.createElement('label');
                 label.className = 'answer-option';
                 label.innerHTML = `
@@ -876,16 +1420,19 @@
                 `;
                 answerOptionsDiv.appendChild(label);
 
+                // Apply staggered animation for options
+                setTimeout(() => {
+                    label.classList.add('show');
+                }, 300 + (index * 100)); // Delay after question appears
+                
                 // Add event listener to change style on selection
                 const radioInput = label.querySelector('input[type="radio"]');
                 radioInput.addEventListener('change', () => {
-                    // Remove selected style from all options
                     answerOptionsDiv.querySelectorAll('.answer-option').forEach(opt => {
-                        opt.classList.remove('border-green-500', 'bg-green-50', 'shadow-md');
+                        opt.classList.remove('selected');
                     });
-                    // Add selected style to the chosen option
                     if (radioInput.checked) {
-                        label.classList.add('border-green-500', 'bg-green-50', 'shadow-md');
+                        label.classList.add('selected');
                     }
                 });
             });
@@ -921,6 +1468,15 @@
                 // All questions answered, show loading screen then result
                 quizScreen.classList.add('hidden');
                 loadingScreen.classList.remove('hidden');
+                // Ensure intro-related classes are removed when going to quiz/results
+                gameApp.classList.remove('intro-active'); // Revert game-container to its default style
+                introPagesContainer.classList.remove('transparent-frame'); 
+                introTitle.classList.remove('hidden-title');
+                document.body.classList.remove('final-intro-overlay-active'); // Remove body overlay
+                
+                // Remove all intro-specific body background classes
+                document.body.classList.remove(...bodyBgClasses);
+                
                 setTimeout(showResult, 2000); // Simulate loading for 2 seconds
             }
         }
@@ -931,6 +1487,12 @@
         function showResult() {
             loadingScreen.classList.add('hidden');
             resultScreen.classList.remove('hidden');
+
+            // Reset animations for result screen elements before showing
+            resultScreen.querySelector('h2').classList.remove('show');
+            mainResultFrame.classList.remove('show');
+            resultScreen.querySelector('.enrollment-link-frame').classList.remove('show');
+            restartButton.classList.remove('show');
 
             let maxScore = -1;
             let dominantElement = '';
@@ -950,55 +1512,120 @@
                 }
             }
             if (possibleDominantElements.length > 1) {
+                // If there's a tie, randomly select one from the tied elements
                 dominantElement = possibleDominantElements[Math.floor(Math.random() * possibleDominantElements.length)];
+            } else if (possibleDominantElements.length === 0) {
+                // Fallback if no element scored (shouldn't happen with current scoring)
+                dominantElement = "ดิน (Earth)"; // Default to Earth
             }
+
+            // Apply the dominant element's background class to the body
+            document.body.classList.add(elements[dominantElement].bgClass);
+
+            // Set custom CSS variable for element-specific coloring
+            document.documentElement.style.setProperty('--element-dynamic-title-color', elements[dominantElement].elementTitleColor);
+
 
             // Display the result
             const resultElement = elements[dominantElement];
-            elementTitle.textContent = dominantElement;
+            elementTitle.textContent = dominantElement.split(' ')[0]; // Just the Thai name
+            elementSubtitle.textContent = resultElement.title; // New subtitle
             elementDescription.textContent = resultElement.description;
             elementIcon.textContent = resultElement.icon; // Set emoji icon
 
-            // Display keywords
+            // Display keywords - MODIFIED: Removed h4 tag
             elementKeywordsDiv.innerHTML = '';
-            resultElement.keywords.forEach(keyword => {
+            resultElement.keywords.forEach((keyword) => {
                 const span = document.createElement('span');
                 span.className = 'keyword-box';
                 span.textContent = keyword;
                 elementKeywordsDiv.appendChild(span);
             });
 
+            // Display pros
+            elementProsList.innerHTML = '';
+            if (resultElement.pros && resultElement.pros.length > 0) {
+                resultElement.pros.forEach((pro) => {
+                    const li = document.createElement('li');
+                    li.className = 'pros-cons-list-item';
+                    li.innerHTML = `<span class="pros-icon">✓</span> <span>${pro}</span>`;
+                    elementProsList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.className = 'pros-cons-list-item';
+                li.innerHTML = `<span class="pros-icon">ℹ️</span> <span>ไม่มีข้อมูลจุดดี</span>`;
+                    elementProsList.appendChild(li);
+            }
+
+            // Display cons
+            elementConsList.innerHTML = '';
+            if (resultElement.cons && resultElement.cons.length > 0) {
+                resultElement.cons.forEach((con) => {
+                    const li = document.createElement('li');
+                    li.className = 'pros-cons-list-item';
+                    li.innerHTML = `<span class="cons-icon">✕</span> <span>${con}</span>`;
+                    elementConsList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.className = 'pros-cons-list-item';
+                li.innerHTML = `<span class="cons-icon">ℹ️</span> <span>ไม่มีข้อมูลจุดด้อย</span>`;
+                elementConsList.appendChild(li);
+            }
+
             // Display compatible elements
             compatibleList.innerHTML = '';
-            if (resultElement.compatible) {
+            const compatibleHeader = document.createElement('li');
+            compatibleHeader.className = 'compatibility-list-item font-semibold text-green-700 mb-2';
+            compatibleHeader.innerHTML = `<span class="compatibility-icon">✅</span> เข้ากันได้:`;
+            compatibleList.appendChild(compatibleHeader);
+
+            if (resultElement.compatible && Object.keys(resultElement.compatible).length > 0) {
                 for (const compElement in resultElement.compatible) {
                     const li = document.createElement('li');
-                    li.className = 'compatibility-item positive';
-                    li.innerHTML = `<span class="compatibility-icon">✅</span> <strong>${compElement}:</strong> ${resultElement.compatible[compElement]}`;
+                    li.className = 'compatibility-list-item positive';
+                    li.innerHTML = `<span class="compatibility-icon">✅</span> <strong>${compElement.split(' ')[0]}:</strong> ${resultElement.compatible[compElement]}`;
                     compatibleList.appendChild(li);
                 }
             } else {
                 const li = document.createElement('li');
-                li.className = 'compatibility-item';
-                li.textContent = "ไม่มีข้อมูลธาตุที่เข้ากันได้";
+                li.className = 'compatibility-list-item';
+                li.innerHTML = `<span class="compatibility-icon">ℹ️</span> <span>ไม่มีข้อมูลธาตุที่เข้ากันได้</span>`;
                 compatibleList.appendChild(li);
             }
 
             // Display conflicting elements
             conflictingList.innerHTML = '';
-            if (resultElement.conflicting) {
+            const conflictingHeader = document.createElement('li');
+            conflictingHeader.className = 'compatibility-list-item font-semibold text-red-700 mb-2 mt-4'; /* Added margin top for separation */
+            conflictingHeader.innerHTML = `<span class="compatibility-icon">❌</span> ขัดแย้งกัน:`;
+            conflictingList.appendChild(conflictingHeader);
+
+
+            if (resultElement.conflicting && Object.keys(resultElement.conflicting).length > 0) {
                 for (const confElement in resultElement.conflicting) {
                     const li = document.createElement('li');
-                    li.className = 'compatibility-item negative';
-                    li.innerHTML = `<span class="compatibility-icon">❌</span> <strong>${confElement}:</strong> ${resultElement.conflicting[confElement]}`;
+                    li.className = 'compatibility-list-item negative';
+                    li.innerHTML = `<span class="compatibility-icon">❌</span> <strong>${confElement.split(' ')[0]}:</strong> ${resultElement.conflicting[confElement]}`;
                     conflictingList.appendChild(li);
                 }
             } else {
                 const li = document.createElement('li');
-                li.className = 'compatibility-item';
-                li.textContent = "ไม่มีข้อมูลธาตุที่ขัดแย้ง";
+                li.className = 'compatibility-list-item';
+                li.innerHTML = `<span class="compatibility-icon">ℹ️</span> <span>ไม่มีข้อมูลธาตุที่ขัดแย้ง</span>`;
                 conflictingList.appendChild(li);
             }
+            
+            // Final line (only one instance now)
+            finalResultText.textContent = "ท่านผู้กล้า! ขอให้การค้นพบธาตุที่แท้จริงในตัวท่านนี้ นำพาซึ่งความเข้าใจตนเองและพลังอันยิ่งใหญ่ เพื่อนำทางสู่ความรุ่งโรจน์ในทุกเส้นทางชีวิตของท่าน!";
+
+
+            // Trigger animations for result screen elements
+            setTimeout(() => { resultScreen.querySelector('h2').classList.add('show'); }, 100);
+            setTimeout(() => { mainResultFrame.classList.add('show'); }, 300);
+            setTimeout(() => { resultScreen.querySelector('.enrollment-link-frame').classList.add('show'); }, 600);
+            setTimeout(() => { restartButton.classList.add('show'); }, 800);
         }
 
         /**
@@ -1015,20 +1642,65 @@
             quizScreen.classList.add('hidden');
             loadingScreen.classList.add('hidden');
             introScreen.classList.remove('hidden');
-            displayIntroPage(); // Reset intro page display
+            
+            // Ensure intro-related classes are reset
+            gameApp.classList.add('intro-active'); // Make game-container transparent again
+            introPagesContainer.classList.remove('transparent-frame'); // Crucial: Remove transparent frame class
+            introTitle.classList.remove('hidden-title');
+            document.body.classList.remove('final-intro-overlay-active'); // Remove body overlay
+            
+            // Remove all element-specific background classes before resetting to intro background
+            Object.values(elements).forEach(el => {
+                if (el.bgClass) {
+                    document.body.classList.remove(el.bgClass);
+                }
+            });
+            // Remove custom CSS variable for element-specific coloring
+            document.documentElement.style.removeProperty('--element-dynamic-title-color');
+
+            document.body.className = ''; // Clear all intro-bg classes
+            document.body.classList.add(bodyBgClasses[0]); // Set initial intro background for page 0
+
+            // Reset introPagesContainer default padding/margin
+            introPagesContainer.style.padding = '25px';
+            introPagesContainer.style.marginBottom = '20px';
+
+            // Clear any active styles on paragraphs before starting new intro
+            introPages = document.querySelectorAll('.intro-page-content');
+            introPages.forEach(page => {
+                page.classList.remove('active');
+                page.style.display = 'none'; // Ensure it's hidden
+                page.querySelectorAll('p').forEach(p => p.classList.remove('show'));
+            });
+
+            // Ensure tap to continue and start button are hidden/reset
+            tapToContinueText.classList.add('hidden');
+            startButton.classList.add('hidden');
+
+            // Ensure question and answer options are reset
+            questionCard.classList.remove('show');
+            questionText.classList.remove('show');
+            answerOptionsDiv.innerHTML = '';
+
+            // Start typing animation for the main title
+            typeIntroTitle();
             updateProgressBar(); // Reset progress bar
         }
 
         // Event Listeners
-        nextIntroPageButton.addEventListener('click', () => {
-            currentIntroPageIndex++;
-            if (currentIntroPageIndex < introPages.length) {
-                displayIntroPage();
-            }
-        });
+        introPagesContainer.addEventListener('click', handleNextIntroPage);
 
         startButton.addEventListener('click', () => {
             introScreen.classList.add('hidden');
+            // Ensure intro-related classes are removed when leaving intro
+            gameApp.classList.remove('intro-active'); // Revert game-container to its default style
+            introPagesContainer.classList.remove('transparent-frame');
+            introTitle.classList.remove('hidden-title');
+            document.body.classList.remove('final-intro-overlay-active'); // Remove body overlay
+            
+            // Ensure all intro-specific background classes are removed
+            document.body.classList.remove(...bodyBgClasses);
+
             quizScreen.classList.remove('hidden');
             displayQuestion();
         });
@@ -1038,7 +1710,6 @@
 
         // Initial setup on window load
         window.onload = function() {
-            // Ensure intro screen is visible initially
             resetGame(); // Call resetGame to set initial state correctly
         };
     </script>
