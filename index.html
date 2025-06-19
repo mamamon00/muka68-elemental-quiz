@@ -3,1831 +3,1202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ดินแดนศักดิ์สิทธิ์มู่คา: ค้นหาธาตุประจำตัวคุณ</title>
-    <!-- Tailwind CSS CDN -->
+    <title>เกมค้นหาธาตุ: ปณิธานแห่งเมตตา</title>
+    <!-- Load Tailwind CSS CDN for quick and responsive design -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for Thai (Noto Sans Thai) and Chinese style fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Load Google Font: Kanit for Thai font -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles for the game */
+        /* Set Kanit font for the entire document */
+        html, body {
+            height: 100%; /* Ensure html and body take full viewport height */
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Hide scrollbar on body by default */
+        }
         body {
-            font-family: 'Noto Sans Thai', sans-serif; /* Default for body to ensure Thai readability */
+            font-family: 'Kanit', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-            /* Base background for the whole app (default, or when quiz/result is active) */
-            background: linear-gradient(to bottom right, #e0f2f7, #e8eaf6, #e0f2f7); /* Soft yellowish-greenish-bluish gradient */
-            transition: background 1s ease-in-out; /* Smooth transition for background changes */
-            position: relative; /* Needed for ::before */
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            background: linear-gradient(135deg, #E0F2F7, #E8F8F0, #F7FCFE, #FFFFFF); /* Default body background, will be covered */
         }
 
-        /* Specific body backgrounds for intro pages 0-3 (subtle variations) */
-        body.intro-bg-0 { background: linear-gradient(to bottom right, #e0f7f9, #d0eff4, #e0f7f9); } /* Light Cyan Blue */
-        body.intro-bg-1 { background: linear-gradient(to bottom right, #dff0f5, #d2e4eb, #dff0f5); } /* Slightly Greener Blue */
-        body.intro-bg-2 { background: linear-gradient(to bottom right, #d8e6eb, #c8dee4, #d8e6eb); } /* Muted Grey-Blue */
-        body.intro-bg-3 { background: linear-gradient(to bottom right, #eafbff, #e1f5fe, #eafbff); } /* Pale Blue */
-
-        /* Element-specific background gradients - ADJUSTED FOR SOFTER COLORS */
-        body.bg-earth { background: linear-gradient(to bottom right, #FDFDF7, #EFEBE0, #FFFFFF); } /* ดิน: Very Light Cream, Light Beige, White */
-        body.bg-wind { background: linear-gradient(to bottom right, #F8F8F8, #EFEFEF, #FFFFFF); } /* ลม: Very Light Gray, Off-White, White */
-        body.bg-fire { background: linear-gradient(to bottom right, #FFF5EB, #FFF8F0, #FFFFFF); } /* ไฟ: Very Light Peach/Orange, Lighter, White */
-        body.bg-water { background: linear-gradient(to bottom right, #F0F8FF, #F5FFFF, #FFFFFF); } /* น้ำ: AliceBlue, Very Light Cyan, White */
-        body.bg-lightning { background: linear-gradient(to bottom right, #FFFCE0, #FFFDF0, #FFFFFF); } /* สายฟ้า: Very Pale Yellow, Almost White, White */
-        body.bg-light { background: linear-gradient(to bottom right, #FFFDE0, #FFFEE0, #FFFFFF); } /* แสง: Very Very Pale Yellow, Almost White, White */
-        body.bg-darkness { background: linear-gradient(to bottom right, #EFE0F5, #F5EBF8, #FFFFFF); } /* ความมืด: Very Pale Lavender/Grey-Purple, Nearly White, White */
-        body.bg-nature { background: linear-gradient(to bottom right, #F0FFF0, #F8FFF8, #FFFFFF); } /* พฤกษา: HoneyDew, Lighter Green, Very Light Green */
-        body.bg-psychic { background: linear-gradient(to bottom right, #FFEFF5, #FFF9EB, #EAFBF5, #EBF5FF, #EFEBFD); } /* พลังจิต: Very Pale Pink, Pale Yellow, Pale Green, Pale Blue, Pale Purple */
-        body.bg-metal { background: linear-gradient(to bottom right, #E0E8EF, #EBF0F5, #FFFFFF); } /* โลหะ: Very Light Blue-Gray, Lighter Blue-Gray, White */
-
-        /* Overlay for the final intro page (body background is still light, but this darkens it) */
-        body.final-intro-overlay-active::before {
-            content: '';
-            position: fixed;
+        /* Styles for Intro and Question screens */
+        .game-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%; /* Take 100% of parent (body), which is 100vh */
+            text-align: center;
+            position: absolute; /* Position absolute to cover the body */
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* 70% black overlay */
-            z-index: -1; /* Behind game-container, but on top of body's own background */
-            transition: background-color 1.5s ease-in-out;
+            opacity: 0; /* Start hidden */
+            transition: opacity 1s ease-in-out; /* Add transition for display */
+            background-size: cover; /* Cover entire area */
+            background-position: center; /* Center position */
+            padding-top: 4rem; /* Added padding to push content down */
+            box-sizing: border-box; /* Ensure padding is included in height calculation */
+            overflow-y: auto; /* Allow vertical scrolling on game screens if content overflows */
+        }
+
+        .game-screen.active {
+            opacity: 1; /* Show active screen */
+            z-index: 10; /* Bring active screen to front */
+        }
+
+        /* Background for Intro 1 (Softer tones with white base) */
+        .bg-intro1 {
+            background: linear-gradient(135deg, #E0F2F7, #E8F8F0, #F7FCFE, #FFFFFF);
+        }
+
+        /* Background for Intro 2 (Adjusted to a slightly different soft tone with white base) */
+        .bg-intro2 {
+            background: linear-gradient(135deg, #FFF0E0, #F0F8E8, #FFFAFA, #FFFFFF);
+        }
+
+        /* Background for Intro 3 (Similar soft tone, perhaps slightly different tint for variety) */
+        .bg-intro3 {
+            background: linear-gradient(135deg, #F0FFF0, #E0F0FF, #F8F8FF, #FFFFFF);
+        }
+        /* Background for Intro 4 (Another soft, consistent tone) */
+        .bg-intro4 {
+            background: linear-gradient(135deg, #EBF8F5, #F5FBEF, #FBFEF8, #FFFFFF);
+        }
+        /* Background for Intro 5 & 6 (Festival theme) */
+        .bg-intro5 {
+            background: linear-gradient(135deg, #FEF9E7, #FCF3CF, #FDF9E0, #FFFFFF);
+        }
+        .bg-intro6 {
+            background: linear-gradient(135deg, #FCEFE2, #FDF4E6, #FFF9F2, #FFFFFF);
+        }
+        /* Background for Intro 7, 8, 9 (Outro theme) */
+        .bg-intro7 {
+            background: linear-gradient(135deg, #EAE0F5, #F0E8F8, #F7F0FC, #FFFFFF);
+        }
+        .bg-intro8 {
+            background: linear-gradient(135deg, #E0EFF5, #E8F5EF, #F0F9F5, #FFFFFF);
+        }
+        .bg-intro9 {
+            background: linear-gradient(135deg, #F0F0FF, #EBF0FF, #F5F8FF, #FFFFFF);
+        }
+
+
+        /* Background for Question (Softer tones with white base) */
+        .bg-question1 {
+            background: linear-gradient(135deg, #E0F7FA, #F0F8F5, #F9FCFF, #FFFFFF);
+        }
+        .bg-question2 {
+            background: linear-gradient(135deg, #FADDEB, #FCEFE2, #FFF7F2, #FFFFFF);
+        }
+        .bg-question3 {
+            background: linear-gradient(135deg, #EAFCE2, #F2FCF0, #F9FFF8, #FFFFFF);
+        }
+        .bg-question4 {
+            background: linear-gradient(135deg, #E2F0FC, #EAF2FB, #F5FAFF, #FFFFFF);
+        }
+        .bg-question6 {
+            background: linear-gradient(135deg, #EFF8FF, #F5F9FF, #FBFDFF, #FFFFFF);
+        }
+        .bg-question7 {
+            background: linear-gradient(135deg, #FFF5EC, #FFFBEB, #FFFEEF, #FFFFFF);
+        }
+        .bg-question8 {
+            background: linear-gradient(135deg, #F0FCEC, #F8FFFA, #FDFEFF, #FFFFFF);
+        }
+        .bg-question9 {
+            background: linear-gradient(135deg, #F5EBFB, #F8F0FB, #FCF5FF, #FFFFFF);
+        }
+        .bg-question10 {
+            background: linear-gradient(135deg, #FBE0E7, #FDE8EF, #FEF0F5, #FFFFFF);
+        }
+        .bg-question11 {
+            background: linear-gradient(135deg, #EBF5F0, #F0FBEF, #F5FDF5, #FFFFFF);
+        }
+        .bg-question12 {
+            background: linear-gradient(135deg, #E0EDF8, #EAF3F9, #F0F8FD, #FFFFFF);
+        }
+
+        /* Background for Result screen */
+        .bg-result {
+            /* Default, will be overridden by JS */
+            background: linear-gradient(135deg, #E8F0F7, #E0F5EB, #F0F5FA, #FFFFFF);
+        }
+
+        /* Background for Loading screen */
+        .bg-loading {
+            background-color: #000000; /* Solid black background */
+        }
+
+        /* Intro text style */
+        .intro-text-container {
+            max-width: 80%;
+            margin-bottom: 2rem;
+            color: #333; /* Darker text color */
+            font-size: 1.5rem; /* Larger font size */
+            font-weight: 300; /* Lighter font weight */
+        }
+
+        .intro-text-container p {
+            opacity: 0; /* Start hidden */
+            animation: fadeInText 0.8s forwards; /* Reduced animation duration for faster text */
+            line-height: 1.8; /* Line spacing */
+            margin-bottom: 1rem; /* Add margin between paragraphs for better spacing */
+        }
+
+        /* Adjusted Delay for sequential text appearance (faster) */
+        #intro1 .intro-text-container p:nth-child(1) { animation-delay: 0.0s; }
+        #intro1 .intro-text-container p:nth-child(2) { animation-delay: 0.8s; }
+        #intro1 .intro-text-container p:nth-child(3) { animation-delay: 1.6s; }
+        #intro1 .intro-text-container p:nth-child(4) { animation-delay: 2.4s; }
+        #intro1 .intro-text-container p:nth-child(5) { animation-delay: 3.2s; }
+
+        #intro2 .intro-text-container p:nth-child(1) { animation-delay: 0.0s; }
+        #intro2 .intro-text-container p:nth-child(2) { animation-delay: 0.8s; }
+        #intro2 .intro-text-container p:nth-child(3) { animation-delay: 1.6s; }
+        #intro2 .intro-text-container p:nth-child(4) { animation-delay: 2.4s; }
+
+        #intro3 .intro-text-container p:nth-child(1) { animation-delay: 0.0s; }
+        #intro3 .intro-text-container p:nth-child(2) { animation-delay: 0.8s; }
+        #intro3 .intro-text-container p:nth-child(3) { animation-delay: 1.6s; }
+
+        #intro4 .intro-text-container p:nth-child(1) { animation-delay: 0.0s; }
+        #intro4 .intro-text-container p:nth-child(2) { animation-delay: 0.8s; }
+        #intro4 .intro-text-container p:nth-child(3) { animation-delay: 1.6s; }
+
+        #intro5 .intro-text-container p:nth-child(1) { animation-delay: 0.0s; }
+        #intro5 .intro-text-container p:nth-child(2) { animation-delay: 0.8s; }
+        #intro5 .intro-text-container p:nth-child(3) { animation-delay: 1.6s; }
+        #intro5 .intro-text-container p:nth-child(4) { animation-delay: 2.4s; }
+
+        #intro6 .intro-text-container p:nth-child(1) { animation-delay: 0.0s; }
+        #intro6 .intro-text-container p:nth-child(2) { animation-delay: 0.8s; }
+
+        #intro7 .intro-text-container p:nth-child(1) { animation-delay: 0.0s; }
+        #intro8 .intro-text-container p:nth-child(1) { animation-delay: 0.0s; }
+        #intro9 .intro-text-container p:nth-child(1) { animation-delay: 0.0s; }
+
+        /* Animation for gradual text appearance */
+        @keyframes fadeInText {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* "Tap to continue" style */
+        .tap-to-continue {
+            color: rgba(0, 0, 0, 0.4);
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            cursor: pointer;
+            visibility: hidden;
+            opacity: 0;
+            animation: pulse 1.5s infinite alternate;
+            transition: opacity 0.0s, visibility 0.0s;
             pointer-events: none;
         }
 
-        .game-container {
-            background-color: transparent; /* Changed to transparent by default for dynamic background */
-            border-radius: 20px;
-            box-shadow: none; /* Removed default shadow, handled by content frames */
-            max-width: 800px;
-            width: 100%;
-            padding: 30px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow: hidden; /* Prevent content overflow during animations */
-            transition: background-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out, padding 0.5s ease-in-out;
+        .tap-to-continue.show-active {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
         }
 
-        /* Game container styles during intro */
-        .game-container.intro-active {
-            background-color: transparent;
-            box-shadow: none;
-            padding: 0; /* No padding around the intro content */
+        /* Styles for auto-advance intros (no tap required) */
+        .intro-auto-advance .tap-to-continue {
+            display: none;
         }
 
-        .button-primary {
-            background-image: linear-gradient(to right, #6EE7B7, #3B82F6);
-            color: white;
-            padding: 12px 28px;
-            border-radius: 9999px; /* Fully rounded */
-            font-weight: bold;
-            font-size: 1.125rem; /* text-lg */
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            border: none;
-            outline: none;
-            margin-top: 20px;
-            width: fit-content;
+        @keyframes pulse {
+            from { opacity: 0.4; }
+            to { opacity: 0.8; }
         }
 
-        .button-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-            background-image: linear-gradient(to right, #3B82F6, #6EE7B7);
-        }
-
-        .button-primary.pulsate {
-            animation: pulseGlow 1.5s infinite ease-in-out;
-        }
-
-        .button-secondary {
-            background-color: #e2e8f0;
-            color: #4a5568;
-            padding: 10px 24px;
+        /* Answer button style */
+        .answer-button {
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(5px);
+            color: #333;
+            padding: 1rem 2rem;
+            margin: 0.75rem;
             border-radius: 9999px;
-            font-weight: bold;
-            font-size: 1rem; /* text-base */
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
-            outline: none;
-            margin-top: 15px;
-            width: fit-content;
-        }
-
-        .button-secondary:hover {
-            background-color: #cbd5e0;
-            transform: translateY(-1px);
-        }
-
-        /* Intro Page Specific Styles */
-        #introScreen {
-            position: relative; /* For the title animation and tap-to-continue text */
-            width: 100%;
-        }
-        
-        #introTitle {
-            font-family: 'Ma Shan Zheng', cursive, 'Noto Sans Thai', sans-serif; /* Chinese-style font for title */
-            transition: opacity 0.5s ease-out; /* Smooth fade for title */
-        }
-        #introTitle.hidden-title {
-            opacity: 0;
-            pointer-events: none; /* Make it unclickable/uninteractable */
-        }
-
-        .intro-page-content {
-            font-family: 'Noto Serif SC', serif, 'Noto Sans Thai', sans-serif; /* Chinese-style serif for intro content */
-            display: none; /* Hidden by default */
-            width: 100%; /* Ensure it fills parent */
-            box-sizing: border-box; /* Include padding in width calculation */
-            position: relative; /* For text styling and z-index */
-            opacity: 0; /* Initial state for fade-in */
-            transition: opacity 0.5s ease-out; /* Fade out when inactive */
-            z-index: 2; /* Ensure intro content is above the game-container's background and body background */
-        }
-        .intro-page-content.active {
-            display: block; /* Shown when active */
-            opacity: 1; /* Fully visible */
-        }
-
-        /* Specific animations for elements inside intro pages */
-        .intro-page-content p {
-            opacity: 0;
-            /* Removed translateY for fade-in effect */
-            transition: opacity 1.5s ease-out; /* Smooth transition for reveal (increased speed) */
-            will-change: opacity; /* Optimize for animation */
-        }
-        .intro-page-content p.show {
-            opacity: 1;
-        }
-
-        /* The container for intro pages text */
-        #introPagesContainer {
-            background-color: rgba(255, 255, 255, 0.8); /* 80% opaque white background for text readability (default) */
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            cursor: pointer; /* Indicate that the container is clickable */
-            transition: all 0.5s ease-in-out; /* Fade for container when switching content + color change */
-            position: relative; 
-            z-index: 1; 
-        }
-        
-        /* Text color for standard intro pages (inside the semi-transparent white container) */
-        .intro-page-content p {
-            color: #4a5568; /* Softened color (gray-700) */
-        }
-
-        /* Custom color for intro highlights */
-        .text-intro-highlight {
-            color: #6092b1; /* Custom color as requested, assuming #6092b1 */
-        }
-
-        /* Styles for the last intro page's container when it turns transparent */
-        #introPagesContainer.transparent-frame {
-            background-color: transparent; /* Make it transparent */
-            box-shadow: none; /* Remove shadow */
-            padding: 0; /* Remove padding for page 5 */
-            margin-bottom: 0; /* Remove margin for page 5 */
-        }
-
-        /* Text color inside the transparent frame on page 5 */
-        #introPagesContainer.transparent-frame .intro-page-content p { /* Target paragraphs inside the black-frame container */
-            color: white;
-            animation: flicker 1.0s infinite alternate; /* Subtle opacity flicker */
-        }
-        #introPagesContainer.transparent-frame .intro-page-content .text-intro-highlight {
-            color: #92e0f7; /* Lighter highlight for dark background */
-        }
-
-        /* Tap to continue text */
-        .tap-to-continue-text {
-            font-size: 0.9rem;
-            color: #a0aec0; /* Light gray for subtle text */
-            margin-top: 15px; /* Space from intro container */
-            opacity: 0;
-            transition: opacity 0.5s ease-out;
-        }
-        .tap-to-continue-text.show {
-            opacity: 1;
-        }
-
-        /* Keyframes for animations */
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transform: scale(1); }
-            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 4px 15px rgba(0, 0, 0, 0.2); transform: scale(1.02); }
-            100% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transform: scale(1); }
-        }
-
-        @keyframes flicker {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; } /* Slight fade in opacity for flicker effect */
-        }
-
-        /* Hourglass animation */
-        @keyframes hourglassTilt {
-            0% { transform: rotateZ(-10deg) scale(1); }
-            50% { transform: rotateZ(10deg) scale(1.05); }
-            100% { transform: rotateZ(-10deg) scale(1); }
-        }
-
-        /* Quiz Section Styles */
-        .question-card {
-            background-color: #f0f9ff; /* Light blue background for questions */
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            text-align: left;
-            opacity: 0; /* Hidden for fade in */
-            transform: translateY(-20px);
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-        }
-        .question-card.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .question-text {
-            font-size: 1.5rem; /* text-2xl */
-            font-weight: bold;
-            color: #4a5568; /* Softened color (gray-700) */
-            margin-bottom: 20px;
-            opacity: 0; /* Controlled by JS and .show class */
-            transform: translateY(-20px); /* Controlled by JS and .show class */
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .question-text.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .answer-option {
-            display: flex;
-            align-items: center;
-            background-color: #ffffff;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease; /* Increased transition duration */
-            opacity: 0; /* Controlled by JS and .show class */
-            transform: translateY(20px); /* Controlled by JS and .show class */
-            position: relative; /* For radio button positioning */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-
-        .answer-option:hover {
-            border-color: #6EE7B7;
-            background-color: #f0fdf4; /* Light green hover */
-            transform: translateY(-3px); /* More pronounced hover effect */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .answer-option.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .answer-option.selected {
-            border-color: #3B82F6; /* Blue border for selected */
-            background-color: #e0f2fe; /* Lighter blue background */
-            transform: translateY(-1px); /* Slight lift on select */
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .answer-option input[type="radio"] {
-            /* Visually hide the actual radio button but keep it functional */
-            position: absolute;
-            left: 15px; /* Align with padding */
-            top: 50%;
-            transform: translateY(-50%) scale(1.5);
-            opacity: 0; /* Hide the radio button */
-            pointer-events: none; /* Make it not interfere with click on label */
-            width: 0;
-            height: 0;
-            margin: 0;
-        }
-
-        .answer-option span {
-            font-size: 1.125rem; /* text-lg */
-            color: #718096; /* Softened color (gray-600) */
-            flex-grow: 1; /* Allow text to take available space */
-            text-align: left; /* Align text left within the card */
-            padding-left: 20px; /* Space for a custom radio indicator if desired */
-        }
-        .answer-option.selected span {
-            color: #3B82F6; /* Blue text for selected option */
-            font-weight: bold;
-        }
-        /* Custom Radio Indicator */
-        .answer-option::before {
-            content: '';
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            border: 2px solid #94a3b8; /* Border color for unselected */
-            margin-right: 15px;
-            display: inline-block;
-            flex-shrink: 0;
-            transition: all 0.2s ease;
-        }
-        .answer-option.selected::before {
-            border-color: #3B82F6; /* Border color for selected */
-            background-color: #3B82F6; /* Fill color for selected */
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); /* Outer glow for selected */
-        }
-        .answer-option.selected::after {
-            content: '';
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: white;
-            position: absolute;
-            left: 24px; /* Adjust based on ::before position */
-            top: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.2s ease;
-        }
-
-
-        .progress-bar-container {
-            width: 100%;
-            background-color: #e2e8f0;
-            border-radius: 10px;
-            height: 12px;
-            margin-bottom: 25px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background-color: #3B82F6;
-            border-radius: 10px;
-            transition: width 0.5s ease-in-out;
-        }
-
-        /* Result Section Styling */
-        .result-section {
-            background-color: transparent; /* Make result section transparent to reveal body background */
-            border-radius: 15px; /* Keep border radius */
-            padding: 0; /* Remove internal padding, let main-result-content handle it */
-            box-shadow: none; /* Removed box shadow, let main-result-content handle it if needed */
-            display: flex;
-            flex-direction: column;
-            gap: 10px; /* Reduced */
-        }
-
-        .main-result-content {
-            background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
-            backdrop-filter: blur(8px); /* Frosted glass effect */
-            border-radius: 15px; /* Match result-section border-radius */
-            padding: 25px; /* Add padding here */
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Add shadow here */
-            display: flex;
-            flex-direction: column;
-            gap: 12px; /* Reduced from 15px to bring sections closer */
-            text-align: left; /* Align text within this frame */
-        }
-
-        .element-summary {
-            text-align: center;
-            margin-bottom: 8px; /* Reduced from 10px */
-            padding-bottom: 8px; /* Reduced from 10px */
-            border-bottom: 1px dashed #e2e8f0; /* Separator */
-        }
-
-        .element-title {
-            font-size: 2rem; /* Reduced */
-            font-weight: bold;
-            color: var(--element-dynamic-title-color); /* Dynamic color based on element */
-            margin-bottom: 8px; /* Reduced from 10px */
-        }
-        /* Style for the element's title/subtitle line 2 */
-        .element-subtitle {
-            font-size: 1.25rem; /* text-xl */
-            font-weight: bold;
-            color: #3B82F6; /* A matching blue */
-            margin-top: -5px; /* Pull it closer to the main title */
-            margin-bottom: 8px; /* Reduced from 10px */
-        }
-
-
-        .element-description {
-            font-family: 'Noto Serif SC', serif, 'Noto Sans Thai', sans-serif; /* Chinese-style serif for description */
-            font-size: 0.95rem; /* Reduced */
-            color: #333333; /* Darker grey for better contrast */
-            line-height: 1.6;
-            text-align: justify; /* Justify text for better readability */
-            margin-bottom: 4px; /* Reduced from 5px */
-            font-weight: 700; /* Increased boldness */
-            text-indent: 2em; /* Added indentation */
-        }
-
-        .element-icon-container {
-            width: 80px; /* Reduced */
-            height: 80px; /* Reduced */
-            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 8px; /* Reduced from 10px */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border: 2px solid var(--element-dynamic-title-color); /* Border color based on element */
-        }
-
-        .element-icon {
-            font-size: 3rem; /* Reduced */
-            color: var(--element-dynamic-title-color); /* Icon color based on element */
-            animation: bounce 2s infinite ease-in-out, glowEffectCustom 1.5s infinite alternate; /* Combined animations */
-        }
-        @keyframes glowEffectCustom {
-            0% { text-shadow: 0 0 5px rgba(255,255,255,0.7); }
-            100% { text-shadow: 0 0 15px var(--element-dynamic-title-color), 0 0 25px rgba(59, 130, 246, 0.6); } /* Glow color matches title */
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .keywords-container {
-            margin-top: 5px; /* Added margin-top to bring it closer to description */
-            margin-bottom: 8px; /* Reduced from 10px */
-            padding-bottom: 8px; /* Reduced from 10px */
-            border-bottom: 1px dashed #e2e8f0; /* Separator */
-            text-align: center; /* Center keywords within this container */
-        }
-
-        .keywords-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px; /* Slightly increased from 6px for larger boxes */
-            justify-content: center; /* Center keywords */
-        }
-
-        .keyword-box {
-            background-color: rgba(255, 255, 255, 0.7); /* White with transparency - General soft */
-            color: #065f46; /* Dark green - kept for elemental distinction */
-            padding: 8px 16px; /* Increased from 6px 14px for larger boxes */
-            border-radius: 20px;
-            font-weight: 700; /* Increased boldness */
-            font-size: 1rem; /* Increased from 0.95rem */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.05); /* Subtle border */
-        }
-        
-        /* New two-column layout for result details */
-        .two-column-result-section {
-            display: flex;
-            flex-wrap: wrap; /* Allows columns to wrap on smaller screens */
-            gap: 20px; /* Space between columns */
-            margin-top: 10px; /* Space from keywords */
-            margin-bottom: 10px; /* Space before final message */
-            justify-content: center; /* Center content horizontally if it doesn't fill the width */
-        }
-        .two-column-result-section > div { /* Target direct children which are columns */
-            flex: 1; /* Allow columns to grow and shrink */
-            min-width: 280px; /* Minimum width before wrapping */
-            background-color: #ffffff; /* White background for each column frame */
-            border-radius: 15px;
-            padding: 15px; /* Padding inside each column frame */
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-            display: flex; /* Make content inside column flex to align header and list */
-            flex-direction: column;
-        }
-
-        /* Adjustments for Pros/Cons and Compatibility sections to fit in columns */
-        .pros-cons-section {
-            margin-top: 0; /* Remove top margin as it's now inside a column container */
-            margin-bottom: 0; /* Remove bottom margin */
-            padding-bottom: 0; /* Remove bottom padding as separator will be on parent */
-            border-bottom: none; /* Remove separator, handled by parent column structure if needed */
-        }
-        .pros-cons-section h4 {
+            border: 2px solid rgba(0, 0, 0, 0.1);
             font-size: 1.1rem;
-            font-weight: bold;
-            color: #4a5568;
-            margin-bottom: 4px; /* Reduced from 6px */
-            text-align: center; /* Center Pros/Cons heading */
-        }
-        .pros-cons-list-item {
-            font-family: 'Noto Serif SC', serif, 'Noto Sans Thai', sans-serif; /* Chinese-style serif for pros/cons */
-            display: flex;
-            align-items: flex-start;
-            gap: 6px;
-            font-size: 0.88rem; /* Slightly reduced */
-            color: #333333; /* Darker grey for better contrast */
-            line-height: 1.4;
-            margin-bottom: 2px; /* Reduced from 4px */
-            font-weight: 700; /* Increased boldness */
-            text-indent: 1em; /* Added indentation for list items */
-        }
-        .pros-cons-list-item strong {
-            font-weight: 700; /* Make strong tags even bolder */
-            color: #1a202c; /* Even darker for emphasis */
-            flex-shrink: 0;
-            margin-right: 4px; /* Space between label and description */
-        }
-        .pros-icon {
-            font-size: 1rem;
-            color: #10B981; /* Green check */
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-        .cons-icon {
-            font-size: 1rem;
-            color: #EF4444; /* Red x */
-            flex-shrink: 0;
-            margin-top: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: left;
+            box-sizing: border-box;
         }
 
-
-        .compatibility-section-group {
-            margin-top: 0; /* Remove top margin as it's now inside a column container */
-            gap: 6px; /* Reduced from 8px */
-        }
-        .compatibility-section-group h4 {
-            font-size: 1.1rem; /* Reduced */
-            font-weight: bold;
-            color: #4a5568;
-            margin-bottom: 4px; /* Reduced from 6px */
-            text-align: center; /* Center compatibility heading */
-        }
-
-        .compatibility-list-item {
-            font-family: 'Noto Serif SC', serif, 'Noto Sans Thai', sans-serif; /* Chinese-style serif for compatibility */
-            display: flex;
-            align-items: flex-start;
-            gap: 6px; /* Reduced */
-            font-size: 0.88rem; /* Slightly reduced */
-            color: #333333; /* Darker grey for better contrast */
-            line-height: 1.3; /* More compact line height */
-            font-weight: 700; /* Increased boldness */
-            text-indent: 1em; /* Added indentation for list items */
-        }
-
-        .compatibility-list-item.positive {
-            color: #065f46;
-        }
-        .compatibility-list-item.negative {
-            color: #dc2626;
-        }
-
-        .compatibility-icon {
-            font-size: 1rem; /* Reduced */
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-        /* Specific header list items adjustments */
-        .compatibility-list-item.font-semibold.text-green-700.mb-2 {
-            margin-bottom: 4px; /* Reduced from 8px (mb-2 default) */
-            text-indent: 0; /* No indent for headers */
-        }
-        .compatibility-list-item.font-semibold.text-red-700.mb-2.mt-4 {
-            margin-top: 6px; /* Keep some separation */
-            margin-bottom: 4px; /* Reduced from 8px (mb-2 default) */
-            text-indent: 0; /* No indent for headers */
-        }
-
-        .enrollment-link-frame {
-            background-color: rgba(240, 248, 255, 0.7); /* AliceBlue with transparency - Softened */
-            border-radius: 15px;
-            padding: 15px; /* Reduced */
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            margin-top: 10px; /* Reduced */
-        }
-        .enrollment-link-frame h4 {
-            font-size: 1.6rem; /* Reduced */
-            font-weight: bold;
-            color: #5a7d9f;
-            margin-bottom: 8px; /* Reduced */
-        }
-        .enrollment-link-frame p {
-            font-size: 0.9rem; /* Reduced */
-            color: #829db7;
-            margin-bottom: 12px; /* Reduced */
-        }
-        .enrollment-link-frame a {
-            display: block;
-            width: fit-content;
-            margin: 0 auto;
-            background-image: linear-gradient(to right, #3B82F6, #8B5CF6);
-            color: white;
-            padding: 8px 20px; /* Reduced */
-            border-radius: 9999px;
-            font-weight: bold;
-            font-size: 0.95rem; /* Reduced */
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            text-decoration: none;
-        }
-        .enrollment-link-frame a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-        }
-
-
-        /* Loading Screen */
-        .loading-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            min-height: 300px;
-        }
-
-        .spinner-icon { /* New spinner style (hourglass) */
-            font-size: 4rem; /* Large enough */
-            color: #3B82F6; /* Blue, matching primary button */
-            display: inline-block; /* Essential for proper display */
-            animation: hourglassTilt 2s infinite ease-in-out; /* Apply animation */
-        }
-
-        /* Removed old .spinner styles */
-
-        /* Responsive adjustments */
-        @media (max-width: 640px) {
-            .game-container {
-                padding: 15px;
-            }
-            .question-text {
-                font-size: 1.15rem;
-            }
-            .answer-option {
-                padding: 10px;
-            }
-            .answer-option span {
-                font-size: 0.95rem;
-            }
-            .element-title {
-                font-size: 1.5rem;
-            }
-            .element-subtitle {
-                font-size: 1rem;
-            }
-            .element-description {
-                font-size: 0.9rem;
-                text-indent: 1.5em; /* Smaller indent for mobile */
-            }
-            .element-icon-container {
-                width: 70px; /* Further reduced for mobile */
-                height: 70px; /* Further reduced for mobile */
-            }
-            .element-icon {
-                font-size: 2.5rem;
-            }
-            .keyword-box {
-                font-size: 0.9rem; /* Adjusted for mobile */
-                padding: 6px 14px; /* Adjusted for mobile */
-            }
-            .compatibility-list-item, .pros-cons-list-item {
-                font-size: 0.85rem;
-                text-indent: 0.8em; /* Smaller indent for mobile */
-            }
-            .enrollment-link-frame h4 {
-                font-size: 1.4rem; /* Further reduced for mobile */
-            }
-            .enrollment-link-frame p {
-                font-size: 0.8rem; /* Further reduced for mobile */
-            }
-            .enrollment-link-frame a {
-                padding: 6px 18px; /* Further reduced for mobile */
-                font-size: 0.85rem; /* Further reduced for mobile */
-            }
-            .intro-page-content p.indent-text {
-                text-indent: 1.5em; /* Smaller indent for mobile */
-            }
-            .loading-screen p:first-of-type { /* First paragraph in loading screen */
-                font-size: 1.5rem; /* Adjust for mobile */
-            }
-            .loading-screen p:last-of-type { /* Second paragraph in loading screen */
-                font-size: 1rem; /* Adjust for mobile */
-            }
-            .tap-to-continue-text {
-                font-size: 0.8rem;
-            }
-            .two-column-result-section {
-                flex-direction: column; /* Stack columns on small screens */
-                gap: 15px; /* Space between stacked columns */
-            }
-            .two-column-result-section > div {
-                min-width: auto; /* Remove min-width when stacking */
-                width: 100%; /* Take full width when stacked */
-            }
-        }
-        /* New style for indented paragraphs in intro */
-        .intro-page-content p.indent-text {
-            text-indent: 2em; /* Indent the first line by 2 em units */
-            text-align: left; /* Keep left-aligned instead of justify */
-        }
-
-        /* New style for displaying scores */
-        #debugScores {
+        .answer-button:hover {
             background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            text-align: left;
-            font-size: 0.9rem;
-            color: #4a5568;
-            font-family: monospace; /* Monospaced font for clear score display */
-        }
-        #debugScores h4 {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #2d3748;
-        }
-        #debugScores ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* Two columns for scores */
-            gap: 5px 15px; /* Row and column gap */
-        }
-        #debugScores li {
-            padding: 2px 0;
-        }
-        #debugScores li strong {
-            color: #3B82F6; /* Blue for element name */
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
 
-        /* Styles for the live debug scores during quiz */
-        #quizDebugScores {
-            position: fixed; /* Keep it fixed on screen */
-            top: 15px; /* From top */
-            right: 15px; /* From right */
-            background-color: rgba(0, 0, 0, 0.7); /* Dark background with transparency */
-            color: white; /* White text */
-            padding: 10px 15px;
+        /* Styles for message box (replaces alert) */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
             border-radius: 10px;
-            font-family: monospace; /* Monospaced font for code-like display */
-            font-size: 0.8rem; /* Smaller font size */
-            z-index: 1000; /* Ensure it's on top of other elements */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s ease-in-out; /* Smooth transition for background changes */
-            max-height: 80vh; /* Limit height */
-            overflow-y: auto; /* Enable scrolling if content overflows */
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            text-align: center;
         }
-        #quizDebugScores h5 {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #6EE7B7; /* Light green for title */
+        .message-box.show {
+            display: block;
+            opacity: 1;
         }
-        #quizDebugScores pre {
-            white-space: pre-wrap; /* Wrap text in pre tag */
-            word-break: break-all; /* Break long words */
+
+        /* Hourglass Emoji for loading screen */
+        .loading-content .hourglass-emoji {
+            font-size: 3rem;
+            margin-top: 20px;
+            display: inline-block;
+            animation: spin 2.5s infinite linear;
         }
-        /* Removed .hidden class default opacity, now controlled by JS */
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-content {
+            font-size: 1.5rem;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-content p {
+            animation: none;
+            opacity: 1;
+        }
+
+        /* Custom class for the main result card background to make it lighter */
+        .bg-result-card {
+            background-color: rgba(255, 255, 255, 0.6); /* 60% opaque white for lighter feel */
+        }
+
+        /* Adjustments for the result screen */
+        #resultScreen {
+            padding-top: 1rem; /* Reduced top padding */
+            padding-bottom: 1rem; /* Reduced bottom padding */
+            justify-content: flex-start; /* Align content to the top */
+            align-items: center; /* Center content horizontally */
+            overflow-y: auto; /* Allow scrolling for results if content is long */
+        }
+
+        /* Adjust main result card padding and max-width */
+        .result-card-container {
+            padding: 0.85rem; /* Slightly increased padding for text */
+            max-width: 480px; /* Default max-width, slightly larger */
+            width: 95%; /* Use percentage for fluid width */
+            box-sizing: border-box; /* Include padding in width/height */
+            margin-top: 1rem; /* Small top margin to avoid clipping, let overflow handle if needed */
+            margin-bottom: 1rem; /* Small bottom margin */
+        }
+
+        /* Responsive max-width for larger screens (Tailwind breakpoints) */
+        @media (min-width: 640px) { /* sm breakpoint */
+            .result-card-container {
+                max-width: 580px; /* Increased for small screens */
+                padding: 1.15rem;
+            }
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .result-card-container {
+                max-width: 700px; /* Increased for medium screens */
+                padding: 1.4rem;
+            }
+        }
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .result-card-container {
+                max-width: 800px; /* Increased for large screens */
+                padding: 1.65rem;
+            }
+        }
+
+        /* Font size adjustments for general result display elements */
+        .result-card-container h1 { font-size: 1.8rem; } /* Significantly increased */
+        .result-card-container h2 { font-size: 1.5rem; } /* Significantly increased */
+        .result-card-container .element-icon { font-size: 3.5rem; } /* Slightly increased icon size */
+        .result-card-container p { font-size: 1rem; } /* Base text size (Tailwind text-base) */
+        .result-card-container .text-sm-custom { font-size: 0.875rem; } /* Adjusted from 0.75rem to 0.875rem (text-sm in Tailwind) */
+        .result-card-container .text-xs-custom { font-size: 0.75rem; } /* Adjusted from 0.625rem to 0.75rem (text-xs in Tailwind) */
+
+        /* Specific adjustments for very small screens */
+        @media (max-width: 480px) {
+            .result-card-container h1 { font-size: 1.5rem; } /* Adjusted for very small screens */
+            .result-card-container h2 { font-size: 1.2rem; } /* Adjusted for very small screens */
+            .result-card-container .element-icon { font-size: 3rem; } /* Adjusted icon size for very small screens */
+            .result-card-container p { font-size: 0.875rem; } /* Adjusted for very small screens */
+            .result-card-container .text-sm-custom { font-size: 0.75rem; }
+            .result-card-container .text-xs-custom { font-size: 0.65rem; } /* Slightly smaller for smallest screens */
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-green-100 via-blue-100 to-purple-100 min-h-screen flex items-center justify-center p-4">
-    <div id="gameApp" class="game-container">
-        <div id="introScreen" class="space-y-6">
-            <h1 id="introTitle" class="text-3xl md:text-4xl font-bold text-gray-700 mb-4">
-                </h1>
+<body class="bg-gradient-to-br from-blue-200 via-green-200 to-white">
+    <!-- Message box -->
+    <div id="messageBox" class="message-box">
+        <p id="messageText"></p>
+        <button id="messageCloseButton" class="mt-4 px-4 py-2 bg-blue-500 rounded-lg">ตกลง</button>
+    </div>
 
-            <div id="introPagesContainer">
-                <div class="intro-page-content" data-page="0">
-                    <p class="text-lg text-gray-600 mb-4 indent-text">
-                        ณ ดินแดนศักดิ์สิทธิ์ มู่คา (木霞) หุบเขาเวทมนตร์เร้นลับ ที่แสงอรุณแรกจะทอดผ่านยอดไม้ใหญ่เฉพาะยามรุ่งสาง ราวกับสวรรค์ซ่อนอยู่ในโลกมนุษย์ ทุกสรรพสิ่งในผืนแผ่นดินนี้ล้วนดำรงอยู่ด้วย <span class="font-semibold text-intro-highlight">พลังวิญญาณ</span> ซึ่งไหลเวียนเป็นหนึ่งเดียวกับธรรมชาติ
-                    </p>
-                </div>
-                <div class="intro-page-content" data-page="1">
-                    <p class="text-lg text-gray-600 mb-4 indent-text">
-                        ทุกชีวิตที่ถือกำเนิด ณ แดนนี้ ล้วนผูกพันกับ “ธาตุประจำตัว” ซึ่งสะท้อนจิตวิญญาณแท้จริงในก้นบึ้งของตนเอง ธาตุทั้งสิบได้แก่ <span class="font-semibold text-intro-highlight">ดิน น้ำ ลม ไฟ สายฟ้า แสง ความมืด พฤกษา โลหะ และพลังจิต</span> ธาตุประจำตัวนี้คือแก่นกลางของตัวตน ไม่ว่าใครจะฝึกฝนวิชา ณ สำนักใด ก็ไม่อาจเปลี่ยนแปลงสิ่งนี้ได้
-                    </p>
-                </div>
-                <div class="intro-page-content" data-page="2">
-                    <p class="text-lg text-gray-600 mb-4 indent-text">
-                        เมื่อกาลเวลาผันผ่าน วิถีเซียนแห่งดินแดนมู่คาได้ผลิดอกออกผล กลายเป็น<span class="font-semibold text-intro-highlight">"สิบสำนักใหญ่"</span> ซึ่งแต่ละสำนักสืบทอดศาสตร์ลึกล้ำแห่งธาตุที่ตนเชี่ยวชาญ สำนักทั้งสิบเป็นดั่งเสาหลักของยุทธภพและเป็นที่พึ่งของผู้แสวงหาพลัง.
-                    </p>
-                </div>
-                <div class="intro-page-content" data-page="3">
-                    <p class="text-lg text-gray-600 mb-4 indent-text">
-                        ในทุกปีเมื่อยามเดือนเจ็ดมาถึง จะมีการจัด <span class="font-semibold text-intro-highlight">“เทศกาลท้าประลองแห่งยุทธภพ”</span> เพื่อเปิดโอกาสให้เหล่าผู้ฝึกวิชา ไม่ว่าจะศิษย์จากสำนักใหญ่หรือพเนจรจากแดนไกล ก็สมัครเข้าร่วมการประลองด้วยตนเอง หากผ่านการคัดกรองจากเหล่าผู้อาวุโส ก็จะได้รับสิทธิ์เป็น <span class="font-semibold text-intro-highlight">“ผู้แทนแห่งธาตุ”</span> และขึ้นประลองต่อหน้าชาวยุทธภพ เพื่อแสดงให้เห็นว่าพลังแห่งธาตุใดจะส่องประกายที่สุดในห้วงปี.
-                    </p>
-                </div>
-                <div class="intro-page-content" data-page="4">
-                    <p class="text-xl font-bold mb-4">
-                        ทว่าปีนี้กลับแตกต่างออกไป...
-                    </p>
-                    <p class="text-xl font-bold mb-4">
-                        สายลมแห่งโชคชะตาเริ่มส่งสัญญาณถึงจุดเปลี่ยน
-                    </p>
-                    <p class="text-xl font-bold mb-4">
-                        พลังวิญญาณที่เคยสงบนิ่งในผืนป่าและผืนฟ้าเริ่มสั่นไหว
-                    </p>
-                    <p class="text-xl font-bold mb-4">
-                        ในห้วงยามแห่งความเปลี่ยนแปลง
-                    </p>
-                    <p class="text-xl font-bold mb-10">
-                        ตำนานบทใหม่ ได้เริ่มต้นขึ้นแล้ว!
-                    </p>
-                </div>
-            </div>
-            <p id="tapToContinueText" class="tap-to-continue-text hidden">แตะที่หน้าจอเพื่อไปต่อ...</p>
-            <button id="startButton" class="button-primary hidden">เริ่มต้นการค้นหาธาตุประจำตัวของคุณ</button>
+    <!-- Intro 1 -->
+    <div id="intro1" class="game-screen bg-intro1 active">
+        <div class="intro-text-container">
+            <p>ณ ดินแดนศักดิ์สิทธิ์มู่คา</p>
+            <p>ดินแดนแห่งการศึกษาอันเปี่ยมด้วยพลังแห่งธรรมชาติ</p>
+            <p>ในทุกขวบปี เหล่าเด็กอัจฉริยะจากทั่วสารทิศต่างมุ่งหน้าสู่ที่นี่</p>
+            <p>เพื่อเข้าศึกษาในสำนักเลื่องชื่อแห่งธาตุต่าง ๆ ทั่วพิภพ</p>
         </div>
+        <div id="tapToContinue1" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
+    </div>
 
-        <div id="quizScreen" class="hidden w-full">
-            <div class="progress-bar-container">
-                <div id="progressBar" class="progress-bar"></div>
-            </div>
-            <div id="questionCard" class="question-card">
-                <p id="questionText" class="question-text"></p>
-                <div id="answerOptions" class="space-y-3">
-                    </div>
-            </div>
-            <button id="nextButton" class="button-primary">ต่อไป</button>
+    <!-- Intro 2 -->
+    <div id="intro2" class="game-screen bg-intro2">
+        <div class="intro-text-container">
+            <p>แม้นวิชาความรู้จะเป็นสิ่งสำคัญยิ่ง</p>
+            <p>หากแต่จิตใจอันเปี่ยมด้วยคุณธรรมก็เป็นสิ่งที่มิอาจขาดได้</p>
+            <p>ดังนั้น บททดสอบแรกที่เหล่าสำนักศึกษาจัดขึ้นแก่ศิษย์ทั้งปวง</p>
+            <p>จึงมีนามว่า “ปณิธานแห่งเมตตา”</p>
         </div>
+        <div id="tapToContinue2" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
+    </div>
 
-        <div id="loadingScreen" class="hidden loading-screen">
-            <span class="spinner-icon">⌛</span>
-            <p class="text-2xl font-bold text-gray-700 text-center">คุณได้ค้นพบพลังภายในที่หลับใหลอยู่แล้ว!</p>
-            <p class="text-xl text-gray-600 text-center">กำลังประมวลผลแก่นแท้แห่งธาตุของท่าน...</p>
-        </div>
-
-        <div id="resultScreen" class="hidden w-full result-section">
-            <h2 class="text-4xl font-bold text-center mb-6 text-gray-800">
-                ธาตุประจำตัวของคุณคือ:
-            </h2>
-
-            <div id="mainResultFrame" class="result-frame">
-                <div class="main-result-content">
-                    <div class="element-summary">
-                        <div class="element-icon-container">
-                            <span id="elementIcon" class="element-icon"></span>
-                        </div>
-                        <h3 id="elementTitle" class="element-title"></h3>
-                        <p id="elementSubtitle" class="element-subtitle"></p>
-                        <p id="elementDescription" class="element-description"></p>
-                    </div>
-
-                    <div class="keywords-container">
-                        <div id="elementKeywords" class="keywords-grid">
-                            </div>
-                    </div>
-
-                    <div class="two-column-result-section">
-                        <div class="column-left">
-                            <div class="pros-cons-section">
-                                <h4>จุดดี:</h4>
-                                <ul id="elementPros" class="list-none">
-                                    </ul>
-                                <h4>จุดด้อย:</h4>
-                                <ul id="elementCons" class="list-none">
-                                    </ul>
-                            </div>
-                        </div>
-                        <div class="column-right">
-                            <div class="compatibility-section-group">
-                                <h4>ความสัมพันธ์:</h4>
-                                <ul id="compatibleList" class="list-none mb-4">
-                                    </ul>
-                                <ul id="conflictingList" class="list-none">
-                                    </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- New debug section for displaying all scores -->
-                    <div id="debugScores">
-                        <h4>คะแนนรวมของทุกธาตุ:</h4>
-                        <ul id="allElementScoresList">
-                        </ul>
-                    </div>
-                    <!-- Final message moved here to ensure it's inside mainResultFrame's content -->
-                    <p id="finalResultText" class="text-base text-gray-700 mt-4 text-center font-bold"></p>
-                </div>
-            </div>
-
-            <div class="enrollment-link-frame">
-                <h4 class="text-2xl md:text-3xl font-extrabold">
-                    โชคชะตาแห่งมู่คา... กำลังเรียกหาท่าน!
-                </h4>
-                <p class="text-base text-gray-700 mt-2 mb-4">
-                    เชิญชวนเหล่า MUKA68 เข้าร่วมเทศกาลแห่งการประลอง
-                </p>
-                <a href="https://forms.gle/3UHbXZ3TiroJhNAR7" target="_blank" class="button-link">
-                    สมัครเข้าร่วมค่ายเซียน!
-                </a>
-            </div>
-
-            <button id="restartButton" class="button-secondary mt-8">เล่นอีกครั้ง</button>
-        </div>
-
-        <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
-            <div class="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm w-full">
-                <p id="messageText" class="text-xl font-semibold text-gray-800 mb-6"></p>
-                <button id="closeMessageBox" class="button-primary">ตกลง</button>
-            </div>
-        </div>
-
-        <!-- Live Debug Scores during Quiz -->
-        <div id="quizDebugScores">
-            <h5>คะแนนปัจจุบัน:</h5>
-            <pre id="quizScoresDisplay"></pre>
+    <!-- Question 1 -->
+    <div id="question1" class="game-screen bg-question1">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            ในการทดสอบ “ปณิธานแห่งเมตตา” นี้<br>
+            ท่านจะต้องจัดการวิกฤตผู้อพยพในภาวะทรัพยากรจำกัด<br>
+            โดยไม่ละทิ้งเมตตาและความยุติธรรม ท่านจะบำเพ็ญเมตตาธรรมเยี่ยงไร?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q1A">เปิดรับผู้อพยพอย่างเต็มใจ แบ่งปันทรัพยากรเท่าที่มี แม้ชาวมู่คาต้องอดออมมากขึ้น</button>
+            <button class="answer-button" data-choice="Q1B">จัดระเบียบผู้อพยพอย่างรัดกุม จัดสรรปันส่วนทรัพยากรอย่างยุติธรรม พร้อมส่งคนออกสำรวจหาแหล่งใหม่</button>
+            <button class="answer-button" data-choice="Q1C">สืบหาสาเหตุการอพยพ เพื่อหาทางแก้ไขปัญหาที่ต้นเหตุ พร้อมเจรจาบกับทุกฝ่ายหาทางออกที่ยั่งยืน</button>
+            <button class="answer-button" data-choice="Q1D">ปกป้องทรัพยากรของชาวมู่คาก่อนเป็นอันดับแรก พร้อมส่งสารขอความร่วมมือจากดินแดนอื่นเพื่อรับผู้อพยพไปบางส่วน</button>
         </div>
     </div>
 
+    <!-- Intro 3 -->
+    <div id="intro3" class="game-screen bg-intro3">
+        <div class="intro-text-container">
+            <p>เมื่อผ่านการทดสอบปณิธานแห่งเมตตามาได้</p>
+            <p>ท่านจะถือว่าเป็นศิษย์ของสำนักอย่างแท้จริง</p>
+            <p>หลังจากนี้ เหล่าศิษย์จะได้พบกับศิษย์พี่และอาจารย์ของตน</p>
+            <p>เพื่อเล่าเรียนและฝึกฝนความสามารถ</p>
+            <p>เตรียมพร้อมสำหรับเทศกาลประกายธาตุ</p>
+        </div>
+        <div id="tapToContinue3" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
+    </div>
+
+    <!-- Question 2 -->
+    <div id="question2" class="game-screen bg-question2">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            ในยามที่การฝึกหนักหน่วงและร่างกายอ่อนล้า<br>
+            หากศิษย์ร่วมสำนักชักชวนให้ท่านหยุดพัก<br>
+            และผ่อนคลาย ท่านจะกระทำเยี่ยงไร?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q2A">ปฏิเสธอย่างสุภาพ มุ่งมั่นฝึกฝนให้บรรลุเป้าหมายที่ตั้งไว้</button>
+            <button class="answer-button" data-choice="Q2B">พักผ่อนเพียงชั่วครู่ ฟื้นฟูร่างกายแล้วกลับมาฝึกต่อด้วยพลังที่เปี่ยมล้น</button>
+            <button class="answer-button" data-choice="Q2C">ชวนศิษย์น้องมาฝึกฝนด้วยกัน เพื่อให้ทุกคนก้าวหน้าไปพร้อมกัน</button>
+            <button class="answer-button" data-choice="Q2D">ใช้พลังจิตวิเคราะห์ว่าการพักผ่อนนี้จะส่งผลดีต่อการฝึกในระยะยาวหรือไม่ แล้วจึงตัดสินใจ</button>
+        </div>
+    </div>
+
+    <!-- Question 3 -->
+    <div id="question3" class="game-screen bg-question3">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            อาจารย์ชี้แนะจุดบกพร่องในวิชาของท่าน<br>
+            ท่านจะน้อมรับและพัฒนาตนเยี่ยงไร?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q3A">น้อมรับคำตำหนิและมุ่งมั่นฝึกฝนให้หนักขึ้น เพื่อพิสูงจ์ตนเองว่าคู่ควร</button>
+            <button class="answer-button" data-choice="Q3B">พยายามทำความเข้าใจคำชี้แนะอย่างลึกซึ้ง และขอคำแนะนำเพิ่มเติมจากอาจารย์</button>
+            <button class="answer-button" data-choice="Q3C">ปล่อยวางคำตำหนิ และฝึกฝนตามทางของตน เพราะเชื่อมั่นในวิถีแห่งตน</button>
+            <button class="answer-button" data-choice="Q3D">ค้นคว้าตำราวิชาด้วยตนเองอย่างถี่ถ้วน เพื่อหาทางแก้ไขจุดบกพร่อง</button>
+        </div>
+    </div>
+
+    <!-- Question 4 -->
+    <div id="question4" class="game-screen bg-question4">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            เผชิญปรากฏการณ์พลังงานลึกลับที่คาดไม่ถึง<br>
+            ท่านจะรับมือกับวิกฤตนี้เยี่ยงไร?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q4A">พยายามใช้พลังวิชาเดิมที่มีอยู่ทั้งหมด เพื่อบังคับให้สถานการณ์คลี่คลาย</button>
+            <button class="answer-button" data-choice="Q4B">สังเกตการณ์อย่างถี่ถ้วน พยายามทำความเข้าใจธรรมชาติของปรากฏการณ์ ก่อนลงมือแก้ไข</button>
+            <button class="answer-button" data-choice="Q4C">รีบกลับไปรายงานอาจารย์ผู้ทรงภูมิปัญญา เพื่อขอคำแนะนำและวิชาใหม่</button>
+            <button class="answer-button" data-choice="Q4D">ใช้สัญชาตญาณและทดลองใช้พลังธาตุต่างๆ อย่างสร้างสรรค์ เพื่อค้นพบหนทางใหม่</button>
+        </div>
+    </div>
+
+    <!-- Intro 4 -->
+    <div id="intro4" class="game-screen bg-intro4">
+        <div class="intro-text-container">
+            <p>เมื่อฝึกฝนและเล่าเรียนจนเข้าใจถึงแก่นของธาตุได้ระดับหนึ่ง</p>
+            <p>สิ่งสำคัญก่อนจะเข้าร่วมเทศกาลประกายธาตุ ก็คือ... ความสามัคคี</p>
+            <p>ดังนั้นเหล่าสำนักจึงได้มีบททดสอบที่ชื่อว่า “ด่านผนึกใจ“ เพื่อขัดเกลา<br>
+            ความสามัคคีให้กับเหล่าศิษย์ทั้งหลาย</p>
+        </div>
+        <div id="tapToContinue4" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
+    </div>
+
+    <!-- Question 6 -->
+    <div id="question6" class="game-screen bg-question6">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            ในการทดสอบ “ด่านผนึกใจ” ทีมต้องเผชิญ<br>
+            ปริศนาซับซ้อน ท่านจะนำพาทีมก้าวข้ามอย่างไร?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q6A">นำโดยตัวเอง วางแผนและสั่งการให้ผู้อื่นทำตาม</button>
+            <button class="answer-button" data-choice="Q6B">รับฟังความคิดเห็นของทุกคน หาจุดร่วม และแบ่งงานตามความถนัด</button>
+            <button class="answer-button" data-choice="Q6C">ให้ทุกคนลองผิดลองถูกด้วยตนเอง เพื่อให้เรียนรู้จากประสบการณ์</button>
+            <button class="answer-button" data-choice="Q6D">ให้กำลังใจและสนับสนุนเพื่อนร่วมทีม แม้ตนเองจะไม่เข้าใจปริศนานั้นทั้งหมด</button>
+        </div>
+    </div>
+
+    <!-- Question 7 -->
+    <div id="question7" class="game-screen bg-question7">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            ยามที่ความคิดเห็นของศิษย์ร่วมทีม<br>
+            ขัดแย้งกันอย่างรุนแรงจนอาจนำไปสู่<br>
+            ความแตกแยก ท่านจะแก้ไขสถานการณ์นี้อย่างไร?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q7A">เข้าไประงับข้อขัดแย้งอย่างเด็ดขาด ตัดสินใจเพื่อประโยชน์ของกลุ่ม</button>
+            <button class="answer-button" data-choice="Q7B">เปิดโอกาสให้ทุกคนได้แสดงความคิดเห็นอย่างเต็มที่ เพื่อให้เกิดความเข้าใจซึ่งกันและกัน</button>
+            <button class="answer-button" data-choice="Q7C">แยกตัวออกมาเพื่อให้แต่ละฝ่ายได้สงบลง แล้วค่อยหาทางเจรจาเมื่อทุกคนใจเย็น</button>
+            <button class="answer-button" data-choice="Q7D">ชี้ให้เห็นถึงเป้าหมายร่วมกันของภารกิจ เพื่อให้ทุกคนกลับมารวมใจกัน</button>
+        </div>
+    </div>
+
+    <!-- Question 8 -->
+    <div id="question8" class="game-screen bg-question8">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            ในการทดสอบสุดท้าย ท่านมีโอกาสก้าวหน้า<br>
+            ไปอย่างโดดเดี่ยวเพื่อบรรลุเป้าหมายสูงสุด<br>
+            หากทีมอ่อนแอลง ท่านจะเลือกหนทางใด?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q8A">สละโอกาสส่วนตน เพื่ออยู่เคียงข้างและนำพาทีมให้สำเร็จภารกิจร่วมกัน</button>
+            <button class="answer-button" data-choice="Q8B">ก้าวไปข้างหน้าตามลำพัง เพราะเชื่อว่าการบรรลุเป้าหมายสูงสุดของตนเป็นสิ่งสำคัญที่สุด</button>
+            <button class="answer-button" data-choice="Q8C">หาหนทางที่ชาญฉลาด เพื่อให้ทั้งตนเองและทีมสามารถบรรลุเป้าหมายได้พร้อมกัน</button>
+            <button class="answer-button" data-choice="Q8D">ขอให้ทีมสนับสนุนการก้าวไปข้างหน้าของตน แล้วสัญญาว่าจะกลับมาช่วยเหลือเมื่อบรรลุเป้าหมาย</button>
+        </div>
+    </div>
+
+    <!-- Intro 5 -->
+    <div id="intro5" class="game-screen bg-intro5">
+        <div class="intro-text-container">
+            <p><strong>ในทุกปี เมื่อศิษย์ผ่านด่านผนึกใจได้แล้ว</strong></p>
+            <p><strong>จะต้องเข้าร่วมเทศกาลประกายธาตุ</strong><br>
+            ณ หุบเขาแห่งธาตุ (วิทยาลัยแห่งขุนเขา)</p>
+            <p>เทศกาลนี้มิใช่การประลองพลังเพื่อชี้ขาดว่าธาตุใดแกร่งกล้าที่สุด<br>
+            แต่เป็นบททดสอบความสามัคคีและการร่วมใจฝ่าฟันอุปสรรค</p>
+        </div>
+        <div id="tapToContinue5" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
+    </div>
+
+    <!-- Intro 6 -->
+    <div id="intro6" class="game-screen bg-intro6 intro-auto-advance">
+        <div class="intro-text-container">
+            <p>เพราะ "ธาตุ" คืออัตลักษณ์แท้จริงของแต่ละคน<br>
+            ที่นี่คือบททดสอบแห่งจิตวิญญาณ<br>
+            เพราะ "พลังที่แท้จริง" ไม่ได้อยู่ที่ธาตุ แต่อยู่ที่หัวใจที่รวมเป็นหนึ่งเดียว</p>
+        </div>
+        <!-- This intro automatically advances -->
+    </div>
+
+    <!-- Question 9 -->
+    <div id="question9" class="game-screen bg-question9">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            ในเทศกาลประกายธาตุ ท่านและทีม<br>
+            ต้องร่วมกันเปิดผนึกประตูโบราณที่ต้องการ<br>
+            พลังธาตุประสานกันซับซ้อน แต่ศิษย์บางคนไม่คุ้นเคย ท่านจะทำอย่างไร?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q9A">เป็นแกนนำในการประสานพลังด้วยตนเอง และคอยปรับแก้ให้ผู้อื่นทำตาม</button>
+            <button class="answer-button" data-choice="Q9B">อธิบายหลักการประสานพลังให้ศิษย์ที่ไม่เข้าใจอย่างละเอียด และฝึกซ้อมด้วยกันจนเชี่ยวชาญ</button>
+            <button class="answer-button" data-choice="Q9C">ให้ศิษย์ผู้เชี่ยวชาญแต่ละธาตุผลัดกันลองนำ เพื่อหาวิธีประสานที่ดีที่สุด</button>
+            <button class="answer-button" data-choice="Q9D">ให้กำลังใจและสร้างบรรยากาศผ่อนคลาย เพื่อลดความกดดันให้ทุกคนทำตามสัญชาตญาณ</button>
+        </div>
+    </div>
+
+    <!-- Question 10 -->
+    <div id="question10" class="game-screen bg-question10">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            ระหว่างการทดสอบ ทีมของท่านเผชิญหน้า<br>
+            กับศัตรูที่แข็งแกร่ง พลังของศิษย์บางคนเริ่มอ่อนล้า<br>
+            ท่านจะนำพาทีมผ่านสถานการณ์นี้ไปได้อย่างไร?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q10A">เข้าปะทะกับศัตรูอย่างเด็ดเดี่ยว เพื่อถ่วงเวลาให้เพื่อนได้ฟื้นตัว</button>
+            <button class="answer-button" data-choice="Q10B">ปรับเปลี่ยนแผนการต่อสู้ โดยใช้จุดแข็งของแต่ละคนให้เกิดประโยชน์สูงสุด</button>
+            <button class="answer-button" data-choice="Q10C">ถอยทัพอย่างมีระเบียบ เพื่อรักษาพลังงานและหาจังหวะสวนกลับในภายหลัง</button>
+            <button class="answer-button" data-choice="Q10D">ใช้พลังจิตสร้างภาพลวงตา เพื่อหลอกล่อศัตรูและสร้างโอกาสให้ทีมรอดพ้น</button>
+        </div>
+    </div>
+
+    <!-- Question 11 -->
+    <div id="question11" class="game-screen bg-question11">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            ในภารกิจ ทีมของท่านได้รับมอบหมายให้ปกป้อง<br>
+            "ผลึกแห่งความสามัคคี" เป้าหมายสำคัญของเทศกาล<br>
+            แต่ท่านมีโอกาสได้รับพลังธาตุใหม่ หากละทิ้งการปกป้องไป ท่านจะตัดสินใจอย่างไร?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q11A">ละทิ้งการปกป้องชั่วคราว เพื่อรับพลังธาตุใหม่ เพราะเชื่อว่าจะนำมาซึ่งชัยชนะที่ยิ่งใหญ่กว่า</button>
+            <button class="answer-button" data-choice="Q11B">ยึดมั่นในการปกป้องผลึก ไม่หวั่นไหวต่อพลังล่อใจ เพราะความสามัคคีคือหัวใจของภารกิจ</button>
+            <button class="answer-button" data-choice="Q11C">พยายามหาวิธีที่จะได้รับพลังธาตุใหม่ โดยไม่ละทิ้งการปกป้องผลึก หรือหาผู้ที่เหมาะสมมาดูแลแทน</button>
+            <button class="answer-button" data-choice="Q11D">หารือกับทีมเกี่ยวกับโอกาสนี้ เพื่อให้ทุกคนมีส่วนร่วมในการตัดสินใจและเข้าใจผลลัพธ์</button>
+        </div>
+    </div>
+
+    <!-- Question 12 -->
+    <div id="question12" class="game-screen bg-question12">
+        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
+            เทศกาลใกล้สิ้นสุด ด่านสุดท้ายต้องใช้พลังแห่งมิตรภาพ<br>
+            เพื่อปลดปล่อย "ประกายธาตุ" ที่แท้จริง<br>
+            แต่มีศิษย์คนหนึ่งในทีมไม่เชื่อมั่น ท่านจะสร้างความสามัคคีขั้นสุดท้ายนี้อย่างไร?
+        </h2>
+        <div class="flex flex-col items-center w-full max-w-2xl">
+            <button class="answer-button" data-choice="Q12A">ใช้พลังวิชาของท่านกระตุ้นและดึงศักยภาพของศิษย์คนนั้นออกมาอย่างเด็ดขาด</button>
+            <button class="answer-button" data-choice="Q12B">เข้าไปปลอบโยนและให้กำลังใจอย่างจริงใจ ชี้ให้เห็นถึงคุณค่าที่เขามีต่อทีม</button>
+            <button class="answer-button" data-choice="Q12C">จัดตำแหน่งให้ศิษย์คนนั้นอยู่ในจุดที่ใช้พลังน้อยที่สุด หรือไม่ต้องใช้เลย เพื่อให้ผ่านไปได้</button>
+            <button class="answer-button" data-choice="Q12D">นำทุกคนในทีมมารวมใจกัน แสดงความเชื่อมั่นในตัวศิษย์คนนั้น เพื่อให้เขารู้สึกถึงพลังแห่งการสนับสนุน</button>
+        </div>
+    </div>
+
+
+    <!-- Intro 7 -->
+    <div id="intro7" class="game-screen bg-intro7 intro-auto-advance">
+        <div class="intro-text-container">
+            <p>หลังผ่านเทศกาลประกายธาตุ เหล่าศิษย์<br>จะกลายเป็นศิษย์ของดินแดนมู่คาและ<br>ต้องเรียนรู้คุณธรรมผ่าน "แก่นแท้แห่งมู่คา"</p>
+        </div>
+    </div>
+
+    <!-- Intro 8 -->
+    <div id="intro8" class="game-screen bg-intro8 intro-auto-advance">
+        <div class="intro-text-container">
+            <p>หลังศึกษา ฝึกฝนและเข้าใจ "แก่นแท้แห่งมู่คา"<br>
+            ถึงเวลาเฉลิมฉลองยินดีกับเหล่าศิษย์<br>
+            ในงานเลี้ยงพิเศษนี้</p>
+        </div>
+    </div>
+
+    <!-- Intro 9 -->
+    <div id="intro9" class="game-screen bg-intro9 intro-auto-advance">
+        <div class="intro-text-container">
+            <p>งานเลี้ยงส่งนี้ไม่ใช่ครั้งสุดท้ายที่เราจะได้เจอกัน<br>
+            แต่คือจุดเริ่มต้นศิษย์ทุกคนจะได้ออกไป<br>
+            ผจญภัยในโลกยุทธภพ เป็นจอมยุทธ์เปี่ยมคุณธรรม</p>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="game-screen bg-loading">
+        <div class="loading-content">
+            <p>กำลังถักทอเส้นใยแห่งโชคชะตา...<br>เพื่อเปิดเผยธาตุที่ซ่อนเร้นในตัวท่าน</p>
+            <div class="hourglass-emoji">⏳</div>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="resultScreen" class="game-screen bg-result">
+        <div id="resultDisplay" class="mt-4 text-gray-700"></div>
+        <button id="playAgainButton" class="mt-4 answer-button hidden">เล่นใหม่อีกครั้ง</button>
+    </div>
+
+
     <script>
-        // Ensure all JavaScript runs after the DOM is fully loaded
-        window.onload = function() {
-            console.log('--- Game Initializing ---');
-
-            // Define elements, their descriptions, keywords, compatible, and conflicting elements
-            const elements = {
-                "ดิน (Earth)": {
-                    title: "ปฐพีอันนิรันดร์ รากฐานแห่งจักรวาล",
-                    description: "ท่านเปรียบดั่งปฐพีอันหนักแน่น ดุจภูผาแก่นสารที่หยั่งรากลึก จิตวิญญาณท่านเปี่ยมด้วยความอดทน ไม่หวั่นไหว เป็นที่พึ่งพิงอันมั่นคง ดุจรากฐานแห่งจักรวาลที่รองรับสรรพสิ่ง คุณเป็นคนที่มีความรับผิดชอบสูง พึ่งพาได้ และมักจะเป็นที่พึ่งพาของผู้อื่นเสมอ ทุกการตัดสินใจของคุณมาจากรากฐานของเหตุผลและตรรกะอันแข็งแกร่ง คุณเป็นนักวางแผนที่รอบคอบและเป็นผู้สร้างสรรค์ที่ไม่เคยละทิ้งความพยายาม ดุจภูผาที่ตระหง่านและไม่อาจโค่นล้มได้! หากได้รับมอบหมายสิ่งใด คุณจะทุ่มเทจนงานสำเร็จลุล่วงอย่างงดงาม พวกเขาเป็นผู้ที่ยึดมั่นในคำพูดและคุณค่าที่แท้จริง ไม่ว่าพายุใดจะโหมกระหน่ำ คุณก็ยังคงยืนหยัดด้วยความอดทนอันเป็นนิรันดร์ ทว่าความมุ่งมั่นนี้อาจแปรเป็นความดื้อรั้น แข็งกระด้าง หรือบางครั้งก็อาจดูเชื่องช้า ขาดความยืดหยุ่น",
-                    icon: "🌍",
-                    keywords: ["มั่นคง", "อดทน", "รากฐาน"],
-                    pros: ["มั่นคง เชื่อถือได้", "อดทน หนักแน่น"],
-                    cons: ["ดื้อรั้น ปรับยาก", "เชื่องช้า ขาดความยืดหยุ่น"],
-                    compatible: {
-                        "พฤกษา": "บำรุงพืช",
-                        "โลหะ": "เป็นแหล่งกำเนิด"
-                    },
-                    conflicting: {
-                        "น้ำ": "น้ำท่วมพังทลาย",
-                        "ลม": "ลมพัดกระจัดกระจาย"
-                    },
-                    bgClass: "bg-earth",
-                    elementTitleColor: "#A0522D" // Earth: Sienna (softened)
-                },
-                "น้ำ (Water)": {
-                    title: "วารีทิพย์ สายธารแห่งปัญญาไร้สิ้นสุด",
-                    description: "ท่านเปรียบดั่งกระแสธาราอันไร้ขอบเขต ไหลรินปรับตัวเป็นเลิศไปตามรูปทรงของภาชนะที่รองรับ จิตใจอ่อนโยน เปี่ยมด้วยเมตตาและสัญชาตญาณอันล้ำลึก มีความคิดสร้างสรรค์และศิลปะในการดำเนินชีวิต ทว่าความอ่อนไหวอาจทำให้จมดิ่งในห้วงอารมณ์ที่แปรปรวน และมักเก็บซ่อนความลับส่วนตัวไว้ภายในใจ ดุจมหาสมุทรอันลึกล้ำที่ซ่อนเร้นพลังอันมหาศาลไว้ภายใน! คุณคือผู้ที่มองโลกด้วยความเข้าใจ และสามารถหาสมดุลในทุกสถานการณ์ได้อย่างเป็นธรรมชาติ",
-                    icon: "💧",
-                    keywords: ["ยืดหยุ่น", "สงบ", "เห็นอกเห็นใจ"],
-                    pros: ["ปรับตัวเก่ง เห็นอกเห็นใจ", "สัญชาตญาณแม่นยำ สร้างสรรค์"],
-                    cons: ["อารมณ์แปรปรวน อ่อนไหว", "ไม่เด็ดขาด เก็บกดอารมณ์"],
-                    compatible: {
-                        "พฤกษา": "หล่อเลี้ยงพืช",
-                        "โลหะ": "กักเก็บได้"
-                    },
-                    conflicting: {
-                        "ไฟ": "ดับไฟ",
-                        "ดิน": "ดินกั้นน้ำ"
-                    },
-                    bgClass: "bg-water",
-                    elementTitleColor: "#4682B4" // Water: SteelBlue (softened from Teal)
-                },
-                "ลม (Wind)": {
-                    title: "วายุเทพ พลังแห่งเสรีภาพอันมิอาจกักขัง",
-                    description: "ท่านเปรียบดั่งวายุอันบริสุทธิ์ ที่พัดผ่านไปในทุกหนแห่งด้วยจิตใจที่กระหายอิสระ ไม่ผูกมัด มีความคิดสร้างสรรค์ ฉลาดเฉลียว ว่องไว และมักจะนำพาไอเดียสดใหม่มาสู่ทุกสถานการณ์ คุณมีเสน่ห์ดึงดูดใจผู้คนด้วยความเบิกบานและมองโลกในแง่ดี แต่ก็สามารถแปรเปลี่ยนเป็นพายุแห่งการปฏิวัติได้เมื่อถึงคราวจำเป็น ดุจสายลมที่พัดผ่านทุกสิ่งอย่างรวดเร็วและไม่อาจคาดเดาได้! ทว่าความรักในอิสระอาจนำมาซึ่งความไม่มั่นคง เปลี่ยนแปลงง่าย และอาจดูไม่จริงจังในบางสถานการณ์ คุณคือผู้ที่ไม่เคยหยุดนิ่งในการเรียนรู้และพัฒนาตนเอง พร้อมที่จะนำพาทุกสิ่งไปสู่ยุคสมัยใหม่ที่สดใสกว่าเดิม",
-                    icon: "🌪️",
-                    keywords: ["อิสระ", "สร้างสรรค์", "เปลี่ยนแปลง"],
-                    pros: ["รักอิสระ ปรับตัวเก่ง", "ฉับไว มีไหวพริบ"],
-                    cons: ["ไม่มั่นคง เปลี่ยนแปลงง่าย", "ใจร้อน ขาดความอดทน"],
-                    compatible: {
-                        "ไฟ": "โหมกระพือไฟ",
-                        "สายฟ้า": "พาสายฟ้า"
-                    },
-                    conflicting: {
-                        "ดิน": "ดินต้านลม",
-                        "โลหะ": "โลหะต้านลม"
-                    },
-                    bgClass: "bg-wind",
-                    elementTitleColor: "#607B8B" // Wind: Darker Slate Gray (softened)
-                },
-                "ไฟ (Fire)": {
-                    title: "อัคคีศักดิ์สิทธิ์ เปลวเพลิงแห่งชีวิตและจิตวิญญาณ",
-                    description: "ท่านเปรียบดั่งเปลวเพลิงอันลุกโชน มีพลังงานล้นเหลือ เปี่ยมด้วยความกระตือรือร้นและแรงขับเคลื่อนอันไม่มีที่สิ้นสุด เป็นผู้นำโดยธรรมชาติ กล้าหาญ มุ่งมั่น และพร้อมที่จะเผชิญหน้ากับความท้าทายทุกรูปแบบ คุณมักจะเป็นผู้นำที่จุดประกายความหวังและแรงบันดาลใจให้กับผู้อื่นเสมอ ด้วยพลังที่ลุกโชนราวกับลาวาจากใจกลางพิภพ คุณสามารถเปลี่ยนแปลงสิ่งต่างๆ ให้เกิดขึ้นได้อย่างรวดเร็วและทรงพลัง แต่ก็ต้องระวังหากขาดการควบคุมจะเผาผลาญทุกอย่าง และนำมาซึ่งความใจร้อน หุนหันพลันแล่น! คุณคือผู้ที่ไม่ยอมแพ้ต่ออุปสรรค และพร้อมที่จะต่อสู้เพื่อสิ่งที่เชื่อมั่นอย่างไม่ลดละ",
-                    icon: "🔥",
-                    keywords: ["มุ่งมั่น", "หลงใหล", "กล้าหาญ"],
-                    pros: ["พลังงานสูง กระตือรือท้น", "เป็นผู้นำ กล้าหาญ"],
-                    cons: ["ใจร้อน หุนหันพลันแล่น", "ชอบแข่งขัน เผาผลาญตนเอง"],
-                    compatible: {
-                        "ลม": "โหมกระพือไฟ",
-                        "พฤกษา": "เป็นเชื้อเพลิง"
-                    },
-                    conflicting: {
-                        "น้ำ": "ดับไฟ",
-                        "ความมืด": "แสงขับไล่ความมืด"
-                    },
-                    bgClass: "bg-fire",
-                    elementTitleColor: "#FF7F50" // Fire: Coral (softened)
-                },
-                "สายฟ้า (Lightning)": {
-                    title: "อัสนีบาตแห่งสวรรค์ พลังแห่งการเปลี่ยนแปลงพลิกฟ้า",
-                    description: "ท่านเปรียบดั่งอัสนีบาตอันเจิดจ้า ที่ฟาดฟันลงมาด้วยความรวดเร็ว ฉับไว มีไหวพริบปฏิภาณดีเยี่ยม สามารถแก้ไขสถานการณ์ได้ในพริบตา มีพลังในการเปลี่ยนแปลงและสร้างสรรค์สิ่งใหม่ๆ อย่างทรงพลัง ทว่าความรวดเร็วนี้อาจนำมาซึ่งความคาดเดาไม่ได้ และสร้างความตื่นตระหนกให้กับผู้คนรอบข้าง! ด้วยพลังอันบริสุทธิ์และรุนแรง คุณเป็นผู้ที่มีวิสัยทัศน์ก้าวไกล มองเห็นโอกาสและสามารถสร้างสรรค์สิ่งใหม่ๆ ได้อย่างรวดเร็ว แต่ก็ต้องระวังพลังที่รุนแรงนี้ไม่ให้ทำลายสิ่งดีๆ รอบตัว! คุณคือผู้ที่จะไม่ปล่อยให้โอกาสหลุดมือ และพร้อมที่จะพุ่งทะยานไปข้างหน้าอย่างไม่หยุดยั้ง",
-                    icon: "⚡",
-                    keywords: ["รวดเร็ว", "เฉียบคม", "เด็ดขาด"],
-                    pros: ["รวดเร็ว มีประสิทธิภาพ", "มีไหวพริบ ทรงพลัง"],
-                    cons: ["คาดเดาไม่ได้ ไม่แน่นอน", "อาจทำลายล้าง ใจร้อน"],
-                    compatible: {
-                        "ลม": "พาสายฟ้า",
-                        "โลหะ": "นำไฟฟ้าได้ดี"
-                    },
-                    conflicting: {
-                        "ดิน": "ดูดซับพลังงาน",
-                        "น้ำ": "น้ำนำไฟฟ้า (อันตราย)"
-                    },
-                    bgClass: "bg-lightning",
-                    elementTitleColor: "#FFEB8A" // Lightning: Light Gold (softened)
-                },
-                "แสง (Light)": {
-                    title: "แสงอรุณ ปัญญาแห่งการชี้นำอันศักดิ์สิทธิ์",
-                    description: "ท่านเปรียบดั่งรัศมีแห่งรุ่งอรุณ ที่ส่องสว่างนำทางในความมืดมิด จิตใจบริสุทธิ์ผุดผ่อง มองโลกในแง่ดี เปี่ยมด้วยปัญญาอันไร้ขีดจำกัด และเป็นแรงบันดาลใจให้กับผู้อื่นเสมอ คุณสามารถมองเห็นความจริงที่ซ่อนอยู่เบื้องหลังสิ่งลวงตา และพร้อมที่จะเปิดเผยความจริงเพื่อความถูกต้อง ดุจดวงประทีปที่ส่องนำทางผู้หลงทาง! ทว่าความสว่างไสวนี้ก็อาจทำให้พวกเขาอ่อนไหวต่อเงามืด และปรารถนาความสมบูรณ์แบบในทุกสิ่งจนบางครั้งอาจสร้างแรงกดดัน คุณคือผู้ที่นำพาความชัดเจนและความกระจ่างมาสู่ทุกสถานการณ์ และเป็นแรงบันดาลใจให้ผู้อื่นก้าวเดินต่อไปด้วยความหวัง",
-                    icon: "✨",
-                    keywords: ["สติปัญญา", "ความหวัง", "ยุติธรรม"],
-                    pros: ["มองโลกในแง่ดี บริสุทธิ์ใจ", "มีปัญญา เป็นแรงบันดาลใจ"],
-                    cons: ["อ่อนไหวต่อด้านลบ โลกสวย", "คาดหวังความสมบูรณ์แบบ"],
-                    compatible: {
-                        "พลังจิต": "เสริมการหยั่งรู้",
-                        "พฤกษา": "จำเป็นต่อการเติบโต",
-                        "ไฟ": "เป็นแหล่งกำเนิด"
-                    },
-                    conflicting: {
-                        "ความมืด": "ขับไล่กันและกัน"
-                    },
-                    bgClass: "bg-light",
-                    elementTitleColor: "#FFED8A" // Light: Light Gold (softened)
-                },
-                "ความมืด (Darkness)": {
-                    title: "เงามืดอเวจี ห้วงลึกแห่งปริศนาไร้ก้นบึ้ง",
-                    description: "ท่านเปรียบดั่งเงามืดอันเร้นลับ ห้วงรัตติกาลอันลึกล้ำที่ซ่อนเร้นพลังอำนาจและปัญญาที่ยากจะหยั่งถึง มีจิตใจลึกลับซับซ้อน สัญชาตญาณแข็งแกร่ง มองเห็นในสิ่งที่ผู้อื่นมองไม่เห็น และชอบเก็บตัว ใคร่ครวญสิ่งต่างๆ ด้วยความลึกซึ้ง คุณมีพลังในการเปลี่ยนแปลงที่สงบนิ่งแต่ทรงประสิทธิภาพ ดุจเงามืดที่สามารถกลืนกินทุกสิ่งแต่ก็เป็นส่วนหนึ่งที่สร้างความสมดุล! ทว่าความลึกลับนี้อาจนำมาซึ่งความโดดเดี่ยว และมีด้านที่คาดเดาไม่ได้ซึ่งอาจทำให้ผู้อื่นหวาดกลัว คุณคือผู้ที่เข้าใจในธรรมชาติของทุกสิ่งอย่างลึกซึ้ง และมักจะค้นพบความจริงที่ผู้อื่นมองข้ามไปเสมอ",
-                    icon: "🌑",
-                    keywords: ["ลึกลับ", "สัญชาตญาณ", "ซับซ้อน"],
-                    pros: ["ลึกซึ้ง สัญชาตญาณแข็งแกร่ง", "เป็นอิสระ พึ่งพาตนเอง"],
-                    cons: ["โดดเดี่ยว เข้าใจยาก", "มีด้านมืด คาดเดาไม่ได้"],
-                    compatible: {
-                        "พลังจิต": "เชื่อมมิติที่มองไม่เห็น",
-                        "น้ำ": "น้ำลึกยากหยั่งถึง"
-                    },
-                    conflicting: {
-                        "แสง": "แสงขับไล่ความมืด",
-                        "ไฟ": "ไฟส่องความมืด"
-                    },
-                    bgClass: "bg-darkness",
-                    elementTitleColor: "#6A1A9E" // Darkness: Muted Purple (softened)
-                },
-                "พฤกษา (Nature)": {
-                    title: "พฤกษาเทวะ วิญญาณแห่งการเติบโตอันเป็นนิรันดร์",
-                    description: "ท่านเปรียบดั่งไม้ยืนต้นอันหยั่งรากลึก ที่สื่อถึงการเติบโตอันไม่สิ้นสุด ความอุดมสมบูรณ์ และการเชื่อมโยงกับทุกสิ่งมีชีวิต จิตใจสงบเยือกเย็น มีความอดทนสูง เอื้อเฟื้อเผื่อแผ่ รักธรรมชาติ เปี่ยมด้วยชีวิตชีวา และฟื้นตัวเร็ว คุณมักจะเป็นผู้สร้างความสงบสุขและร่มเย็นให้กับสิ่งรอบข้าง ดุจต้นไม้ใหญ่ที่แผ่กิ่งก้านสาขาให้ร่มเงาและออกผล! ทว่าความสงบนี้อาจทำให้ดูเชื่องช้า ขาดความกระตือรือร้นในบางครั้ง และอ่อนไหวต่อสภาพแวดล้อมโดยรอบมากเกินไป คุณคือผู้ที่ให้ความสำคัญกับการอยู่ร่วมกันอย่างกลมกลืน และเชื่อมั่นในพลังแห่งการเติบโตที่ไม่เคยหยุดนิ่ง",
-                    icon: "🍃",
-                    keywords: ["เติบโต", "เมตตา", "ชีวิตชีวา"],
-                    pros: ["อดทนสูง ใจเย็น", "เป็นผู้ให้ ฟื้นตัวดี"],
-                    cons: ["เชื่องช้า ขาดความกระตือรือท้น", "อ่อนไหว ไม่ชอบเผชิญหน้า"],
-                    compatible: {
-                        "น้ำ": "หล่อเลี้ยงพืช",
-                        "ดิน": "เป็นรากฐานและอาหาร"
-                    },
-                    conflicting: {
-                        "ไฟ": "ไฟเผาทำลาย",
-                        "โลหะ": "โลหะตัดโค่น"
-                    },
-                    bgClass: "bg-nature",
-                    elementTitleColor: "#5CB85C" // Nature: Medium Sea Green (softened)
-                },
-                "โลหะ (Metal)": {
-                    title: "โลหันต์เกราะทอง คมดาบแห่งระเบียบศักดิ์สิทธิ์",
-                    description: "ท่านเปรียบดั่งคมดาบศักดิ์สิทธิ์ ที่เฉียบคม เด็ดขาด และเปี่ยมด้วยระเบียบวินัย ยึดมั่นความถูกต้องและยุติธรรมเป็นที่ตั้ง สามารถวิเคราะห์สิ่งต่างๆ ได้อย่างเป็นระบบและแม่นยำ คุณเป็นนักปกป้องที่ทรงพลัง และพร้อมที่จะต่อสู้เพื่อความยุติธรรมอย่างไม่หวั่นเกรง ดุจคมดาบที่ส่องประกายและฟาดฟันทุกอุปสรรค! ทว่าความเด็ดขาดอาจนำมาซึ่งความแข็งกระด้าง ขาดความยืดหยุ่น และขาดความเห็นอกเห็นใจในบางสถานการณ์ คุณคือผู้ที่มุ่งมั่นและไม่ยอมประนีประนอมในสิ่งที่เชื่อมั่น และสามารถนำพาทุกสิ่งให้เป็นไปตามกฎเกณฑ์ที่วางไว้",
-                    icon: "🗡️",
-                    keywords: ["แข็งแกร่ง", "แม่นยำ", "มีวินัย"],
-                    pros: ["ยุติธรรม มีระเบียบวินัย", "เด็ดขาด แข็งแกร่ง"],
-                    cons: ["แข็งกระด้าง ยืดหยุ่นน้อย", "ขาดความเห็นอกเห็นใจ"],
-                    compatible: {
-                        "ดิน": "เกิดจากดิน",
-                        "สายฟ้า": "นำไฟฟ้าดี"
-                    },
-                    conflicting: {
-                        "ไฟ": "หลอมละลาย",
-                        "น้ำ": "กัดกร่อนสนิม"
-                    },
-                    bgClass: "bg-metal",
-                    elementTitleColor: "#6A8EAB" // Metal: Muted Blue (softened)
-                },
-                "พลังจิต (Psychic)": {
-                    title: "มโนธาตุ วิญญาณผู้หยั่งรู้แห่งจักรวาล",
-                    description: "ท่านเปรียบดั่งจิตวิญญาณผู้หยั่งรู้ ที่มีสัญชาตญาณคมกล้า สามารถเข้าถึงและเข้าใจความรู้สึกผู้อื่นได้อย่างลึกซึ้ง มีความคิดซับซ้อน ชอบวิเคราะห์ และสามารถควบคุมและเปลี่ยนแปลงสิ่งต่างๆ ได้ด้วยพลังจิตอันไร้ขีดจำกัด คุณมีจินตนาการกว้างไกล และสามารถสร้างสรรค์สิ่งใหม่ๆ จากความคิดนามธรรมได้อย่างน่าทึ่ง ดุจดวงตาแห่งเทพที่ไร้ขีดจำกัดและสามารถเข้าถึงห้วงความรู้แห่งจักรวาล! ทว่าความอ่อนไหวอาจทำให้รับภาระทางอารมณ์มากเกินไป และอาจดูแยกตัวออกจากสังคมในบางครั้ง คุณคือผู้ที่ใช้ปัญญาญาณนำทางชีวิต และสามารถไขปริศนาที่ซับซ้อนที่สุดได้อย่างง่ายดาย",
-                    icon: "🧠",
-                    keywords: ["หยั่งรู้", "ความคิดสร้างสรรค์", "สัจธรรม"],
-                    pros: ["เข้าใจผู้อื่นลึกซึ้ง มีปัญญา", "ความสามารถพิเศษ นักแก้ปัญหา"],
-                    cons: ["อ่อนไหว เครียดง่าย", "โดดเดี่ยว เข้าใจยาก"],
-                    compatible: {
-                        "ความมืด": "เชื่อมมิติที่มองไม่เห็น",
-                        "ลม": "ส่งผ่านความคิดรวดเร็ว"
-                    },
-                    conflicting: {
-                        "โลหะ": "จำกัดพลังจิต",
-                        "ดิน": "ดินต้านจิต"
-                    },
-                    bgClass: "bg-psychic",
-                    elementTitleColor: "#9370DB" // Psychic: MediumPurple (softened)
-                }
-            };
-
-            // Quiz questions and their scoring
-            const questions = [
-                {
-                    question: "1. คุณจะตอบสนองอย่างไรเมื่อตำนานโบราณถูกปลุกให้ตื่นขึ้น และพลังวิญญาณเริ่มแปรปรวน?",
-                    options: [
-                        { text: "วิเคราะห์สถานการณ์อย่างรอบคอบ วางแผนการรับมืออย่างละเอียด", scores: { "ดิน": 2.5, "โลหะ": 1.5, "พลังจิต": 1 } },
-                        { text: "พุ่งเข้าสู่ใจกลางความปั่นป่วนด้วยความกล้าหาญและพลังทั้งหมด", scores: { "ไฟ": 2.5, "สายฟ้า": 2.5, "ลม": 1.5 } },
-                        { text: "ปรับตัวตามกระแสแห่งพลังที่เปลี่ยนแปลง ค้นหาสมดุลใหม่", scores: { "น้ำ": 2.5, "ลม": 2.0, "พฤกษา": 1 } }, 
-                        { text: "ซุ่มสังเกตการณ์จากเงามืด รอจังหวะที่เหมาะสมที่สุดในการลงมือ", scores: { "ความมืด": 2.5, "พลังจิต": 1.5 } }
-                    ]
-                },
-                {
-                    question: "2. ในยามที่โลกมู่คาเข้าสู่จุดเปลี่ยน คุณจะใช้เวลาว่างไปกับสิ่งใด?",
-                    options: [
-                        { text: "บำเพ็ญเพียรในถ้ำศักดิ์สิทธิ์ ขัดเกลาจิตวิญญาณให้บริสุทธิ์ยิ่งขึ้น", scores: { "แสง": 2.5, "พลังจิต": 1.5, "ความมืด": 1 } },
-                        { text: "ออกสำรวจดินแดนที่เปลี่ยนแปลงไป ค้นหาความลับที่ซ่อนอยู่", scores: { "ลม": 2.5 } },
-                        { text: "ฟื้นฟูธรรมชาติที่ร่วงโรยไป หรือทำสมาธิในป่าลึก", scores: { "พฤกษา": 2.5, "ดิน": 1.5, "น้ำ": 1.5 } },
-                        { text: "หลอมสร้างอาวุธหรืออุปกรณ์เวทมนตร์ชิ้นใหม่เพื่อรับมือกับภัย", scores: { "โลหะ": 2.5, "ไฟ": 1, "สายฟ้า": 0.5 } }
-                    ]
-                },
-                {
-                    question: "3. สิ่งใดที่คุณยึดมั่นถือมั่นมากที่สุดในเส้นทางแห่งเซียน?",
-                    options: [
-                        { text: "ความมั่นคงของสำนักและรากฐานวิชาที่แข็งแกร่ง", scores: { "ดิน": 2.5, "โลหะ": 1.5 } },
-                        { text: "การข้ามผ่านขีดจำกัดตนเอง และพัฒนาสู่จุดสูงสุดอย่างต่อเนื่อง", scores: { "พลังจิต": 2.5, "แสง": 2.5, "พฤกษา": 1 } },
-                        { text: "อิสระในการแสวงหาสัจธรรม และความสามารถในการปรับเปลี่ยนตามสถานการณ์", scores: { "ลม": 2.5, "น้ำ": 1.5 } },
-                        { text: "การสร้างตำนานอันยิ่งใหญ่ที่จะถูกจดจำไปชั่วกาล", scores: { "ไฟ": 2.5, "สายฟ้า": 1.5, "ความมืด": 1 } }
-                    ]
-                },
-                {
-                    question: "4. เมื่อมิตรสหายแห่งเซียนตกอยู่ในอันตราย คุณจะตอบสนองอย่างไร?",
-                    options: [
-                        { text: "ค้นหาสาเหตุของอันตรายอย่างถ่องแท้ และวางแผนช่วยอย่างรอบคอบ", scores: { "ดิน": 2.5, "แสง": 2.0, "พลังจิต": 1 } },
-                        { text: "พุ่งทะยานเข้าช่วยเหลือด้วยพลังทั้งหมด ไม่ลังเลแม้เสี้ยววินาที", scores: { "ไฟ": 2.5, "สายฟ้า": 2.5 } },
-                        { text: "เข้าประชิดตัวอย่างนุ่มนวล หลบหลีกการโจมตี และหาช่องทางพยุงมิตรออกมา", scores: { "น้ำ": 2.5, "พฤกษา": 2.5 } },
-                        { text: "ใช้พลังอำนาจที่เฉียบคม จัดการภัยคุกคามให้สิ้นซากในพริบตา", scores: { "โลหะ": 2.5, "ความมืด": 1.5, "ลม": 1.5 } }
-                    ]
-                },
-                {
-                    question: "5. คุณรับมือกับการเปลี่ยนแปลงที่ไม่คาดฝันในวิถีเซียนอย่างไร?",
-                    options: [
-                        { text: "ปรับตัวตามกระแสแห่งโชคชะตา ค้นหาสิ่งใหม่ๆ ที่จะเรียนรู้", scores: { "น้ำ": 2.5, "ลม": 2.0, "พฤกษา": 1.5 } },
-                        { text: "ยึดมั่นในวิถีเดิมให้มากที่สุด และเสริมสร้างความแข็งแกร่งภายใน", scores: { "ดิน": 2.5, "โลหะ": 1.5 } },
-                        { text: "มองว่านี่คือการท้าทายครั้งใหม่ และโอกาสในการปลดปล่อยพลังที่แท้จริง", scores: { "ไฟ": 2.5, "สายฟ้า": 2.5 } },
-                        { text: "มองเห็นนิมิตหมายหรือความหมายที่ซ่อนอยู่เบื้องหลังการเปลี่ยนแปลงนั้น", scores: { "แสง": 2.5, "ความมืด": 1.5, "พลังจิต": 1.5 } }
-                    ]
-                },
-                {
-                    question: "6. ในการรวมพลังเพื่อเผชิญหน้ากับภัยคุกคาม คุณมีบทบาทแบบใดมากที่สุด?",
-                    options: [
-                        { text: "เป็นแกนหลักในการจัดระเบียบทัพและวางกลยุทธ์", scores: { "ดิน": 2.5, "โลหะ": 1.5 } },
-                        { text: "เป็นผู้จุดประกายความหวังและกระตุ้นขวัญกำลังใจของเหล่าเซียน", scores: { "ไฟ": 2.5, "สายฟ้า": 1.5 } },
-                        { text: "เป็นผู้เชื่อมโยงจิตใจของทุกคน และนำพาสู่ความสามัคคี", scores: { "น้ำ": 2.5, "ลม": 2.0, "พฤกษา": 1.5 } },
-                        { text: "เป็นผู้หยั่งรู้ถึงจุดอ่อนของศัตรู และกำหนดทิศทางในการพิชิต", scores: { "แสง": 2.5, "พลังจิต": 2.5, "ความมืด": 1.5 } }
-                    ]
-                },
-                {
-                    question: "7. สถานที่ใดในดินแดนมู่คาที่ทำให้คุณรู้สึกเชื่อมโยงกับพลังวิญญาณมากที่สุด?",
-                    options: [
-                        { text: "ยอดเขาลึกลับที่ปกคลุมด้วยหมอกยามเช้า หรือวิหารโบราณอันเงียบสงบ", scores: { "ความมืด": 2.5, "แสง": 2.0, "พลังจิต": 1.5 } },
-                        { text: "ป่าทึบที่ยังไม่ถูกสำรวจ หรือน้ำตกที่ซ่อนอยู่ในหุบเหว", scores: { "พฤกษา": 2.5, "น้ำ": 1.5, "ดิน": 1.5 } },
-                        { text: "ลานประลองที่กึกก้องด้วยเสียงคำราม หรือท้องฟ้าที่เต็มไปด้วยเมฆฝนคำราม", scores: { "สายฟ้า": 2.5, "ลม": 2.0, "ไฟ": 1.5 } },
-                        { text: "ห้องคลังศิลาเวท หรือโรงหลอมที่เต็มไปด้วยประกายไฟ", scores: { "โลหะ": 2.5, "ไฟ": 1.5 } }
-                    ]
-                },
-                {
-                    question: "8. คุณมีปฏิกิริยาอย่างไรเมื่อเผชิญหน้ากับการทรยศหักหลังในหมู่เซียน?",
-                    options: [
-                        { text: "พยายามทำความเข้าใจแรงจูงใจที่ซับซ้อน และแสวงหาสัจธรรมเบื้องหลัง", scores: { "พลังจิต": 2.5, "แสง": 2.0 } },
-                        { text: "ตอบโต้ด้วยความรวดเร็วและเด็ดขาด ปกป้องความยุติธรรมอันศักดิ์สิทธิ์", scores: { "ไฟ": 2.5, "สายฟ้า": 2.5, "โลหะ": 1.5 } },
-                        { text: "โอบรับความเจ็บปวด และหาวิธีเยียวยาบาดแผลในจิตใจของทุกคน", scores: { "น้ำ": 2.5, "พฤกษา": 1.5 } },
-                        { text: "เก็บงำความโกรธไว้ในเงามืด และรอเวลาที่เหมาะสมเพื่อชำระแค้น", scores: { "ความมืด": 2.5, "ดิน": 1.5 } }
-                    ]
-                },
-                {
-                    question: "9. หากคุณสามารถควบคุมพลังวิญญาณแห่งธาตุได้ คุณอยากให้มันเกี่ยวกับอะไร?",
-                    options: [
-                        { text: "ควบคุมสรรพชีวิตและธรรมชาติให้เติบโตอย่างงดงาม", scores: { "พฤกษา": 2.5, "ดิน": 1.5, "น้ำ": 1.5 } },
-                        { text: "ควบคุมมิติเวลาและห้วงอวกาศเพื่อมองเห็นอนาคต", scores: { "พลังจิต": 2.5, "แสง": 2.0, "ความมืด": 1.5 } },
-                        { text: "ปลดปล่อยพลังทำลายล้างที่สามารถเปลี่ยนแปลงโลกได้ในพริบตา", scores: { "ไฟ": 2.5, "สายฟ้า": 2.5, "โลหะ": 1.5 } },
-                        { text: "เคลื่อนที่ไปในทุกหนแห่งได้อย่างอิสระและรวดเร็วไร้ขีดจำกัด", scores: { "ลม": 2.5, "สายฟ้า": 1.5 } }
-                    ]
-                },
-                {
-                    question: "10. เมื่อต้องสร้างสรรค์สิ่งใหม่ๆ ในดินแดนศักดิ์สิทธิ์มู่คา คุณจะเริ่มต้นอย่างไร?",
-                    options: [
-                        { text: "วางแผนอย่างละเอียดจากข้อมูลพื้นฐานและโครงสร้างที่แข็งแรง", scores: { "ดิน": 2.5, "โลหะ": 1.5 } },
-                        { text: "ปล่อยให้ความคิดสร้างสรรค์ไหลลื่นตามสัญชาตญาณและแรงบันดาลใจ", scores: { "น้ำ": 2.5, "พฤกษา": 1.5, "ลม": 2.0 } },
-                        { text: "จุดประกายไอเดียด้วยความกล้าหาญและไม่กลัวความล้มเหลว", scores: { "ไฟ": 2.5, "สายฟ้า": 1.5, "ลม": 2.0 } },
-                        { text: "ค้นหาความจริงที่ซ่อนอยู่ เพื่อสร้างสรรค์สิ่งที่เหนือความคาดหมาย", scores: { "แสง": 2.5, "ความมืด": 1.5, "พลังจิต": 1.5 } }
-                    ]
-                }
-            ];
-
-            let currentIntroPageIndex = 0;
-            let currentQuestionIndex = 0;
-            let scores = {}; // To store scores for each element
-            const allElements = Object.keys(elements); // Get all element names
-            let introAnimationTimeout = null; // Initialize to null
-
-            // Initialize scores to 0 for all elements
-            allElements.forEach(element => {
-                scores[element] = 0;
-            });
-            console.log('Scores after initial setup (all 0s):', JSON.parse(JSON.stringify(scores)));
-
-
-            // Get DOM elements
-            const introScreen = document.getElementById('introScreen');
-            const introTitle = document.getElementById('introTitle');
-            const introPagesContainer = document.getElementById('introPagesContainer');
-            let introPages;
-            const tapToContinueText = document.getElementById('tapToContinueText');
-
-            const quizScreen = document.getElementById('quizScreen');
-            const progressBar = document.getElementById('progressBar');
-            const questionCard = document.getElementById('questionCard');
-            const questionText = document.getElementById('questionText');
-            const answerOptionsDiv = document.getElementById('answerOptions');
-            const nextButton = document.getElementById('nextButton');
-
-            const loadingScreen = document.getElementById('loadingScreen');
-            const spinnerIcon = document.querySelector('.spinner-icon');
-            const loadingText1 = loadingScreen.querySelector('p:first-of-type');
-            const loadingText2 = loadingScreen.querySelector('p:last-of-type');
-
-            const resultScreen = document.getElementById('resultScreen');
-            const elementIcon = document.getElementById('elementIcon');
-            const elementTitle = document.getElementById('elementTitle');
-            const elementSubtitle = document.getElementById('elementSubtitle');
-            const elementDescription = document.getElementById('elementDescription');
-            const elementKeywordsDiv = document.getElementById('elementKeywords');
-            const elementProsList = document.getElementById('elementPros');
-            const elementConsList = document.getElementById('elementCons');
-            const compatibleList = document.getElementById('compatibleList');
-            const conflictingList = document.getElementById('conflictingList');
-            const restartButton = document.getElementById('restartButton');
-            const mainResultFrame = document.getElementById('mainResultFrame');
-            const finalResultText = document.getElementById('finalResultText');
-            const allElementScoresList = document.getElementById('allElementScoresList');
-
-            const messageBox = document.getElementById('messageBox');
-            const messageText = document.getElementById('messageText');
-            const closeMessageBox = document.getElementById('closeMessageBox');
-            const startButton = document.getElementById('startButton');
-            const gameApp = document.getElementById('gameApp');
-
-            // New debug score elements
-            const quizDebugScores = document.getElementById('quizDebugScores');
-            const quizScoresDisplay = document.getElementById('quizScoresDisplay');
-
-
-            // Body background classes for intro pages 0-3
-            const bodyBgClasses = [
-                'intro-bg-0',
-                'intro-bg-1',
-                'intro-bg-2',
-                'intro-bg-3'
-            ];
-
-            // Main Title "Typing" Effect
-            const fullIntroTitle = 'ยินดีต้อนรับสู่ ดินแดนศักดิ์สิทธิ์มู่คา';
-            function typeIntroTitle() {
-                let charIndex = 0;
-                introTitle.textContent = '';
-                const textSpan = document.createElement('span');
-                textSpan.className = 'text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-blue-600';
-                introTitle.appendChild(textSpan);
-
-                const typeInterval = setInterval(() => {
-                    if (charIndex < fullIntroTitle.length) {
-                        textSpan.textContent += fullIntroTitle.charAt(charIndex);
-                        charIndex++;
-                    } else {
-                        clearInterval(typeInterval);
-                        displayIntroPage();
-                    }
-                }, 50);
-            }
-
-            /**
-             * Shows a custom message box.
-             * @param {string} message - The message to display.
-             */
-            function showMessageBox(message) {
-                messageText.textContent = message;
-                messageBox.classList.remove('hidden');
-            }
-
-            /**
-             * Hides the custom message box.
-             */
-            function hideMessageBox() {
-                messageBox.classList.add('hidden');
-            }
-
-            closeMessageBox.addEventListener('click', hideMessageBox);
-
-            /**
-             * Animates paragraphs in the current intro page.
-             */
-            function animateIntroElements(pageElement) {
-                const paragraphs = pageElement.querySelectorAll('p');
-                clearTimeout(introAnimationTimeout);
-
-                paragraphs.forEach(p => p.classList.remove('show'));
-
-                let delay = 100;
-                paragraphs.forEach((p, pIndex) => {
-                    setTimeout(() => {
-                        p.classList.add('show');
-                    }, delay + (pIndex * 800));
-                });
-
-                const totalAnimationDuration = delay + ((paragraphs.length - 1) * 800) + 1500;
-                introAnimationTimeout = setTimeout(() => {
-                    if (currentIntroPageIndex === introPages.length - 1) {
-                        startButton.classList.add('pulsate');
-                    } else {
-                        tapToContinueText.classList.add('show');
-                    }
-                    introPagesContainer.style.pointerEvents = 'auto';
-                }, totalAnimationDuration);
-            }
-
-            /**
-             * Displays the current introduction page.
-             */
-            function displayIntroPage() {
-                introPages = document.querySelectorAll('.intro-page-content');
-                
-                introPagesContainer.style.opacity = '0';
-                tapToContinueText.classList.remove('show');
-
-                introTitle.classList.remove('hidden-title');
-                document.body.classList.remove('final-intro-overlay-active');
-                
-                Object.values(elements).forEach(el => {
-                    if (el.bgClass) {
-                        document.body.classList.remove(el.bgClass);
-                    }
-                });
-
-                setTimeout(() => {
-                    introPages.forEach((page, index) => {
-                        page.classList.remove('active'); 
-                        page.style.display = 'none';
-                        page.querySelectorAll('p').forEach(p => p.classList.remove('show'));
-                    });
-
-                    const currentPageElement = introPages[currentIntroPageIndex];
-                    if (currentPageElement) {
-                        currentPageElement.classList.add('active');
-                        currentPageElement.style.display = 'block';
-
-                        document.body.className = '';
-                        if (currentIntroPageIndex < bodyBgClasses.length) {
-                            document.body.classList.add(bodyBgClasses[currentIntroPageIndex]);
-                            gameApp.classList.add('intro-active');
-                            introPagesContainer.classList.remove('transparent-frame');
-                            introPagesContainer.style.padding = '25px';
-                            introPagesContainer.style.marginBottom = '20px';
-
-                        } else if (currentIntroPageIndex === introPages.length - 1) {
-                            document.body.classList.add('intro-bg-0'); 
-                            document.body.classList.add('final-intro-overlay-active');
-                            gameApp.classList.add('intro-active');
-                            introPagesContainer.classList.add('transparent-frame');
-                            introPagesContainer.style.padding = '0';
-                            introPagesContainer.style.marginBottom = '0';
-                        }
-                        
-                        if (currentIntroPageIndex === introPages.length - 1) {
-                            introTitle.classList.add('hidden-title');
-                        } else {
-                            introTitle.classList.remove('hidden-title');
-                        }
-
-                        introPagesContainer.style.pointerEvents = 'none';
-                        animateIntroElements(currentPageElement);
-                    }
-
-                    if (currentIntroPageIndex === introPages.length - 1) {
-                        startButton.classList.remove('hidden');
-                        startButton.classList.remove('pulsate');
-                        tapToContinueText.classList.add('hidden');
-                        introPagesContainer.style.cursor = 'default'; 
-                    } else {
-                        startButton.classList.add('hidden');
-                        startButton.classList.remove('pulsate');
-                        tapToContinueText.classList.remove('hidden');
-                        introPagesContainer.style.cursor = 'pointer';
-                    }
-
-                    introPagesContainer.style.opacity = '1';
-                }, 500);
-            }
-
-            /**
-             * Handles advancing to the next intro page when clicking anywhere on the container.
-             */
-            function handleNextIntroPage() {
-                if (introPagesContainer.style.pointerEvents === 'none') {
-                    return;
-                }
-
-                if (currentIntroPageIndex === introPages.length - 1) {
-                    startButton.click();
-                    return;
-                }
-
-                currentIntroPageIndex++;
-                displayIntroPage();
-            }
-
-            /**
-             * Updates the progress bar based on the current question index.
-             */
-            function updateProgressBar() {
-                const totalQuestions = questions.length; 
-                const progress = (currentQuestionIndex / totalQuestions) * 100;
-                progressBar.style.width = `${progress}%`;
-            }
-
-            /**
-             * Updates the debug score display and applies a visual flash.
-             */
-            function updateDebugScoresDisplay() {
-                // Ensure the element exists before trying to update it
-                if (quizScoresDisplay) { 
-                    let scoreText = '';
-                    for (const element of allElements) {
-                        // Ensure the score is a number and format to 1 decimal place
-                        scoreText += `${element.split(' ')[0]}: ${(scores[element] !== undefined ? scores[element] : 0).toFixed(1)} คะแนน\n`; 
-                    }
-                    quizScoresDisplay.textContent = scoreText;
-                    console.log(`Updated quizScoresDisplay content: \n${scoreText}`);
-
-                    // Visual flash effect on quizDebugScores container
-                    if (quizDebugScores) { // Ensure the container also exists
-                        quizDebugScores.style.transition = 'none'; // Disable transition for immediate flash
-                        quizDebugScores.style.backgroundColor = 'rgba(255, 255, 0, 0.8)'; // Bright yellow for flash
-                        setTimeout(() => {
-                            quizDebugScores.style.transition = 'background-color 0.3s ease-in-out'; // Re-enable transition
-                            quizDebugScores.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; // Return to original color
-                        }, 100);
-                    }
-                } else {
-                    console.warn('quizScoresDisplay or quizDebugScores element not found for updating debug scores.');
-                }
-            }
-
-            /**
-             * Displays the current question and its answer options.
-             */
-            function displayQuestion() {
-                questionCard.classList.remove('show');
-                questionText.classList.remove('show');
-                answerOptionsDiv.innerHTML = '';
-
-                setTimeout(() => {
-                    questionCard.classList.add('show');
-
-                    questionText.textContent = `${questions[currentQuestionIndex].question}`;
-                    questionText.classList.add('show');
-                }, 100);
-
-                questions[currentQuestionIndex].options.forEach((option, index) => {
-                    const label = document.createElement('label');
-                    label.className = 'answer-option';
-                    label.innerHTML = `
-                        <input type="radio" name="answer" value="${index}" class="form-radio">
-                        <span>${option.text}</span>
-                    `;
-                    answerOptionsDiv.appendChild(label);
-
-                    setTimeout(() => {
-                        label.classList.add('show');
-                    }, 300 + (index * 100));
-                    
-                    const radioInput = label.querySelector('input[type="radio"]');
-                    radioInput.addEventListener('change', () => {
-                        answerOptionsDiv.querySelectorAll('.answer-option').forEach(opt => {
-                            opt.classList.remove('selected');
-                        });
-                        if (radioInput.checked) {
-                            label.classList.add('selected');
-                        }
-                    });
-                });
-                updateProgressBar();
-                // Check if quizDebugScores exists before trying to manipulate its class
-                if (quizDebugScores) {
-                    quizDebugScores.classList.remove('hidden'); // Ensure debug scores are visible during quiz
-                }
-                updateDebugScoresDisplay(); // Update debug scores for the new question
-            }
-
-            /**
-             * Handles the "Next" button click.
-             * Calculates scores based on the selected answer and moves to the next question or results.
-             */
-            function handleNextQuestion() {
-                const selectedOption = document.querySelector('input[name="answer"]:checked');
-                if (!selectedOption) {
-                    showMessageBox("กรุณาเลือกคำตอบก่อนกด 'ต่อไป'");
-                    console.warn(`[Q${currentQuestionIndex + 1}] No option selected. Scores not updated.`);
-                    return;
-                }
-
-                const selectedOptionIndex = parseInt(selectedOption.value);
-                const currentQuestion = questions[currentQuestionIndex];
-                const selectedAnswerScores = currentQuestion.options[selectedOptionIndex].scores;
-
-                // Log scores before update
-                console.log(`[Q${currentQuestionIndex + 1}] Scores BEFORE update:`, JSON.parse(JSON.stringify(scores)));
-                console.log(`[Q${currentQuestionIndex + 1}] Selected answer scores for option ${selectedOptionIndex}:`, selectedAnswerScores);
-
-                for (const element in selectedAnswerScores) {
-                    if (scores.hasOwnProperty(element)) {
-                        console.log(`    [Q${currentQuestionIndex + 1}] Updating ${element}: From ${scores[element]} + ${selectedAnswerScores[element]}`);
-                        scores[element] += selectedAnswerScores[element];
-                        console.log(`    [Q${currentQuestionIndex + 1}] ${element} new value: ${scores[element]}`);
-                    }
-                }
-
-                // Log scores after update
-                console.log(`[Q${currentQuestionIndex + 1}] Scores AFTER update:`, JSON.parse(JSON.stringify(scores)));
-
-                // Update debug scores immediately after adding scores on screen
-                updateDebugScoresDisplay(); 
-
-                currentQuestionIndex++;
-                if (currentQuestionIndex < questions.length) {
-                    displayQuestion();
-                } else {
-                    quizScreen.classList.add('hidden');
-                    // Check if quizDebugScores exists before trying to manipulate its class
-                    if (quizDebugScores) {
-                        quizDebugScores.classList.add('hidden'); // Hide debug scores when going to loading/result
-                    }
-                    loadingScreen.classList.remove('hidden');
-                    
-                    gameApp.classList.remove('intro-active');
-                    introPagesContainer.classList.remove('transparent-frame'); 
-                    introTitle.classList.remove('hidden-title');
-                    document.body.classList.remove('final-intro-overlay-active');
-                    
-                    document.body.classList.remove(...bodyBgClasses);
-
-                    // Log final scores before showing result
-                    console.log('FINAL SCORES before displaying result:', JSON.parse(JSON.stringify(scores)));
-                    
-                    setTimeout(showResult, 2000);
-                }
-            }
-
-            /**
-             * Determines the dominant element and displays the result screen.
-             */
-            function showResult() {
-                loadingScreen.classList.add('hidden');
-                resultScreen.classList.remove('hidden');
-
-                resultScreen.querySelector('h2').classList.remove('show');
-                mainResultFrame.classList.remove('show');
-                resultScreen.querySelector('.enrollment-link-frame').classList.remove('show');
-                restartButton.classList.remove('show');
-
-                let maxScore = -1;
-                let dominantElement = '';
-
-                // Ensure scores is not empty or all zeros
-                let allScoresAreZero = true;
-                for (const element in scores) {
-                    if (scores[element] > 0) {
-                        allScoresAreZero = false;
-                        break;
-                    }
-                }
-
-                if (allScoresAreZero) {
-                    // Fallback to a default element if all scores are zero or object is empty
-                    dominantElement = "ดิน (Earth)"; 
-                    console.warn('All scores are zero or no scores recorded, defaulting to Earth.');
-                } else {
-                    for (const element in scores) {
-                        if (scores[element] > maxScore) {
-                            maxScore = scores[element];
-                            dominantElement = element;
-                        }
-                    }
-
-                    const possibleDominantElements = [];
-                    for (const element in scores) {
-                        if (scores[element] === maxScore) {
-                            possibleDominantElements.push(element);
-                        }
-                    }
-                    if (possibleDominantElements.length > 1) {
-                        dominantElement = possibleDominantElements[Math.floor(Math.random() * possibleDominantElements.length)];
-                        console.log(`Multiple dominant elements found. Randomly selected: ${dominantElement}`);
-                    }
-                }
-                console.log(`Dominant Element: ${dominantElement} with score: ${maxScore}`);
-
-
-                document.body.classList.add(elements[dominantElement].bgClass);
-                document.documentElement.style.setProperty('--element-dynamic-title-color', elements[dominantElement].elementTitleColor);
-
-                const resultElement = elements[dominantElement];
-                elementTitle.textContent = dominantElement.split(' ')[0];
-                elementSubtitle.textContent = resultElement.title;
-                elementDescription.textContent = resultElement.description;
-                elementIcon.textContent = resultElement.icon;
-
-                elementKeywordsDiv.innerHTML = '';
-                resultElement.keywords.forEach((keyword) => {
-                    const span = document.createElement('span');
-                    span.className = 'keyword-box';
-                    span.textContent = keyword;
-                    elementKeywordsDiv.appendChild(span);
-                });
-
-                elementProsList.innerHTML = '';
-                if (resultElement.pros && resultElement.pros.length > 0) {
-                    resultElement.pros.forEach((pro) => {
-                        const li = document.createElement('li');
-                        li.className = 'pros-cons-list-item';
-                        li.innerHTML = `<span class="pros-icon">✓</span> <span>${pro}</span>`;
-                        elementProsList.appendChild(li);
-                    });
-                } else {
-                    const li = document.createElement('li');
-                    li.className = 'pros-cons-list-item';
-                    li.innerHTML = `<span class="pros-icon">ℹ️</span> <span>ไม่มีข้อมูลจุดดี</span>`;
-                        elementProsList.appendChild(li);
-                }
-
-                elementConsList.innerHTML = '';
-                if (resultElement.cons && resultElement.cons.length > 0) {
-                    resultElement.cons.forEach((con) => {
-                        const li = document.createElement('li');
-                        li.className = 'pros-cons-list-item';
-                        li.innerHTML = `<span class="cons-icon">✕</span> <span>${con}</span>`;
-                        elementConsList.appendChild(li);
-                    });
-                } else {
-                    const li = document.createElement('li');
-                    li.className = 'pros-cons-list-item';
-                    li.innerHTML = `<span class="cons-icon">ℹ️</span> <span>ไม่มีข้อมูลจุดด้อย</span>`;
-                    elementConsList.appendChild(li);
-                }
-
-                compatibleList.innerHTML = '';
-                const compatibleHeader = document.createElement('li');
-                compatibleHeader.className = 'compatibility-list-item font-semibold text-green-700 mb-2';
-                compatibleHeader.innerHTML = `<span class="compatibility-icon">✅</span> เข้ากันได้:`;
-                compatibleList.appendChild(compatibleHeader);
-
-                if (resultElement.compatible && Object.keys(resultElement.compatible).length > 0) {
-                    for (const compElement in resultElement.compatible) {
-                        const li = document.createElement('li');
-                        li.className = 'compatibility-list-item positive';
-                        li.innerHTML = `<span class="compatibility-icon">✅</span> <strong>${compElement.split(' ')[0]}:</strong> ${resultElement.compatible[compElement]}`;
-                        compatibleList.appendChild(li);
-                    }
-                } else {
-                    const li = document.createElement('li');
-                    li.className = 'compatibility-list-item';
-                    li.innerHTML = `<span class="compatibility-icon">ℹ️</span> <span>ไม่มีข้อมูลธาตุที่เข้ากันได้</span>`;
-                    compatibleList.appendChild(li);
-                }
-
-                conflictingList.innerHTML = '';
-                const conflictingHeader = document.createElement('li');
-                conflictingHeader.className = 'compatibility-list-item font-semibold text-red-700 mb-2 mt-4';
-                conflictingHeader.innerHTML = `<span class="compatibility-icon">❌</span> ขัดแย้งกัน:`;
-                conflictingList.appendChild(conflictingHeader);
-
-
-                if (resultElement.conflicting && Object.keys(resultElement.conflicting).length > 0) {
-                    for (const confElement in resultElement.conflicting) {
-                        const li = document.createElement('li');
-                        li.className = 'compatibility-list-item negative';
-                        li.innerHTML = `<span class="compatibility-icon">❌</span> <strong>${confElement.split(' ')[0]}:</strong> ${resultElement.conflicting[confElement]}`;
-                        conflictingList.appendChild(li);
-                    }
-                } else {
-                    const li = document.createElement('li');
-                    li.className = 'compatibility-list-item';
-                    li.innerHTML = `<span class="compatibility-icon">ℹ️</span> <span>ไม่มีข้อมูลธาตุที่ขัดแย้ง</span>`;
-                    conflictingList.appendChild(li);
-                }
-                
-                allElementScoresList.innerHTML = '';
-                for (const element of allElements) {
-                    const li = document.createElement('li');
-                    // Ensure score is a number and format to 1 decimal place
-                    li.textContent = `${element.split(' ')[0]}: ${(scores[element] !== undefined ? scores[element] : 0).toFixed(1)} คะแนน`; 
-                    allElementScoresList.appendChild(li);
-                }
-
-                finalResultText.textContent = "ท่านผู้กล้า! ขอให้การค้นพบธาตุที่แท้จริงในตัวท่านนี้ นำพาซึ่งความเข้าใจตนเองและพลังอันยิ่งใหญ่ เพื่อนำทางสู่ความรุ่งโรจน์ในทุกเส้นทางชีวิตของท่าน!";
-
-                setTimeout(() => { resultScreen.querySelector('h2').classList.add('show'); }, 100);
-                setTimeout(() => { mainResultFrame.classList.add('show'); }, 300);
-                setTimeout(() => { resultScreen.querySelector('.enrollment-link-frame').classList.add('show'); }, 600);
-                setTimeout(() => { restartButton.classList.add('show'); }, 800);
-            }
-
-            /**
-             * Resets the game to its initial state.
-             */
-            function resetGame() {
-                currentIntroPageIndex = 0;
-                currentQuestionIndex = 0;
-                allElements.forEach(element => {
-                    scores[element] = 0;
-                });
-                console.log('Scores reset to 0 by resetGame():', JSON.parse(JSON.stringify(scores)));
-                
-                resultScreen.classList.add('hidden');
-                quizScreen.classList.add('hidden');
-                loadingScreen.classList.add('hidden');
-                introScreen.classList.remove('hidden');
-                
-                // Check if quizDebugScores exists before trying to manipulate its class
-                if (quizDebugScores) {
-                    quizDebugScores.classList.add('hidden'); // Hide debug scores at start of game
-                }
-
-                gameApp.classList.add('intro-active');
-                introPagesContainer.classList.remove('transparent-frame');
-                introTitle.classList.remove('hidden-title');
-                document.body.classList.remove('final-intro-overlay-active');
-                
-                document.body.classList.remove(...bodyBgClasses);
-
-                Object.values(elements).forEach(el => {
-                    if (el.bgClass) {
-                        document.body.classList.remove(el.bgClass);
-                    }
-                });
-                document.documentElement.style.removeProperty('--element-dynamic-title-color');
-
-                document.body.className = '';
-                document.body.classList.add(bodyBgClasses[0]);
-
-                introPagesContainer.style.padding = '25px';
-                introPagesContainer.style.marginBottom = '20px';
-
-                introPages = document.querySelectorAll('.intro-page-content');
-                introPages.forEach(page => {
-                    page.classList.remove('active');
-                    page.style.display = 'none';
-                    page.querySelectorAll('p').forEach(p => p.classList.remove('show'));
-                });
-
-                tapToContinueText.classList.add('hidden');
-                startButton.classList.add('hidden');
-
-                questionCard.classList.remove('show');
-                questionText.classList.remove('show');
-                answerOptionsDiv.innerHTML = '';
-
-                typeIntroTitle();
-                updateProgressBar();
-                updateDebugScoresDisplay(); // Initial update of debug scores
-            }
-
-            // Event Listeners
-            introPagesContainer.addEventListener('click', handleNextIntroPage);
-
-            startButton.addEventListener('click', () => {
-                introScreen.classList.add('hidden');
-                
-                gameApp.classList.remove('intro-active');
-                introPagesContainer.classList.remove('transparent-frame');
-                introTitle.classList.remove('hidden-title');
-                document.body.classList.remove('final-intro-overlay-active');
-                
-                document.body.classList.remove(...bodyBgClasses);
-
-                quizScreen.classList.remove('hidden');
-                displayQuestion();
-            });
-
-            nextButton.addEventListener('click', handleNextQuestion);
-            restartButton.addEventListener('click', resetGame);
-
-            // Initial setup for the game
-            resetGame(); 
+        // Define variables to store scores for each element
+        let currentElementScores = {
+            'ดิน': 0, 'น้ำ': 0, 'ลม': 0, 'ไฟ': 0, 'สายฟ้า': 0,
+            'แสง': 0, 'ความมืด': 0, 'พลังจิต': 0, 'พฤกษา': 0, 'โลหะ': 0
         };
+
+        // Define element data including icons, descriptions, and keywords
+        // Using Emojis for icons for self-contained HTML
+        const elementData = {
+            'ดิน': {
+                icon: '⛰️', // Alternative: '🪨', '🪵', '🧱', '🥔', '🌐' (โลก)
+                description: 'ท่านเป็นเหมือน ผืนดินที่มั่นคง ดุจภูผาที่หยั่งรากลึกและขุนเขาที่สง่างาม จิตใจของท่านเต็มไปด้วยความ อดทน ไม่หวั่นไหวต่อโชคชะตา เป็นที่พึ่งพิงอันมั่นคงให้กับผู้อื่น ท่านมักเลือกเส้นทางที่ มั่นคง ปลอดภัย ยึดมั่นในประเพณี แต่ความมุ่งมั่นนี้อาจกลายเป็นความ ดื้อรั้น แข็งกระด้าง และบางครั้งก็ดู เชื่องช้า หรือ ขาดความยืดหยุ่น ในสายตาคนอื่น',
+                keywords: ['มั่นคง', 'อดทน', 'พึ่งพาได้', 'ผู้ให้', 'ดื้อรั้น'],
+                strengths: ['มั่นคงและน่าเชื่อถือ: เป็นที่พึ่งพาได้เสมอ มีความรับผิดชอบสูง', 'อดทนและหนักแน่น: ไม่หวั่นไหวกับเรื่องเล็กน้อย มีความอดทนสูง'],
+                weaknesses: ['ดื้อรั้นและปรับตัวยาก: ยากที่จะเปลี่ยนความคิดหรือทัศนคติ', 'เชื่องช้าและขาดความยืดหยุ่น: อาจใช้เวลานานในการตัดสินใจหรือลงมือทำ'],
+                compatible: ['พฤกษา', 'โลหะ'],
+                conflicting: ['น้ำ', 'ลม'],
+                background: 'linear-gradient(135deg, #EFEBE9, #F9F9F9, #FFFFFF)' // very light brown-gray faded to white
+            },
+            'น้ำ': {
+                icon: '💧', // Alternative: '🌊', '🧊', '💦', '☔'
+                description: 'ท่านเป็นเหมือน กระแสธาราอันไร้ขอบเขต ยามสงบก็ใสกระจ่าง ยามโกรธก็เชี่ยวกราก ท่านสามารถ ปรับตัว ได้เป็นเลิศ ดุจน้ำที่ไหลไปตามภาชนะ จิตใจของท่าน อ่อนโยน เปี่ยมด้วย เมตตา และ สัญชาตญาณอันลึกล้ำ มีความคิด สร้างสรรค์ ที่ไหลรินไม่ขาดสาย แต่ความ อ่อนไหว นี้ก็อาจทำให้ท่านจมดิ่งในอารมณ์ที่ แปรปรวน และมักเก็บซ่อนความลับไว้ในส่วนลึกของจิตใจ',
+                keywords: ['ปรับตัว', 'อ่อนโยน', 'สัญชาตญาณ', 'แปรปรวน', 'สร้างสรรค์'],
+                strengths: ['ปรับตัวเก่งและเห็นอกเห็นใจ: เข้ากับสถานการณ์และเข้าใจความรู้สึกผู้อื่นได้ดี', 'สัญชาตญาณแม่นยำและสร้างสรรค์: มักเชื่อในลางสังหรณ์และมีไอเดียใหม่ ๆ'],
+                weaknesses: ['อารมณ์แปรปรวนและอ่อนไหวเกินไป: อารมณ์เปลี่ยนแปลงง่ายและรับความรู้สึกผู้อื่นมามาก', 'ไม่เด็ดขาดและเก็บกดอารมณ์: ลังเลในการตัดสินใจและซ่อนความรู้สึก'],
+                compatible: ['พฤกษา', 'โลหะ'],
+                conflicting: ['ไฟ', 'ดิน'],
+                background: 'linear-gradient(135deg, #E0F8F8, #E0FDFD, #FFFFFF)' // very light cyan faded to white
+            },
+            'ลม': {
+                icon: '🌬️', // Alternative: '💨', '🍃', '🌪️', '🕊️', '☁️'
+                description: 'ท่านเป็นเหมือน วายุอันบริสุทธิ์ ดุจปีกวิหคที่โบยบินสู่ฟ้ากว้าง จิตใจของท่านกระหาย อิสระ ไม่ผูกมัดกับสิ่งใด มีความคิด ริเริ่มสร้างสรรค์ เป็นเลิศ ดุจกระแสลมที่นำพาสิ่งใหม่ ๆ มาสู่โลก ท่าน ฉลาดเฉลียว ว่องไว ในทุกการกระทำ แต่ความรักในอิสระนี้ก็อาจนำมาซึ่งความ ไม่มั่นคง เปลี่ยนแปลงง่าย และอาจดูเหมือนไม่จริงจังกับสิ่งใดเป็นพิเศษ',
+                keywords: ['อิสระ', 'รวดเร็ว', 'เปลี่ยนแปลง', 'ว่องไว', 'ใจร้อน'],
+                strengths: ['รักอิสระและปรับตัวเก่ง: ไม่ชอบการผูกมัดและพร้อมที่จะเปลี่ยนแปลง', 'ฉับไวและมีไหวพริบ: มีไอเดียใหม่ ๆ และคิดเร็วทำเร็ว'],
+                weaknesses: ['ไม่มั่นคงและเปลี่ยนแปลงง่าย: อาจจะเปลี่ยนใจง่ายหรือขาดความมุ่งมั่น', 'ใจร้อนและขาดความอดทน: ไม่ชอบอะไรที่รอช้า'],
+                compatible: ['ไฟ', 'สายฟ้า'],
+                conflicting: ['ดิน', 'โลหะ'],
+                background: 'linear-gradient(135deg, #FDFDFD, #FDFDFD, #FFFFFF)' // almost white faded to white
+            },
+            'ไฟ': {
+                icon: '�', // Alternative: '🔆', '💥', '🌞', '🌋' (ภูเขาไฟ)
+                description: 'ท่านเป็นเหมือน เปลวเพลิงอันลุกโชน ดุจดวงอาทิตย์ที่แผดจ้า ท่านมี พลังงานล้นเหลือ เปี่ยมด้วยความ กระตือรือร้น เป็น ผู้นำ โดยธรรมชาติ กล้าหาญ ไม่เกรงกลัว มีความ มุ่งมั่น ดุจไฟที่เผาผลาญทุกสิ่งจนกว่าจะบรรลุเป้าหมาย แต่ไฟก็มีสองคมเช่นกัน หากขาดการควบคุมก็จะกลายเป็นเพลิงกัลป์ และนำมาซึ่งความ ใจร้อน หุนหันพลันแล่น ไม่ยั้งคิด',
+                keywords: ['พลังงานสูง', 'มุ่งมั่น', 'ผู้นำ', 'กล้าหาญ', 'หุนหันพลันแล่น'],
+                strengths: ['มีพลังงานและความกระตือรือร้นสูง: เต็มไปด้วยไฟในการใช้ชีวิต', 'เป็นผู้นำและกล้าหาญ: กล้าตัดสินใจและพร้อมที่จะเผชิญหน้า'],
+                weaknesses: ['ใจร้อนและหุนหันพลันแล่น: อารมณ์ขึ้นลงเร็วและลงมือทำโดยไม่ไตร่ตรอง', 'เผาผลาญตัวเองและชอบการแข่งขัน: อาจใช้พลังงานมากเกินไปและทะเยอทะยานสูง'],
+                compatible: ['ลม', 'พฤกษา'],
+                conflicting: ['น้ำ', 'ความมืด'],
+                background: 'linear-gradient(135deg, #FFFAF5, #FFECEC, #FFFFFF)' // very light peach faded to white
+            },
+            'สายฟ้า': {
+                icon: '⚡', // Alternative: '🌩️', '🔌'
+                description: 'ท่านเป็นเหมือน อัสนีบาตอันเจิดจ้า ดุจประกายฟ้าแห่งการรู้แจ้ง ท่านมีความ รวดเร็ว และ ฉับไว ในทุกกระบวนท่า มี ไหวพริบ เป็นเลิศ สามารถแก้ไขสถานการณ์เฉพาะหน้าได้อย่างน่าอัศจรรย์ มี พลังในการเปลี่ยนแปลง และสร้างสรรค์สิ่งใหม่ ๆ ได้อย่างพลิกฟ้าพลิกแผ่นดิน แต่ความรวดเร็วและพลังอำนาจนี้ก็อาจนำมาซึ่งความ คาดเดาไม่ได้ และอาจสร้างความตื่นตระหนกแก่ผู้ที่อ่อนแอได้',
+                keywords: ['ฉับไว', 'เปลี่ยนแปลง', 'ไหวพริบ', 'คาดเดาไม่ได้', 'ทรงพลัง'],
+                strengths: ['รวดเร็วและมีประสิทธิภาพ: ตัดสินใจและลงมือทำได้อย่างรวดเร็ว', 'มีไหวพริบและทรงพลัง: แก้ปัญหาเฉพาะหน้าได้เก่งและมีพลังในการเปลี่ยนแปลง'],
+                weaknesses: ['คาดเดาไม่ได้และไม่แน่นอน: การกระทำและอารมณ์อาจเปลี่ยนแปลงอย่างกะทันหัน', 'อาจทำลายล้างและใจร้อน: พลังที่มากเกินไปอาจสร้างความเสียหายและไม่ชอบความล่าช้า'],
+                compatible: ['ลม', 'โลหะ'],
+                conflicting: ['ดิน', 'พฤกษา'],
+                background: 'linear-gradient(135deg, #FFFFF0, #FFFFF8, #FFFFFF)' // ivory faded to white
+            },
+            'แสง': {
+                icon: '✨', // Alternative: '🌟', '💡', '🌈', '🔆'
+                description: 'ท่านเป็นเหมือน รัศมีแห่งรุ่งอรุณ ดุจดวงอาทิตย์ที่สาดส่องความมืดมิด จิตใจของท่าน บริสุทธิ์ผุดผ่อง เป็นผู้ มองโลกในแง่ดี เปี่ยมด้วย ปัญญา และความเข้าใจที่ชัดเจน สามารถเป็น แรงบันดาลใจ ให้ผู้อื่นก้าวเดินไปในทางที่ถูกต้อง แต่ความสว่างไสวนี้ก็อาจทำให้ท่าน อ่อนไหวต่อเงามืด และปรารถนา ความสมบูรณ์แบบ ที่อาจยากจะเข้าถึงในโลกแห่งความเป็นจริง',
+                keywords: ['สดใส', 'บริสุทธิ์', 'ปัญญา', 'แรงบันดาลใจ', 'อ่อนไหว'],
+                strengths: ['มองโลกในแง่ดีและบริสุทธิ์ใจ: สร้างบรรยากาศที่ดีและมีความซื่อตรง', 'มีปัญญาและเป็นแรงบันดาลใจ: สามารถให้คำแนะนำที่ดีและชี้นำผู้อื่นได้'],
+                weaknesses: ['อ่อนไหวต่อด้านลบและโลกสวยเกินไป: ไม่ชอบความมืดหรือปัญหาที่ซับซ้อนและอาจมองข้ามความเป็นจริง', 'คาดหวังความสมบูรณ์แบบและอาจตัดสินผู้อื่น: อาจจะกดดันตนเองและผู้อื่นมากเกินไป'],
+                compatible: ['ไฟ', 'ลม'],
+                conflicting: ['ความมืด'],
+                background: 'linear-gradient(135deg, #FFFCEF, #FFFFF5, #FFFFFF)' // very light cream faded to white
+            },
+            'ความมืด': {
+                icon: '🌑', // Alternative: '🌌', '🦇', '🗝️', '👁️', '🌒' (จันทร์เสี้ยว)
+                description: 'ท่านเป็นเหมือน เงามืดอันเร้นลับ ดุจห้วงอวกาศอันไร้ที่สิ้นสุด ท่านไม่จำเป็นต้องชั่วร้าย แต่มีจิตใจที่ ลึกลับซับซ้อน ยากแก่การหยั่งถึง มีความคิด อิสระ และ สัญชาตญาณอันแข็งแกร่ง สามารถมองเห็นในสิ่งที่ผู้อื่นมองไม่เห็น มักจะชอบ เก็บตัว และใคร่ครวญในห้วงความคิดอันลึกซึ้ง แต่ความลึกลับนี้ก็อาจนำมาซึ่งความ โดดเดี่ยว และอาจมีด้านที่ คาดเดาไม่ได้ ซึ่งพร้อมจะเผยออกมาในยามที่ถูกกระตุ้น',
+                keywords: ['ลึกลับ', 'ซับซ้อน', 'อิสระ', 'เก็บตัว', 'คาดเดาไม่ได้'],
+                strengths: ['มีความลึกซึ้งและสัญชาตญาณที่แข็งแกร่ง: เข้าใจสิ่งต่าง ๆ ได้อย่างลึกซึ้งและรับรู้ถึงสิ่งที่ไม่สามารถมองเห็นได้', 'เป็นอิสระและพึ่งพาตนเอง: ไม่ต้องการการยอมรับจากผู้อื่นมากนัก'],
+                weaknesses: ['อาจดูโดดเดี่ยวและเข้าใจยาก: มักเก็บตัวและไม่เปิดเผยตัวตน', 'มีด้านมืดและคาดเดาไม่ได้: หากควบคุมได้ไม่ดี อาจจมดิ่งในความคิดด้านลบ'],
+                compatible: ['พลังจิต', 'น้ำ'],
+                conflicting: ['แสง', 'ไฟ'],
+                background: 'linear-gradient(135deg, #F5F5F7, #E8E8EC, #D0D0D5, #FFFFFF)' // very light gray-purple faded to white, hinting at darker tones
+            },
+            'พลังจิต': {
+                icon: '🔮', // Alternative: '🧠', '✨', '🧘'
+                description: 'ท่านเป็นเหมือน จิตวิญญาณผู้หยั่งรู้ ดุจห้วงความคิดอันไร้ขีดจำกัด ท่านมี สัญชาตญาณ อันคมกล้า สามารถรับรู้และเข้าใจความรู้สึกของผู้อื่นได้อย่างลึกซึ้ง มีความคิดที่ ซับซ้อน และ ล้ำลึก ชอบการ วิเคราะห์ และเชื่อมโยงสิ่งต่าง ๆ เข้าด้วยกัน สามารถควบคุมและเปลี่ยนแปลงสิ่งต่าง ๆ ได้ด้วย พลังแห่งจิต แต่ความอ่อนไหวต่อจิตใจผู้อื่นก็อาจทำให้ท่านรับภาระมากเกินไป และอาจดูเหมือน แยกตัวออกจากสังคม เพื่อรักษาความสมดุลทางจิตใจของตน',
+                keywords: ['หยั่งรู้', 'อ่อนไหว', 'ซับซ้อน', 'วิเคราะห์', 'ควบคุม'],
+                strengths: ['เข้าใจผู้อื่นอย่างลึกซึ้งและมีปัญญา: มีความเห็นอกเห็นใจและคิดวิเคราะห์ได้ดี', 'มีความสามารถพิเศษและเป็นนักแก้ปัญหา: มีศักยภาพที่จะทำสิ่งที่เหนือธรรมชาติ'],
+                weaknesses: ['อ่อนไหวเกินไปและเครียดง่าย: อาจจะรับพลังงานด้านลบมามากเกินไป', 'โดดเดี่ยวและเข้าใจยาก: ความคิดที่ล้ำลึกอาจทำให้ผู้อื่นเข้าไม่ถึง'],
+                compatible: ['ความมืด', 'ลม'],
+                conflicting: ['โลหะ', 'ดิน'],
+                background: 'linear-gradient(135deg, #FFEBEB, #EBF3FF, #EBFBEB, #FFFEEB, #F9EBFF, #FFFFFF)' // very light pastel rainbow
+            },
+            'โลหะ': {
+                icon: '🛡️', // Alternative: '🔗', '⚙️', '🧲', '💎', '⚔️'
+                description: 'ท่านเป็นเหมือน คมดาบศักดิ์สิทธิ์ ที่ฟาดฟันความอยุติธรรม และ โล่เหล็กกล้า ที่ไม่อาจเจาะทะลุได้ จิตวิญญาณของท่าน เฉียบคม เด็ดขาด และเปี่ยมด้วย ระเบียบวินัย ยึดมั่นใน ความถูกต้องและความยุติธรรม อย่างเคร่งครัด มีความสามารถในการ วิเคราะห์และแยกแยะ สิ่งต่าง ๆ ได้อย่างเป็นระบบ แต่ความเด็ดขาดนี้อาจนำมาซึ่งความ แข็งกระด้าง และ การขาดความยืดหยุ่น และบางครั้งก็ ขาดความเห็นอกเห็นใจ หรือความเข้าใจในความรู้สึกของผู้อื่น',
+                keywords: ['เด็ดขาด', 'ยุติธรรม', 'มีระเบียบ', 'แข็งกร้าว', 'วิเคราะห์'],
+                strengths: ['มีความยุติธรรมและมีระเบียบวินัยสูง: ยึดมั่นในความถูกต้องและทำสิ่งต่าง ๆ อย่างเป็นระบบ', 'เด็ดขาดและแข็งแกร่ง: สามารถตัดสินใจและยืนหยัดปกป้องสิ่งที่เชื่อมั่นได้'],
+                weaknesses: ['แข็งกระด้างและยืดหยุ่นน้อย: ไม่ค่อยยอมปรับเปลี่ยนและยึดติดกับกฎเกณฑ์', 'ขาดความเห็นอกเห็นใจและอาจดูเย็นชา: เน้นเหตุผลมากเกินไปและไม่ค่อยแสดงอารมณ์'],
+                compatible: ['ดิน', 'น้ำ'],
+                conflicting: ['ไฟ', 'ลม'],
+                background: 'linear-gradient(135deg, #EFEFF1, #F8F8F9, #FFFFFF)' // very light blue-gray faded to white
+            },
+            'พฤกษา': {
+                icon: '🌳', // Alternative: '🌿', '🌸', '🍄'
+                description: 'ท่านเป็นเหมือน ไม้ยืนต้นอันหยั่งรากลึก และ ดอกไม้ที่เบ่งบานงดงาม จิตใจของท่านสงบเยือกเย็น มีความ อดทน สูงยิ่ง สามารถผ่านพ้นอุปสรรคและเติบโตขึ้นได้อย่างแข็งแกร่ง ท่านมีความ เอื้อเฟื้อเผื่อแผ่ รักธรรมชาติ และเปี่ยมไปด้วย ชีวิตชีวา สามารถฟื้นตัวจากความเสียหายได้รวดเร็ว แต่ความสงบนี้ก็อาจทำให้ท่านดู เชื่องช้า ในสายตาผู้อื่น และ อ่อนไหวต่อสภาพแวดล้อม ที่แปรปรวนจนบางครั้งขาดความกระตือรือร้น',
+                keywords: ['อดทน', 'เติบโต', 'เอื้อเฟื้อ', 'ชีวิตชีวา', 'อ่อนไหว'],
+                strengths: ['ความอดทนสูงและใจเย็น: สามารถรอคอยและอดทนต่อความยากลำบากได้ดี', 'เป็นผู้ให้และฟื้นตัวได้ดี: ชอบช่วยเหลือผู้อื่นและสามารถฟื้นจากความผิดหวังได้'],
+                weaknesses: ['เชื่องช้าและขาดความกระตือรือร้น: อาจใช้เวลานานในการตัดสินใจและดูเฉื่อยชา', 'อ่อนไหวต่อสภาพแวดล้อมและไม่ชอบเผชิญหน้า: อารมณ์เปลี่ยนแปลงตามสิ่งรอบข้างและหลีกเลี่ยงความขัดแย้ง'],
+                compatible: ['น้ำ', 'ดิน'],
+                conflicting: ['ไฟ', 'โลหะ'],
+                background: 'linear-gradient(135deg, #F0FFF0, #F8FFF8, #FFFFFF)' // honeydew faded to white
+            }
+        };
+
+        // Define element scores for each choice
+        const choiceScores = {
+            // Question 1 Scores (Refugee Crisis - Confirmed to this version)
+            'Q1A': { 'น้ำ': 3, 'แสง': 2, 'พฤกษา': 2, 'ดิน': 1 },
+            'Q1B': { 'ดิน': 3, 'โลหะ': 3, 'พลังจิต': 2, 'สายฟ้า': 1 },
+            'Q1C': { 'ลม': 3, 'พลังจิต': 3, 'ความมืด': 2, 'น้ำ': 1 },
+            'Q1D': { 'ไฟ': 3, 'สายฟ้า': 3, 'โลหะ': 2, 'ดิน': 1 },
+
+            // Question 2 Scores (Discipline & Endurance)
+            'Q2A': { 'ดิน': 3, 'โลหะ': 3, 'ไฟ': 2, 'ความมืด': 1 },
+            'Q2B': { 'น้ำ': 2, 'พฤกษา': 3, 'ลม': 1, 'แสง': 1 },
+            'Q2C': { 'แสง': 3, 'พลังจิต': 2, 'น้ำ': 1, 'ดิน': 1 },
+            'Q2D': { 'พลังจิต': 3, 'ลม': 2, 'สายฟ้า': 1, 'ความมืด': 1 },
+
+            // Question 3 Scores (Humility & Learning)
+            'Q3A': { 'ไฟ': 3, 'โลหะ': 2, 'ดิน': 1, 'สายฟ้า': 1 },
+            'Q3B': { 'พลังจิต': 3, 'ลม': 2, 'แสง': 1, 'น้ำ': 1 },
+            'Q3C': { 'ความมืด': 2, 'พฤกษา': 2, 'ดิน': 1, 'ลม': 1 },
+            'Q3D': { 'แสง': 3, 'สายฟ้า': 2, 'โลหะ': 1, 'พลังจิต': 1 },
+
+            // Question 4 Scores (Adaptability & Unknown Phenomenon)
+            'Q4A': { 'ไฟ': 3, 'โลหะ': 3, 'ความมืด': 2, 'ดิน': 1 },
+            'Q4B': { 'ลม': 3, 'พลังจิต': 3, 'น้ำ': 2, 'แสง': 1 },
+            'Q4C': { 'ดิน': 2, 'น้ำ': 1, 'พฤกษา': 2, 'แสง': 1 },
+            'Q4D': { 'สายฟ้า': 3, 'แสง': 2, 'ลม': 1, 'ไฟ': 1 },
+
+            // Question 6 Scores (Unity/Cooperation)
+            'Q6A': { 'ไฟ': 3, 'โลหะ': 3, 'สายฟ้า': 2, 'ความมืด': 1 },
+            'Q6B': { 'ลม': 3, 'น้ำ': 3, 'แสง': 2, 'พลังจิต': 1 },
+            'Q6C': { 'ความมืด': 2, 'ดิน': 1, 'พฤกษา': 2, 'ลม': 1 },
+            'Q6D': { 'น้ำ': 2, 'แสง': 2, 'พฤกษา': 2, 'ดิน': 1 },
+
+            // Question 7 Scores (Trust/Conflict Resolution)
+            'Q7A': { 'ไฟ': 3, 'โลหะ': 3, 'สายฟ้า': 2, 'ความมืด': 1 },
+            'Q7B': { 'ลม': 3, 'พลังจิต': 3, 'น้ำ': 2, 'แสง': 1 },
+            'Q7C': { 'ความมืด': 2, 'ดิน': 1, 'พฤกษา': 2, 'ลม': 1 },
+            'Q7D': { 'แสง': 3, 'ไฟ': 2, 'ดิน': 1, 'โลหะ': 1 },
+
+            // Question 8 Scores (Sacrifice for the Team)
+            'Q8A': { 'น้ำ': 2, 'แสง': 2, 'พฤกษา': 3, 'ดิน': 1 },
+            'Q8B': { 'ไฟ': 3, 'สายฟ้า': 3, 'ความมืด': 2, 'โลหะ': 1 },
+            'Q8C': { 'พลังจิต': 3, 'ลม': 2, 'แสง': 1, 'โลหะ': 1 },
+            'Q8D': { 'ดิน': 3, 'ไฟ': 2, 'โลหะ': 1, 'สายฟ้า': 1 },
+
+            // Question 9 Scores (Elemental Synchronization / Team Learning)
+            'Q9A': { 'ไฟ': 3, 'สายฟ้า': 3, 'โลหะ': 2, 'ความมืด': 1 },
+            'Q9B': { 'พลังจิต': 3, 'ลม': 3, 'แสง': 2, 'น้ำ': 1 },
+            'Q9C': { 'พฤกษา': 3, 'ดิน': 1, 'น้ำ': 1, 'ลม': 1 },
+            'Q9D': { 'แสง': 3, 'น้ำ': 2, 'พฤกษา': 1, 'ดิน': 1 },
+
+            // Question 10 Scores (Facing Strong Adversary / Resilience)
+            'Q10A': { 'ไฟ': 3, 'สายฟ้า': 3, 'โลหะ': 2, 'ความมืด': 1 },
+            'Q10B': { 'ลม': 3, 'พลังจิต': 3, 'แสง': 2, 'ดิน': 1 },
+            'Q10C': { 'ความมืด': 2, 'ดิน': 2, 'น้ำ': 1, 'ลม': 1, 'พฤกษา': 2 },
+            'Q10D': { 'พลังจิต': 3, 'แสง': 2, 'ลม': 1, 'ความมืด': 1 },
+
+            // Question 11 Scores (Prioritizing Team vs. Individual Gain)
+            'Q11A': { 'ไฟ': 3, 'สายฟ้า': 3, 'ความมืด': 2, 'โลหะ': 1 },
+            'Q11B': { 'ดิน': 2, 'น้ำ': 2, 'แสง': 1, 'พฤกษา': 3 },
+            'Q11C': { 'พลังจิต': 3, 'ลม': 2, 'สายฟ้า': 1, 'แสง': 1 },
+            'Q11D': { 'แสง': 2, 'น้ำ': 2, 'ดิน': 1, 'พฤกษา': 3 },
+            
+            // Question 12 Scores (Final Unity / Trust)
+            'Q12A': { 'ไฟ': 3, 'สายฟ้า': 3, 'โลหะ': 2, 'ความมืด': 1 },
+            'Q12B': { 'น้ำ': 2, 'แสง': 2, 'พฤกษา': 3, 'ดิน': 1 },
+            'Q12C': { 'ความมืด': 3, 'ดิน': 2, 'โลหะ': 1, 'ลม': 1 },
+            'Q12D': { 'แสง': 3, 'พลังจิต': 2, 'น้ำ': 1, 'ลม': 1 }
+        };
+
+        // UI Elements
+        const intro1Screen = document.getElementById('intro1');
+        const intro2Screen = document.getElementById('intro2');
+        const intro3Screen = document.getElementById('intro3');
+        const intro4Screen = document.getElementById('intro4');
+        const intro5Screen = document.getElementById('intro5');
+        const intro6Screen = document.getElementById('intro6');
+        const intro7Screen = document.getElementById('intro7');
+        const intro8Screen = document.getElementById('intro8');
+        const intro9Screen = document.getElementById('intro9');
+
+        const question1Screen = document.getElementById('question1');
+        const question2Screen = document.getElementById('question2');
+        const question3Screen = document.getElementById('question3');
+        const question4Screen = document.getElementById('question4');
+        const question6Screen = document.getElementById('question6');
+        const question7Screen = document.getElementById('question7');
+        const question8Screen = document.getElementById('question8');
+        const question9Screen = document.getElementById('question9');
+        const question10Screen = document.getElementById('question10');
+        const question11Screen = document.getElementById('question11');
+        const question12Screen = document.getElementById('question12');
+
+        const loadingScreen = document.getElementById('loadingScreen');
+        const resultScreen = document.getElementById('resultScreen');
+
+        const tapToContinue1 = document.getElementById('tapToContinue1');
+        const tapToContinue2 = document.getElementById('tapToContinue2');
+        const tapToContinue3 = document.getElementById('tapToContinue3');
+        const tapToContinue4 = document.getElementById('tapToContinue4');
+        const tapToContinue5 = document.getElementById('tapToContinue5');
+
+        const question1Buttons = document.querySelectorAll('#question1 .answer-button');
+        const question2Buttons = document.querySelectorAll('#question2 .answer-button');
+        const question3Buttons = document.querySelectorAll('#question3 .answer-button');
+        const question4Buttons = document.querySelectorAll('#question4 .answer-button');
+        const question6Buttons = document.querySelectorAll('#question6 .answer-button');
+        const question7Buttons = document.querySelectorAll('#question7 .answer-button');
+        const question8Buttons = document.querySelectorAll('#question8 .answer-button');
+        const question9Buttons = document.querySelectorAll('#question9 .answer-button');
+        const question10Buttons = document.querySelectorAll('#question10 .answer-button');
+        const question11Buttons = document.querySelectorAll('#question11 .answer-button');
+        const question12Buttons = document.querySelectorAll('#question12 .answer-button');
+
+        const resultDisplay = document.getElementById('resultDisplay');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageCloseButton = document.getElementById('messageCloseButton');
+        const playAgainButton = document.getElementById('playAgainButton');
+
+        // Function to show a message box (replaces alert)
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.add('show');
+        }
+
+        // Event listener to close the message box
+        messageCloseButton.addEventListener('click', () => {
+            messageBox.classList.remove('show');
+        });
+
+        // Function to show "Tap to continue" button instantly
+        function showTapToContinue(buttonElement) {
+            buttonElement.style.visibility = 'visible';
+            buttonElement.style.opacity = '1';
+            buttonElement.style.pointerEvents = 'auto';
+        }
+
+        // Function to hide "Tap to continue" button instantly when clicked
+        function hideTapToContinue(buttonElement) {
+            buttonElement.style.visibility = 'hidden';
+            buttonElement.style.opacity = '0';
+            buttonElement.style.pointerEvents = 'none';
+        }
+
+        // Function to switch screens
+        function showScreen(screenToShow) {
+            // Hide all screens
+            const allScreens = document.querySelectorAll('.game-screen');
+            allScreens.forEach(screen => screen.classList.remove('active'));
+
+            // Show the desired screen
+            screenToShow.classList.add('active');
+
+            // Hide the play again button on non-result screens
+            if (screenToShow !== resultScreen) {
+                playAgainButton.classList.add('hidden');
+                resultDisplay.classList.add('hidden'); // Also hide the result text
+            }
+        }
+
+        // Helper function for auto-advancing intros (text fades in, then moves to next screen)
+        function autoAdvanceIntro(introScreenElement, textAnimationTotalDuration, nextScreenElement) {
+            showScreen(introScreenElement);
+            setTimeout(() => {
+                const tapButton = introScreenElement.querySelector('.tap-to-continue');
+                if (introScreenElement.classList.contains('intro-auto-advance')) {
+                    showScreen(nextScreenElement);
+                } else {
+                    if (tapButton) {
+                        showTapToContinue(tapButton);
+                    }
+                }
+            }, textAnimationTotalDuration);
+        }
+
+
+        // When the page finishes loading
+        window.onload = function() {
+            autoAdvanceIntro(intro1Screen, 3200 + 500, intro2Screen);
+        };
+
+        // Event Listener for Intro 1
+        tapToContinue1.addEventListener('click', () => {
+            hideTapToContinue(tapToContinue1);
+            autoAdvanceIntro(intro2Screen, 2400 + 500, question1Screen);
+        });
+
+        // Event Listener for Intro 2
+        tapToContinue2.addEventListener('click', () => {
+            hideTapToContinue(tapToContinue2);
+            showScreen(question1Screen);
+        });
+
+        // Event Listener for Question 1 buttons
+        question1Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+                autoAdvanceIntro(intro3Screen, 1600 + 500, question2Screen);
+            });
+        });
+
+        // Event Listener for Intro 3
+        tapToContinue3.addEventListener('click', () => {
+            hideTapToContinue(tapToContinue3);
+            showScreen(question2Screen);
+        });
+
+
+        // Event Listeners for Question 2 buttons
+        question2Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+                showScreen(question3Screen);
+            });
+        });
+
+        // Event Listeners for Question 3 buttons
+        question3Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+                showScreen(question4Screen);
+            });
+        });
+
+        // Event Listeners for Question 4 buttons (Now leads directly to Intro 4)
+        question4Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+                autoAdvanceIntro(intro4Screen, 1600 + 500, question6Screen);
+            });
+        });
+
+        // Event Listener for Intro 4
+        tapToContinue4.addEventListener('click', () => {
+            hideTapToContinue(tapToContinue4);
+            showScreen(question6Screen);
+        });
+
+        // Event Listeners for Question 6 buttons
+        question6Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+                showScreen(question7Screen);
+            });
+        });
+
+        // Event Listeners for Question 7 buttons
+        question7Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+                showScreen(question8Screen);
+            });
+        });
+
+        // Event Listeners for Question 8 buttons (Now leads to Intro 5)
+        question8Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+                autoAdvanceIntro(intro5Screen, 2400 + 500, intro6Screen);
+            });
+        });
+
+        // Event Listener for Intro 5
+        tapToContinue5.addEventListener('click', () => {
+            hideTapToContinue(tapToContinue5);
+            autoAdvanceIntro(intro6Screen, 800 + 500, question9Screen);
+        });
+
+        // Event Listeners for Question 9 buttons
+        question9Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+                showScreen(question10Screen);
+            });
+        });
+
+        // Event Listeners for Question 10 buttons
+        question10Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+                showScreen(question11Screen);
+            });
+        });
+
+        // Event Listeners for Question 11 buttons
+        question11Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+                showScreen(question12Screen);
+            });
+        });
+
+        // Event Listeners for Question 12 buttons (Last Question, leads to final Intro sequence then loading and results)
+        question12Buttons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const choice = event.target.dataset.choice;
+                applyScores(choice);
+
+                // Start the final auto-advance intro sequence (Intro 7 -> Intro 8 -> Intro 9 -> Loading -> Results)
+                autoAdvanceIntro(intro7Screen, 800 + 2000, intro8Screen);
+                setTimeout(() => {
+                    autoAdvanceIntro(intro8Screen, 800 + 2000, intro9Screen);
+                    setTimeout(() => {
+                        autoAdvanceIntro(intro9Screen, 2400 + 2000, loadingScreen);
+                        setTimeout(() => {
+                            showScreen(resultScreen);
+                            displayResults();
+                            playAgainButton.classList.remove('hidden');
+                        }, 7000); // Duration for loading screen (7 seconds - slower)
+                    }, 2800); // Delay before Intro 9 starts (after Intro 8 finishes)
+                }, 2800); // Delay before Intro 8 starts (after Intro 7 finishes)
+            });
+        });
+
+        // Event Listener for Play Again Button
+        playAgainButton.addEventListener('click', () => {
+            // Reset scores
+            for (const element in currentElementScores) {
+                currentElementScores[element] = 0;
+            }
+            // Hide result display and play again button
+            resultDisplay.classList.add('hidden');
+            playAgainButton.classList.add('hidden');
+            // Start over from Intro 1
+            autoAdvanceIntro(intro1Screen, 3200 + 500, intro2Screen);
+        });
+
+
+        // Function to add element scores
+        function applyScores(choice) {
+            const scoresToAdd = choiceScores[choice];
+            for (const element in scoresToAdd) {
+                if (currentElementScores.hasOwnProperty(element)) {
+                    currentElementScores[element] += scoresToAdd[element];
+                }
+            }
+            console.log("Current Scores:", currentElementScores);
+        }
+
+        // Function to display results
+        function displayResults() {
+            // Find the element(s) with the highest score
+            let maxScore = -1;
+            let dominantElements = [];
+            for (const element in currentElementScores) {
+                if (currentElementScores[element] > maxScore) {
+                    maxScore = currentElementScores[element];
+                    dominantElements = [element];
+                } else if (currentElementScores[element] === maxScore) {
+                    dominantElements.push(element);
+                }
+            }
+
+            // Get data for the dominant element (if multiple, just use the first one)
+            const dominantElement = dominantElements[0];
+            const data = elementData[dominantElement];
+
+            if (!data) {
+                resultDisplay.innerHTML = `<p class="text-red-500">ไม่พบข้อมูลสำหรับธาตุ: ${dominantElement}</p>`;
+                resultDisplay.classList.remove('hidden');
+                return;
+            }
+
+            // Set the background of the result screen
+            resultScreen.style.background = data.background;
+
+            let resultHtml = `
+                <div class="bg-result-card rounded-xl shadow-2xl result-card-container mx-auto text-center border border-gray-200">
+                    <h1 class="text-xl font-extrabold text-gray-800 mb-3">
+                        ธาตุ${dominantElement}
+                    </h1>
+                    <div class="flex flex-col items-center mb-3">
+                        <span class="element-icon mb-1">${data.icon}</span>
+                        <h2 class="text-lg font-bold text-gray-800 mb-2"></h2>
+                        <p class="text-base text-gray-700 max-w-xs mx-auto mb-2">${data.description}</p>
+                        <div class="flex flex-wrap justify-center gap-1">
+                            ${data.keywords.map(k => `<span class="px-1.5 py-0.5 bg-gray-100 rounded-md border border-gray-300 text-sm text-gray-700 italic">${k}</span>`).join('')}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4 text-base">
+                        <div class="bg-blue-50 p-2 rounded-lg border border-blue-200 text-left">
+                            <h3 class="font-semibold text-blue-800 mb-1">จุดเด่น:</h3>
+                            <ul class="list-disc list-inside text-gray-600 text-sm pl-1.5 mb-1.5">
+                                ${data.strengths.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                            <h3 class="font-semibold text-blue-800 mb-1">ควรพัฒนา:</h3>
+                            <ul class="list-disc list-inside text-gray-600 text-sm pl-1.5">
+                                ${data.weaknesses.map(w => `<li>${w}</li>`).join('')}
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 p-2 rounded-lg border border-green-200 text-left">
+                            <h3 class="font-semibold text-green-800 mb-1">ความสัมพันธ์:</h3>
+                            <div class="mb-1.5">
+                                <h4 class="font-medium text-gray-700 text-base">เข้ากันได้ดีกับ:</h4>
+                                <ul class="list-disc list-inside text-gray-600 text-sm pl-1.5">
+                                    ${data.compatible.map(c => `<li>ธาตุ ${c}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-700 text-base">ขัดแย้งกับ:</h4>
+                                <ul class="list-disc list-inside text-gray-600 text-sm pl-1.5">
+                                    ${data.conflicting.map(f => `<li>ธาตุ ${f}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-base text-gray-800 font-semibold mb-4">
+                        ขอให้การค้นพบธาตุที่แท้จริงในตัวท่านนี้ นำพาซึ่งความเข้าใจตนเองและพลังอันยิ่งใหญ่<br>
+                        เพื่อนำทางสู่ความรุ่งโรจน์ในทุกเส้นทางชีวิตของท่าน!
+                    </p>
+
+                    <div class="bg-white p-3 rounded-lg border border-gray-200 mt-4">
+                        <h3 class="text-lg font-semibold text-purple-800 mb-2">สำหรับเหล่า MUKA68</h3>
+                        <p class="text-base text-gray-700 mb-2">
+                            ผู้ที่ต้องการเข้าร่วมการฝึกตนในดินแดนมู่คา เพื่อค้นพบศักยภาพที่แท้จริงในตัวท่าน<br>
+                            มาร่วมผจญภัยและเติบโตไปพร้อมกับเรา
+                        </p>
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdjQIRD6qnVHZB4vWeQaTfvMeocCXgZqZTfcU8w-CXlWVHcmg/viewform" target="_blank" class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-1.5 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-base">
+                            สมัครเข้าร่วมค่าย MUKA68 ที่นี่!
+                        </a>
+                    </div>
+                </div>
+            `;
+
+            resultDisplay.innerHTML = resultHtml;
+            resultDisplay.classList.remove('hidden');
+        }
+
+        // --- Global Variables (as per instructions, though not used in this front-end only app) ---
+        // These variables are typically provided by the Canvas environment for backend integration.
+        // For a purely client-side HTML app for GitHub, they are just declared here as placeholders.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // These variables are for Firebase integration and not directly used in this standalone HTML/JS game logic.
+        // const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
+
+        // Dummy userId for frontend only, if needed conceptually
+        const userId = 'user_' + crypto.randomUUID();
+        console.log(`App ID: ${appId}`);
+        console.log(`User ID (conceptual): ${userId}`);
+        // console.log(`Firebase Config:`, firebaseConfig); // Uncomment if you want to see the dummy config
+        // console.log(`Initial Auth Token:`, initialAuthToken); // Uncomment if you want to see the dummy token
+
+        // No Firebase initialization/auth needed for this purely frontend game as per current requirements.
+        // If data persistence (e.g., user scores, multiple questions) were requested, Firestore would be integrated here.
+
     </script>
 </body>
 </html>
