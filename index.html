@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เกมค้นหาธาตุ: ปณิธานแห่งเมตตา</title>
+    <title>พลังแห่งธาตุที่ซ่อนอยู่</title>
     <!-- Load Tailwind CSS CDN for quick and responsive design -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Google Font: Kanit for Thai font -->
@@ -21,7 +21,24 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #E0F2F7, #E8F8F0, #F7FCFE, #FFFFFF); /* Default body background, will be covered */
+            background: linear-gradient(135deg, #E0F2F7, #E8F8F0, #F7FCFE, #FFFFFF); /* Default body background */
+        }
+
+        /* New wrapper to enforce portrait aspect ratio */
+        #game-wrapper {
+            position: relative; /* For absolute positioning of game screens */
+            width: 100%; /* Take full width of parent */
+            max-width: 600px; /* Max width for wider screens */
+            height: 100%; /* Take full height of parent initially */
+            max-height: 100vh; /* Ensure it doesn't exceed viewport height */
+            aspect-ratio: 9 / 16; /* Enforce portrait aspect ratio (width / height) */
+            background-color: #fff; /* Fallback background for the wrapper */
+            box-shadow: 0 0 20px rgba(0,0,0,0.2); /* Subtle shadow for game area */
+            border-radius: 15px; /* Rounded corners for the game frame */
+            overflow: hidden; /* Hide anything outside this wrapper */
+            display: flex; /* Flexbox for centering content inside */
+            justify-content: center;
+            align-items: center;
         }
 
         /* Styles for Intro and Question screens */
@@ -30,17 +47,18 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 100%;
-            height: 100%; /* Take 100% of parent (body), which is 100vh */
+            width: 100%; /* Fill the game-wrapper */
+            height: 100%; /* Fill the game-wrapper */
             text-align: center;
-            position: absolute; /* Position absolute to cover the body */
+            position: absolute; /* Position absolute to overlay within game-wrapper */
             top: 0;
             left: 0;
             opacity: 0; /* Start hidden */
             transition: opacity 1s ease-in-out; /* Add transition for display */
             background-size: cover; /* Cover entire area */
             background-position: center; /* Center position */
-            padding-top: 4rem; /* Added padding to push content down */
+            padding-top: 2rem; /* Adjusted padding for portrait mode */
+            padding-bottom: 2rem;
             box-sizing: border-box; /* Ensure padding is included in height calculation */
             overflow-y: auto; /* Allow vertical scrolling on game screens if content overflows */
         }
@@ -98,7 +116,7 @@
             background: linear-gradient(135deg, #EAFCE2, #F2FCF0, #F9FFF8, #FFFFFF);
         }
         .bg-question4 {
-            background: linear-gradient(135deg, #E2F0FC, #EAF2FB, #F5FAFF, #FFFFFF);
+            background: linear-gradient(135deg, #E2F0FC, #EAF3F9, #F5FAFF, #FFFFFF);
         }
         .bg-question6 {
             background: linear-gradient(135deg, #EFF8FF, #F5F9FF, #FBFDFF, #FFFFFF);
@@ -135,10 +153,10 @@
 
         /* Intro text style */
         .intro-text-container {
-            max-width: 80%;
+            max-width: 90%; /* Increased for better readability in portrait */
             margin-bottom: 2rem;
             color: #333; /* Darker text color */
-            font-size: 1.5rem; /* Larger font size */
+            font-size: 1.15rem; /* Adjusted font size */
             font-weight: 300; /* Lighter font weight */
         }
 
@@ -146,7 +164,7 @@
             opacity: 0; /* Start hidden */
             animation: fadeInText 0.8s forwards; /* Reduced animation duration for faster text */
             line-height: 1.8; /* Line spacing */
-            margin-bottom: 1rem; /* Add margin between paragraphs for better spacing */
+            margin-bottom: 0.8rem; /* Adjusted margin between paragraphs */
         }
 
         /* Adjusted Delay for sequential text appearance (faster) */
@@ -190,8 +208,8 @@
         /* "Tap to continue" style */
         .tap-to-continue {
             color: rgba(0, 0, 0, 0.4);
-            font-size: 1.2rem;
-            margin-top: 2rem;
+            font-size: 1.1rem; /* Slightly smaller */
+            margin-top: 1.5rem; /* Adjusted margin */
             cursor: pointer;
             visibility: hidden;
             opacity: 0;
@@ -221,16 +239,16 @@
             background-color: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(5px);
             color: #333;
-            padding: 1rem 2rem;
-            margin: 0.75rem;
+            padding: 0.8rem 1.5rem; /* Adjusted padding */
+            margin: 0.6rem; /* Adjusted margin */
             border-radius: 9999px;
             border: 2px solid rgba(0, 0, 0, 0.1);
-            font-size: 1.1rem;
+            font-size: 0.95rem; /* Adjusted font size */
             cursor: pointer;
             transition: all 0.3s ease-in-out;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 600px;
+            width: 95%; /* Fill more width in portrait */
+            max-width: 500px; /* Adjusted max-width */
             text-align: left;
             box-sizing: border-box;
         }
@@ -276,7 +294,7 @@
         }
 
         .loading-content {
-            font-size: 1.5rem;
+            font-size: 1.4rem; /* Adjusted font size */
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -305,49 +323,76 @@
         /* Adjust main result card padding and max-width */
         .result-card-container {
             padding: 0.85rem; /* Slightly increased padding for text */
-            max-width: 480px; /* Default max-width, slightly larger */
+            max-width: 95%; /* Use percentage for fluid width */
             width: 95%; /* Use percentage for fluid width */
             box-sizing: border-box; /* Include padding in width/height */
-            margin-top: 1rem; /* Small top margin to avoid clipping, let overflow handle if needed */
-            margin-bottom: 1rem; /* Small bottom margin */
+            margin-top: 0.8rem; /* Small top margin to avoid clipping, let overflow handle if needed */
+            margin-bottom: 0.8rem; /* Small bottom margin */
         }
 
         /* Responsive max-width for larger screens (Tailwind breakpoints) */
         @media (min-width: 640px) { /* sm breakpoint */
             .result-card-container {
-                max-width: 580px; /* Increased for small screens */
+                max-width: 500px; /* Adjusted for larger portrait screens */
                 padding: 1.15rem;
+            }
+            .intro-text-container {
+                font-size: 1.25rem; /* Restore slightly larger font on wider screens */
+            }
+            .answer-button {
+                font-size: 1.05rem; /* Restore slightly larger font on wider screens */
+            }
+            .loading-content {
+                font-size: 1.45rem; /* Restore larger font on wider screens */
             }
         }
         @media (min-width: 768px) { /* md breakpoint */
+            #game-wrapper {
+                max-width: 768px; /* Wider for tablets */
+                max-height: 90vh; /* Adjust max height for larger screens */
+            }
             .result-card-container {
-                max-width: 700px; /* Increased for medium screens */
+                max-width: 600px; /* Adjusted for larger portrait screens */
                 padding: 1.4rem;
             }
         }
         @media (min-width: 1024px) { /* lg breakpoint */
+            #game-wrapper {
+                max-width: 900px; /* Even wider for large desktops */
+            }
             .result-card-container {
-                max-width: 800px; /* Increased for large screens */
+                max-width: 700px; /* Adjusted for larger portrait screens */
                 padding: 1.65rem;
             }
         }
 
         /* Font size adjustments for general result display elements */
-        .result-card-container h1 { font-size: 1.8rem; } /* Significantly increased */
-        .result-card-container h2 { font-size: 1.5rem; } /* Significantly increased */
-        .result-card-container .element-icon { font-size: 3.5rem; } /* Slightly increased icon size */
-        .result-card-container p { font-size: 1rem; } /* Base text size (Tailwind text-base) */
-        .result-card-container .text-sm-custom { font-size: 0.875rem; } /* Adjusted from 0.75rem to 0.875rem (text-sm in Tailwind) */
-        .result-card-container .text-xs-custom { font-size: 0.75rem; } /* Adjusted from 0.625rem to 0.75rem (text-xs in Tailwind) */
+        .result-card-container h1 { font-size: 1.55rem; } /* Adjusted for better fit */
+        .result-card-container h2 { font-size: 1.25rem; } /* Adjusted */
+        .result-card-container .element-icon { font-size: 2.9rem; } /* Adjusted icon size */
+        .result-card-container p { font-size: 0.88rem; } /* Adjusted base text size */
+        .result-card-container .text-sm-custom { font-size: 0.78rem; } /* Adjusted */
+        .result-card-container .text-xs-custom { font-size: 0.67rem; } /* Adjusted */
 
-        /* Specific adjustments for very small screens */
+        /* Specific adjustments for very small screens (portrait mobile) */
         @media (max-width: 480px) {
-            .result-card-container h1 { font-size: 1.5rem; } /* Adjusted for very small screens */
-            .result-card-container h2 { font-size: 1.2rem; } /* Adjusted for very small screens */
-            .result-card-container .element-icon { font-size: 3rem; } /* Adjusted icon size for very small screens */
-            .result-card-container p { font-size: 0.875rem; } /* Adjusted for very small screens */
-            .result-card-container .text-sm-custom { font-size: 0.75rem; }
-            .result-card-container .text-xs-custom { font-size: 0.65rem; } /* Slightly smaller for smallest screens */
+            .intro-text-container {
+                font-size: 0.95rem; /* Further reduced for smallest screens */
+            }
+            .answer-button {
+                font-size: 0.8rem; /* Further reduced for smallest screens */
+                padding: 0.5rem 0.8rem; /* Adjusted padding */
+            }
+            .game-screen h2 { /* Targeting question headers specifically on small screens */
+                font-size: 1.0rem; /* Adjusted for smallest screens */
+            }
+            .result-card-container h1 { font-size: 1.2rem; }
+            .result-card-container h2 { font-size: 0.9rem; }
+            .result-card-container .element-icon { font-size: 2.4rem; }
+            .result-card-container p { font-size: 0.75rem; }
+            .result-card-container .text-sm-custom { font-size: 0.65rem; }
+            .result-card-container .text-xs-custom { font-size: 0.55rem; }
+            .loading-content p { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -358,273 +403,270 @@
         <button id="messageCloseButton" class="mt-4 px-4 py-2 bg-blue-500 rounded-lg">ตกลง</button>
     </div>
 
-    <!-- Intro 1 -->
-    <div id="intro1" class="game-screen bg-intro1 active">
-        <div class="intro-text-container">
-            <p>ณ ดินแดนศักดิ์สิทธิ์มู่คา</p>
-            <p>ดินแดนแห่งการศึกษาอันเปี่ยมด้วยพลังแห่งธรรมชาติ</p>
-            <p>ในทุกขวบปี เหล่าเด็กอัจฉริยะจากทั่วสารทิศต่างมุ่งหน้าสู่ที่นี่</p>
-            <p>เพื่อเข้าศึกษาในสำนักเลื่องชื่อแห่งธาตุต่าง ๆ ทั่วพิภพ</p>
+    <!-- Game Wrapper to enforce aspect ratio -->
+    <div id="game-wrapper">
+        <!-- Intro 1 -->
+        <div id="intro1" class="game-screen bg-intro1 active">
+            <div class="intro-text-container">
+                <p>ณ ดินแดนศักดิ์สิทธิ์มู่คา</p>
+                <p>ดินแดนแห่งการศึกษา<br>อันเปี่ยมด้วยพลังแห่งธรรมชาติ</p>
+                <p>ในทุกขวบปี เหล่าเด็กอัจฉริยะ<br>จากทั่วสารทิศต่างมุ่งหน้าสู่ที่นี่</p>
+                <p>เพื่อเข้าศึกษาในสำนักเลื่องชื่อ<br>แห่งธาตุต่าง ๆ ทั่วพิภพ</p>
+            </div>
+            <div id="tapToContinue1" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
         </div>
-        <div id="tapToContinue1" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
-    </div>
 
-    <!-- Intro 2 -->
-    <div id="intro2" class="game-screen bg-intro2">
-        <div class="intro-text-container">
-            <p>แม้นวิชาความรู้จะเป็นสิ่งสำคัญยิ่ง</p>
-            <p>หากแต่จิตใจอันเปี่ยมด้วยคุณธรรมก็เป็นสิ่งที่มิอาจขาดได้</p>
-            <p>ดังนั้น บททดสอบแรกที่เหล่าสำนักศึกษาจัดขึ้นแก่ศิษย์ทั้งปวง</p>
-            <p>จึงมีนามว่า “ปณิธานแห่งเมตตา”</p>
+        <!-- Intro 2 -->
+        <div id="intro2" class="game-screen bg-intro2">
+            <div class="intro-text-container">
+                <p>แม้นวิชาความรู้จะเป็นสิ่งสำคัญยิ่ง</p>
+                <p>หากแต่จิตใจอันเปี่ยมด้วยคุณธรรม<br>ก็เป็นสิ่งที่มิอาจขาดได้</p>
+                <p>ดังนั้น บททดสอบแรก<br>ที่เหล่าสำนักศึกษาจัดขึ้นแก่ศิษย์ทั้งปวง</p>
+                <p>จึงมีนามว่า “ปณิธานแห่งเมตตา”</p>
+            </div>
+            <div id="tapToContinue2" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
         </div>
-        <div id="tapToContinue2" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
-    </div>
 
-    <!-- Question 1 -->
-    <div id="question1" class="game-screen bg-question1">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            ในการทดสอบ “ปณิธานแห่งเมตตา” นี้<br>
-            ท่านจะต้องจัดการวิกฤตผู้อพยพในภาวะทรัพยากรจำกัด<br>
-            โดยไม่ละทิ้งเมตตาและความยุติธรรม ท่านจะบำเพ็ญเมตตาธรรมเยี่ยงไร?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q1A">เปิดรับผู้อพยพอย่างเต็มใจ แบ่งปันทรัพยากรเท่าที่มี แม้ชาวมู่คาต้องอดออมมากขึ้น</button>
-            <button class="answer-button" data-choice="Q1B">จัดระเบียบผู้อพยพอย่างรัดกุม จัดสรรปันส่วนทรัพยากรอย่างยุติธรรม พร้อมส่งคนออกสำรวจหาแหล่งใหม่</button>
-            <button class="answer-button" data-choice="Q1C">สืบหาสาเหตุการอพยพ เพื่อหาทางแก้ไขปัญหาที่ต้นเหตุ พร้อมเจรจาบกับทุกฝ่ายหาทางออกที่ยั่งยืน</button>
-            <button class="answer-button" data-choice="Q1D">ปกป้องทรัพยากรของชาวมู่คาก่อนเป็นอันดับแรก พร้อมส่งสารขอความร่วมมือจากดินแดนอื่นเพื่อรับผู้อพยพไปบางส่วน</button>
+        <!-- Question 1 -->
+        <div id="question1" class="game-screen bg-question1">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                ในการทดสอบ “ปณิธานแห่งเมตตา” นี้<br>
+                ท่านต้องจัดการวิกฤตผู้อพยพ<br>ในภาวะทรัพยากรจำกัด<br>
+                ด้วยเมตตาธรรม ท่านจะทำเช่นไร?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q1A">เปิดรับผู้อพยพอย่างเต็มใจ แบ่งปันทรัพยากรเท่าที่มี แม้ชาวมู่คาต้องอดออมมากขึ้น</button>
+                <button class="answer-button" data-choice="Q1B">จัดระเบียบผู้อพยพอย่างรัดกุม จัดสรรปันส่วนทรัพยากรอย่างยุติธรรม พร้อมส่งคนออกสำรวจหาแหล่งใหม่</button>
+                <button class="answer-button" data-choice="Q1C">สืบหาสาเหตุการอพยพ เพื่อหาทางแก้ไขปัญหาที่ต้นเหตุ พร้อมเจรจาบกับทุกฝ่ายหาทางออกที่ยั่งยืน</button>
+                <button class="answer-button" data-choice="Q1D">ปกป้องทรัพยากรของชาวมู่คาก่อนเป็นอันดับแรก พร้อมส่งสารขอความร่วมมือจากดินแดนอื่นเพื่อรับผู้อพยพไปบางส่วน</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Intro 3 -->
-    <div id="intro3" class="game-screen bg-intro3">
-        <div class="intro-text-container">
-            <p>เมื่อผ่านการทดสอบปณิธานแห่งเมตตามาได้</p>
-            <p>ท่านจะถือว่าเป็นศิษย์ของสำนักอย่างแท้จริง</p>
-            <p>หลังจากนี้ เหล่าศิษย์จะได้พบกับศิษย์พี่และอาจารย์ของตน</p>
-            <p>เพื่อเล่าเรียนและฝึกฝนความสามารถ</p>
-            <p>เตรียมพร้อมสำหรับเทศกาลประกายธาตุ</p>
+        <!-- Intro 3 -->
+        <div id="intro3" class="game-screen bg-intro3">
+            <div class="intro-text-container">
+                <p>เมื่อผ่านการทดสอบปณิธานแห่งเมตตามาได้</p>
+                <p>ท่านจะถือว่าเป็นศิษย์ของสำนักอย่างแท้จริง</p>
+                <p>หลังจากนี้ เหล่าศิษย์จะได้พบกับ<br>ศิษย์พี่และอาจารย์ของตน</p>
+                <p>เพื่อเล่าเรียนและฝึกฝนความสามารถ<br>เตรียมพร้อมสำหรับเทศกาลประกายธาตุ</p>
+            </div>
+            <div id="tapToContinue3" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
         </div>
-        <div id="tapToContinue3" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
-    </div>
 
-    <!-- Question 2 -->
-    <div id="question2" class="game-screen bg-question2">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            ในยามที่การฝึกหนักหน่วงและร่างกายอ่อนล้า<br>
-            หากศิษย์ร่วมสำนักชักชวนให้ท่านหยุดพัก<br>
-            และผ่อนคลาย ท่านจะกระทำเยี่ยงไร?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q2A">ปฏิเสธอย่างสุภาพ มุ่งมั่นฝึกฝนให้บรรลุเป้าหมายที่ตั้งไว้</button>
-            <button class="answer-button" data-choice="Q2B">พักผ่อนเพียงชั่วครู่ ฟื้นฟูร่างกายแล้วกลับมาฝึกต่อด้วยพลังที่เปี่ยมล้น</button>
-            <button class="answer-button" data-choice="Q2C">ชวนศิษย์น้องมาฝึกฝนด้วยกัน เพื่อให้ทุกคนก้าวหน้าไปพร้อมกัน</button>
-            <button class="answer-button" data-choice="Q2D">ใช้พลังจิตวิเคราะห์ว่าการพักผ่อนนี้จะส่งผลดีต่อการฝึกในระยะยาวหรือไม่ แล้วจึงตัดสินใจ</button>
+        <!-- Question 2 -->
+        <div id="question2" class="game-screen bg-question2">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                ยามฝึกหนัก ร่างกายอ่อนล้า<br>
+                ศิษย์ชวนพัก ท่านจะทำเช่นไร?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q2A">ปฏิเสธอย่างสุภาพ มุ่งมั่นฝึกฝนให้บรรลุเป้าหมายที่ตั้งไว้</button>
+                <button class="answer-button" data-choice="Q2B">พักผ่อนเพียงชั่วครู่ ฟื้นฟูร่างกายแล้วกลับมาฝึกต่อด้วยพลังที่เปี่ยมล้น</button>
+                <button class="answer-button" data-choice="Q2C">ชวนศิษย์น้องมาฝึกฝนด้วยกัน เพื่อให้ทุกคนก้าวหน้าไปพร้อมกัน</button>
+                <button class="answer-button" data-choice="Q2D">ใช้พลังจิตวิเคราะห์ว่าการพักผ่อนนี้จะส่งผลดีต่อการฝึกในระยะยาวหรือไม่ แล้วจึงตัดสินใจ</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Question 3 -->
-    <div id="question3" class="game-screen bg-question3">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            อาจารย์ชี้แนะจุดบกพร่องในวิชาของท่าน<br>
-            ท่านจะน้อมรับและพัฒนาตนเยี่ยงไร?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q3A">น้อมรับคำตำหนิและมุ่งมั่นฝึกฝนให้หนักขึ้น เพื่อพิสูงจ์ตนเองว่าคู่ควร</button>
-            <button class="answer-button" data-choice="Q3B">พยายามทำความเข้าใจคำชี้แนะอย่างลึกซึ้ง และขอคำแนะนำเพิ่มเติมจากอาจารย์</button>
-            <button class="answer-button" data-choice="Q3C">ปล่อยวางคำตำหนิ และฝึกฝนตามทางของตน เพราะเชื่อมั่นในวิถีแห่งตน</button>
-            <button class="answer-button" data-choice="Q3D">ค้นคว้าตำราวิชาด้วยตนเองอย่างถี่ถ้วน เพื่อหาทางแก้ไขจุดบกพร่อง</button>
+        <!-- Question 3 -->
+        <div id="question3" class="game-screen bg-question3">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                อาจารย์ชี้จุดบกพร่อง<br>
+                ท่านจะน้อมรับและพัฒนาตนเยี่ยงไร?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q3A">น้อมรับคำตำหนิและมุ่งมั่นฝึกฝนให้หนักขึ้น เพื่อพิสูงจ์ตนเองว่าคู่ควร</button>
+                <button class="answer-button" data-choice="Q3B">พยายามทำความเข้าใจคำชี้แนะอย่างลึกซึ้ง และขอคำแนะนำเพิ่มเติมจากอาจารย์</button>
+                <button class="answer-button" data-choice="Q3C">ปล่อยวางคำตำหนิ และฝึกฝนตามทางของตน เพราะเชื่อมั่นในวิถีแห่งตน</button>
+                <button class="answer-button" data-choice="Q3D">ค้นคว้าตำราวิชาด้วยตนเองอย่างถี่ถ้วน เพื่อหาทางแก้ไขจุดบกพร่อง</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Question 4 -->
-    <div id="question4" class="game-screen bg-question4">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            เผชิญปรากฏการณ์พลังงานลึกลับที่คาดไม่ถึง<br>
-            ท่านจะรับมือกับวิกฤตนี้เยี่ยงไร?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q4A">พยายามใช้พลังวิชาเดิมที่มีอยู่ทั้งหมด เพื่อบังคับให้สถานการณ์คลี่คลาย</button>
-            <button class="answer-button" data-choice="Q4B">สังเกตการณ์อย่างถี่ถ้วน พยายามทำความเข้าใจธรรมชาติของปรากฏการณ์ ก่อนลงมือแก้ไข</button>
-            <button class="answer-button" data-choice="Q4C">รีบกลับไปรายงานอาจารย์ผู้ทรงภูมิปัญญา เพื่อขอคำแนะนำและวิชาใหม่</button>
-            <button class="answer-button" data-choice="Q4D">ใช้สัญชาตญาณและทดลองใช้พลังธาตุต่างๆ อย่างสร้างสรรค์ เพื่อค้นพบหนทางใหม่</button>
+        <!-- Question 4 -->
+        <div id="question4" class="game-screen bg-question4">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                เผชิญปรากฏการณ์พลังงานลึกลับ<br>
+                ท่านจะรับมือกับวิกฤตนี้เยี่ยงไร?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q4A">พยายามใช้พลังวิชาเดิมที่มีอยู่ทั้งหมด เพื่อบังคับให้สถานการณ์คลี่คลาย</button>
+                <button class="answer-button" data-choice="Q4B">สังเกตการณ์อย่างถี่ถ้วน พยายามทำความเข้าใจธรรมชาติของปรากฏการณ์ ก่อนลงมือแก้ไข</button>
+                <button class="answer-button" data-choice="Q4C">รีบกลับไปรายงานอาจารย์ผู้ทรงภูมิปัญญา เพื่อขอคำแนะนำและวิชาใหม่</button>
+                <button class="answer-button" data-choice="Q4D">ใช้สัญชาตญาณและทดลองใช้พลังธาตุต่างๆ อย่างสร้างสรรค์ เพื่อค้นพบหนทางใหม่</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Intro 4 -->
-    <div id="intro4" class="game-screen bg-intro4">
-        <div class="intro-text-container">
-            <p>เมื่อฝึกฝนและเล่าเรียนจนเข้าใจถึงแก่นของธาตุได้ระดับหนึ่ง</p>
-            <p>สิ่งสำคัญก่อนจะเข้าร่วมเทศกาลประกายธาตุ ก็คือ... ความสามัคคี</p>
-            <p>ดังนั้นเหล่าสำนักจึงได้มีบททดสอบที่ชื่อว่า “ด่านผนึกใจ“ เพื่อขัดเกลา<br>
-            ความสามัคคีให้กับเหล่าศิษย์ทั้งหลาย</p>
+        <!-- Intro 4 -->
+        <div id="intro4" class="game-screen bg-intro4">
+            <div class="intro-text-container">
+                <p>เมื่อฝึกฝนและเล่าเรียน<br>จนเข้าใจถึงแก่นของธาตุได้ระดับหนึ่ง</p>
+                <p>สิ่งสำคัญก่อนจะเข้าร่วม<br>เทศกาลประกายธาตุก็คือ...<br>ความสามัคคี</p>
+                <p>ดังนั้นเหล่าสำนักจึงมีบททดสอบ<br>ที่ชื่อว่า “ด่านผนึกใจ“<br>เพื่อขัดเกลาความสามัคคี<br>ให้กับเหล่าศิษย์ทั้งหลาย</p>
+            </div>
+            <div id="tapToContinue4" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
         </div>
-        <div id="tapToContinue4" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
-    </div>
 
-    <!-- Question 6 -->
-    <div id="question6" class="game-screen bg-question6">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            ในการทดสอบ “ด่านผนึกใจ” ทีมต้องเผชิญ<br>
-            ปริศนาซับซ้อน ท่านจะนำพาทีมก้าวข้ามอย่างไร?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q6A">นำโดยตัวเอง วางแผนและสั่งการให้ผู้อื่นทำตาม</button>
-            <button class="answer-button" data-choice="Q6B">รับฟังความคิดเห็นของทุกคน หาจุดร่วม และแบ่งงานตามความถนัด</button>
-            <button class="answer-button" data-choice="Q6C">ให้ทุกคนลองผิดลองถูกด้วยตนเอง เพื่อให้เรียนรู้จากประสบการณ์</button>
-            <button class="answer-button" data-choice="Q6D">ให้กำลังใจและสนับสนุนเพื่อนร่วมทีม แม้ตนเองจะไม่เข้าใจปริศนานั้นทั้งหมด</button>
+        <!-- Question 6 -->
+        <div id="question6" class="game-screen bg-question6">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                ใน “ด่านผนึกใจ” ทีมเผชิญปริศนา<br>
+                ท่านจะนำพาทีมก้าวข้ามอย่างไร?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q6A">นำโดยตัวเอง วางแผนและสั่งการให้ผู้อื่นทำตาม</button>
+                <button class="answer-button" data-choice="Q6B">รับฟังความคิดเห็นของทุกคน หาจุดร่วม และแบ่งงานตามความถนัด</button>
+                <button class="answer-button" data-choice="Q6C">ให้ทุกคนลองผิดลองถูกด้วยตนเอง เพื่อให้เรียนรู้จากประสบการณ์</button>
+                <button class="answer-button" data-choice="Q6D">ให้กำลังใจและสนับสนุนเพื่อนร่วมทีม แม้ตนเองจะไม่เข้าใจปริศนานั้นทั้งหมด</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Question 7 -->
-    <div id="question7" class="game-screen bg-question7">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            ยามที่ความคิดเห็นของศิษย์ร่วมทีม<br>
-            ขัดแย้งกันอย่างรุนแรงจนอาจนำไปสู่<br>
-            ความแตกแยก ท่านจะแก้ไขสถานการณ์นี้อย่างไร?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q7A">เข้าไประงับข้อขัดแย้งอย่างเด็ดขาด ตัดสินใจเพื่อประโยชน์ของกลุ่ม</button>
-            <button class="answer-button" data-choice="Q7B">เปิดโอกาสให้ทุกคนได้แสดงความคิดเห็นอย่างเต็มที่ เพื่อให้เกิดความเข้าใจซึ่งกันและกัน</button>
-            <button class="answer-button" data-choice="Q7C">แยกตัวออกมาเพื่อให้แต่ละฝ่ายได้สงบลง แล้วค่อยหาทางเจรจาเมื่อทุกคนใจเย็น</button>
-            <button class="answer-button" data-choice="Q7D">ชี้ให้เห็นถึงเป้าหมายร่วมกันของภารกิจ เพื่อให้ทุกคนกลับมารวมใจกัน</button>
+        <!-- Question 7 -->
+        <div id="question7" class="game-screen bg-question7">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                ความคิดเห็นขัดแย้ง<br>จนอาจนำไปสู่ความแตกแยก<br>
+                ท่านจะแก้ไขสถานการณ์นี้อย่างไร?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q7A">เข้าไประงับข้อขัดแย้งอย่างเด็ดขาด ตัดสินใจเพื่อประโยชน์ของกลุ่ม</button>
+                <button class="answer-button" data-choice="Q7B">เปิดโอกาสให้ทุกคนได้แสดงความคิดเห็นอย่างเต็มที่ เพื่อให้เกิดความเข้าใจซึ่งกันและกัน</button>
+                <button class="answer-button" data-choice="Q7C">แยกตัวออกมาเพื่อให้แต่ละฝ่ายได้สงบลง แล้วค่อยหาทางเจรจาเมื่อทุกคนใจเย็น</button>
+                <button class="answer-button" data-choice="Q7D">ชี้ให้เห็นถึงเป้าหมายร่วมกันของภารกิจ เพื่อให้ทุกคนกลับมารวมใจกัน</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Question 8 -->
-    <div id="question8" class="game-screen bg-question8">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            ในการทดสอบสุดท้าย ท่านมีโอกาสก้าวหน้า<br>
-            ไปอย่างโดดเดี่ยวเพื่อบรรลุเป้าหมายสูงสุด<br>
-            หากทีมอ่อนแอลง ท่านจะเลือกหนทางใด?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q8A">สละโอกาสส่วนตน เพื่ออยู่เคียงข้างและนำพาทีมให้สำเร็จภารกิจร่วมกัน</button>
-            <button class="answer-button" data-choice="Q8B">ก้าวไปข้างหน้าตามลำพัง เพราะเชื่อว่าการบรรลุเป้าหมายสูงสุดของตนเป็นสิ่งสำคัญที่สุด</button>
-            <button class="answer-button" data-choice="Q8C">หาหนทางที่ชาญฉลาด เพื่อให้ทั้งตนเองและทีมสามารถบรรลุเป้าหมายได้พร้อมกัน</button>
-            <button class="answer-button" data-choice="Q8D">ขอให้ทีมสนับสนุนการก้าวไปข้างหน้าของตน แล้วสัญญาว่าจะกลับมาช่วยเหลือเมื่อบรรลุเป้าหมาย</button>
+        <!-- Question 8 -->
+        <div id="question8" class="game-screen bg-question8">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                ด่านสุดท้ายมีโอกาสก้าวหน้าโดดเดี่ยว<br>
+                แต่ทีมอ่อนแอลง<br>ท่านจะเลือกหนทางใด?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q8A">สละโอกาสส่วนตน เพื่ออยู่เคียงข้างและนำพาทีมให้สำเร็จภารกิจร่วมกัน</button>
+                <button class="answer-button" data-choice="Q8B">ก้าวไปข้างหน้าตามลำพัง เพราะเชื่อว่าการบรรลุเป้าหมายสูงสุดของตนเป็นสิ่งสำคัญที่สุด</button>
+                <button class="answer-button" data-choice="Q8C">หาหนทางที่ชาญฉลาด เพื่อให้ทั้งตนเองและทีมสามารถบรรลุเป้าหมายได้พร้อมกัน</button>
+                <button class="answer-button" data-choice="Q8D">ขอให้ทีมสนับสนุนการก้าวไปข้างหน้าของตน แล้วสัญญาว่าจะกลับมาช่วยเหลือเมื่อบรรลุเป้าหมาย</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Intro 5 -->
-    <div id="intro5" class="game-screen bg-intro5">
-        <div class="intro-text-container">
-            <p><strong>ในทุกปี เมื่อศิษย์ผ่านด่านผนึกใจได้แล้ว</strong></p>
-            <p><strong>จะต้องเข้าร่วมเทศกาลประกายธาตุ</strong><br>
-            ณ หุบเขาแห่งธาตุ (วิทยาลัยแห่งขุนเขา)</p>
-            <p>เทศกาลนี้มิใช่การประลองพลังเพื่อชี้ขาดว่าธาตุใดแกร่งกล้าที่สุด<br>
-            แต่เป็นบททดสอบความสามัคคีและการร่วมใจฝ่าฟันอุปสรรค</p>
+        <!-- Intro 5 -->
+        <div id="intro5" class="game-screen bg-intro5">
+            <div class="intro-text-container">
+                <p><strong>ในทุกปี เมื่อศิษย์ผ่านด่านผนึกใจได้แล้ว</strong></p>
+                <p><strong>จะต้องเข้าร่วมเทศกาลประกายธาตุ</strong><br>
+                ณ หุบเขาแห่งธาตุ (วิทยาลัยแห่งขุนเขา)</p>
+                <p>เทศกาลนี้มิใช่การประลองพลัง<br>เพื่อชี้ขาดว่าธาตุใดแกร่งกล้าที่สุด<br>
+                แต่เป็นบททดสอบความสามัคคี<br>และการร่วมใจฝ่าฟันอุปสรรค</p>
+            </div>
+            <div id="tapToContinue5" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
         </div>
-        <div id="tapToContinue5" class="tap-to-continue">แตะเพื่อก้าวไปข้างหน้า</div>
-    </div>
 
-    <!-- Intro 6 -->
-    <div id="intro6" class="game-screen bg-intro6 intro-auto-advance">
-        <div class="intro-text-container">
-            <p>เพราะ "ธาตุ" คืออัตลักษณ์แท้จริงของแต่ละคน<br>
-            ที่นี่คือบททดสอบแห่งจิตวิญญาณ<br>
-            เพราะ "พลังที่แท้จริง" ไม่ได้อยู่ที่ธาตุ แต่อยู่ที่หัวใจที่รวมเป็นหนึ่งเดียว</p>
+        <!-- Intro 6 -->
+        <div id="intro6" class="game-screen bg-intro6 intro-auto-advance">
+            <div class="intro-text-container">
+                <p>เพราะ "ธาตุ" คืออัตลักษณ์แท้จริงของแต่ละคน<br>ที่นี่คือบททดสอบแห่งจิตวิญญาณ</p>
+                <p>เพราะ "พลังที่แท้จริง" ไม่ได้อยู่ที่ธาตุ<br>แต่อยู่ที่หัวใจที่รวมเป็นหนึ่งเดียว</p>
+            </div>
+            <!-- This intro automatically advances -->
         </div>
-        <!-- This intro automatically advances -->
-    </div>
 
-    <!-- Question 9 -->
-    <div id="question9" class="game-screen bg-question9">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            ในเทศกาลประกายธาตุ ท่านและทีม<br>
-            ต้องร่วมกันเปิดผนึกประตูโบราณที่ต้องการ<br>
-            พลังธาตุประสานกันซับซ้อน แต่ศิษย์บางคนไม่คุ้นเคย ท่านจะทำอย่างไร?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q9A">เป็นแกนนำในการประสานพลังด้วยตนเอง และคอยปรับแก้ให้ผู้อื่นทำตาม</button>
-            <button class="answer-button" data-choice="Q9B">อธิบายหลักการประสานพลังให้ศิษย์ที่ไม่เข้าใจอย่างละเอียด และฝึกซ้อมด้วยกันจนเชี่ยวชาญ</button>
-            <button class="answer-button" data-choice="Q9C">ให้ศิษย์ผู้เชี่ยวชาญแต่ละธาตุผลัดกันลองนำ เพื่อหาวิธีประสานที่ดีที่สุด</button>
-            <button class="answer-button" data-choice="Q9D">ให้กำลังใจและสร้างบรรยากาศผ่อนคลาย เพื่อลดความกดดันให้ทุกคนทำตามสัญชาตญาณ</button>
+        <!-- Question 9 -->
+        <div id="question9" class="game-screen bg-question9">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                ทีมต้องเปิดผนึกประตูโบราณ<br>
+                แต่ศิษย์ไม่คุ้นเคย ท่านจะทำอย่างไร?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q9A">เป็นแกนนำในการประสานพลังด้วยตนเอง และคอยปรับแก้ให้ผู้อื่นทำตาม</button>
+                <button class="answer-button" data-choice="Q9B">อธิบายหลักการประสานพลังให้ศิษย์ที่ไม่เข้าใจอย่างละเอียด และฝึกซ้อมด้วยกันจนเชี่ยวชาญ</button>
+                <button class="answer-button" data-choice="Q9C">ให้ศิษย์ผู้เชี่ยวชาญแต่ละธาตุผลัดกันลองนำ เพื่อหาวิธีประสานที่ดีที่สุด</button>
+                <button class="answer-button" data-choice="Q9D">ให้กำลังใจและสร้างบรรยากาศผ่อนคลาย เพื่อลดความกดดันให้ทุกคนทำตามสัญชาตญาณ</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Question 10 -->
-    <div id="question10" class="game-screen bg-question10">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            ระหว่างการทดสอบ ทีมของท่านเผชิญหน้า<br>
-            กับศัตรูที่แข็งแกร่ง พลังของศิษย์บางคนเริ่มอ่อนล้า<br>
-            ท่านจะนำพาทีมผ่านสถานการณ์นี้ไปได้อย่างไร?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q10A">เข้าปะทะกับศัตรูอย่างเด็ดเดี่ยว เพื่อถ่วงเวลาให้เพื่อนได้ฟื้นตัว</button>
-            <button class="answer-button" data-choice="Q10B">ปรับเปลี่ยนแผนการต่อสู้ โดยใช้จุดแข็งของแต่ละคนให้เกิดประโยชน์สูงสุด</button>
-            <button class="answer-button" data-choice="Q10C">ถอยทัพอย่างมีระเบียบ เพื่อรักษาพลังงานและหาจังหวะสวนกลับในภายหลัง</button>
-            <button class="answer-button" data-choice="Q10D">ใช้พลังจิตสร้างภาพลวงตา เพื่อหลอกล่อศัตรูและสร้างโอกาสให้ทีมรอดพ้น</button>
+        <!-- Question 10 -->
+        <div id="question10" class="game-screen bg-question10">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                ทีมเผชิญศัตรูแกร่ง<br>
+                พลังศิษย์อ่อนล้า<br>
+                ท่านจะนำทีมผ่านอย่างไร?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q10A">เข้าปะทะกับศัตรูอย่างเด็ดเดี่ยว เพื่อถ่วงเวลาให้เพื่อนได้ฟื้นตัว</button>
+                <button class="answer-button" data-choice="Q10B">ปรับเปลี่ยนแผนการต่อสู้ โดยใช้จุดแข็งของแต่ละคนให้เกิดประโยชน์สูงสุด</button>
+                <button class="answer-button" data-choice="Q10C">ถอยทัพอย่างมีระเบียบ เพื่อรักษาพลังงานและหาจังหวะสวนกลับในภายหลัง</button>
+                <button class="answer-button" data-choice="Q10D">ใช้พลังจิตสร้างภาพลวงตา เพื่อหลอกล่อศัตรูและสร้างโอกาสให้ทีมรอดพ้น</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Question 11 -->
-    <div id="question11" class="game-screen bg-question11">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            ในภารกิจ ทีมของท่านได้รับมอบหมายให้ปกป้อง<br>
-            "ผลึกแห่งความสามัคคี" เป้าหมายสำคัญของเทศกาล<br>
-            แต่ท่านมีโอกาสได้รับพลังธาตุใหม่ หากละทิ้งการปกป้องไป ท่านจะตัดสินใจอย่างไร?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q11A">ละทิ้งการปกป้องชั่วคราว เพื่อรับพลังธาตุใหม่ เพราะเชื่อว่าจะนำมาซึ่งชัยชนะที่ยิ่งใหญ่กว่า</button>
-            <button class="answer-button" data-choice="Q11B">ยึดมั่นในการปกป้องผลึก ไม่หวั่นไหวต่อพลังล่อใจ เพราะความสามัคคีคือหัวใจของภารกิจ</button>
-            <button class="answer-button" data-choice="Q11C">พยายามหาวิธีที่จะได้รับพลังธาตุใหม่ โดยไม่ละทิ้งการปกป้องผลึก หรือหาผู้ที่เหมาะสมมาดูแลแทน</button>
-            <button class="answer-button" data-choice="Q11D">หารือกับทีมเกี่ยวกับโอกาสนี้ เพื่อให้ทุกคนมีส่วนร่วมในการตัดสินใจและเข้าใจผลลัพธ์</button>
+        <!-- Question 11 -->
+        <div id="question11" class="game-screen bg-question11">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                ภารกิจปกป้อง "ผลึกแห่งความสามัคคี"<br>
+                มีโอกาสได้พลังธาตุใหม่<br>
+                ท่านจะตัดสินใจอย่างไร?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q11A">ละทิ้งการปกป้องชั่วคราว เพื่อรับพลังธาตุใหม่ เพราะเชื่อว่าจะนำมาซึ่งชัยชนะที่ยิ่งใหญ่กว่า</button>
+                <button class="answer-button" data-choice="Q11B">ยึดมั่นในการปกป้องผลึก ไม่หวั่นไหวต่อพลังล่อใจ เพราะความสามัคคีคือหัวใจของภารกิจ</button>
+                <button class="answer-button" data-choice="Q11C">พยายามหาวิธีที่จะได้รับพลังธาตุใหม่ โดยไม่ละทิ้งการปกป้องผลึก หรือหาผู้ที่เหมาะสมมาดูแลแทน</button>
+                <button class="answer-button" data-choice="Q11D">หารือกับทีมเกี่ยวกับโอกาสนี้ เพื่อให้ทุกคนมีส่วนร่วมในการตัดสินใจและเข้าใจผลลัพธ์</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Question 12 -->
-    <div id="question12" class="game-screen bg-question12">
-        <h2 class="text-xl font-bold mb-8 text-gray-800 px-4">
-            เทศกาลใกล้สิ้นสุด ด่านสุดท้ายต้องใช้พลังแห่งมิตรภาพ<br>
-            เพื่อปลดปล่อย "ประกายธาตุ" ที่แท้จริง<br>
-            แต่มีศิษย์คนหนึ่งในทีมไม่เชื่อมั่น ท่านจะสร้างความสามัคคีขั้นสุดท้ายนี้อย่างไร?
-        </h2>
-        <div class="flex flex-col items-center w-full max-w-2xl">
-            <button class="answer-button" data-choice="Q12A">ใช้พลังวิชาของท่านกระตุ้นและดึงศักยภาพของศิษย์คนนั้นออกมาอย่างเด็ดขาด</button>
-            <button class="answer-button" data-choice="Q12B">เข้าไปปลอบโยนและให้กำลังใจอย่างจริงใจ ชี้ให้เห็นถึงคุณค่าที่เขามีต่อทีม</button>
-            <button class="answer-button" data-choice="Q12C">จัดตำแหน่งให้ศิษย์คนนั้นอยู่ในจุดที่ใช้พลังน้อยที่สุด หรือไม่ต้องใช้เลย เพื่อให้ผ่านไปได้</button>
-            <button class="answer-button" data-choice="Q12D">นำทุกคนในทีมมารวมใจกัน แสดงความเชื่อมั่นในตัวศิษย์คนนั้น เพื่อให้เขารู้สึกถึงพลังแห่งการสนับสนุน</button>
+        <!-- Question 12 -->
+        <div id="question12" class="game-screen bg-question12">
+            <h2 class="font-bold mb-8 text-gray-800 px-4">
+                ด่านสุดท้ายใช้พลังมิตรภาพ<br>
+                เพื่อปลดปล่อย "ประกายธาตุ" ที่แท้จริง<br>
+                แต่ศิษย์ไม่เชื่อมั่น<br>
+                ท่านจะสร้างความสามัคคีนี้อย่างไร?
+            </h2>
+            <div class="flex flex-col items-center w-full max-w-2xl">
+                <button class="answer-button" data-choice="Q12A">ใช้พลังวิชาของท่านกระตุ้นและดึงศักยภาพของศิษย์คนนั้นออกมาอย่างเด็ดขาด</button>
+                <button class="answer-button" data-choice="Q12B">เข้าไปปลอบโยนและให้กำลังใจอย่างจริงใจ ชี้ให้เห็นถึงคุณค่าที่เขามีต่อทีม</button>
+                <button class="answer-button" data-choice="Q12C">จัดตำแหน่งให้ศิษย์คนนั้นอยู่ในจุดที่ใช้พลังน้อยที่สุด หรือไม่ต้องใช้เลย เพื่อให้ผ่านไปได้</button>
+                <button class="answer-button" data-choice="Q12D">นำทุกคนในทีมมารวมใจกัน แสดงความเชื่อมั่นในตัวศิษย์คนนั้น เพื่อให้เขารู้สึกถึงพลังแห่งการสนับสนุน</button>
+            </div>
         </div>
-    </div>
 
 
-    <!-- Intro 7 -->
-    <div id="intro7" class="game-screen bg-intro7 intro-auto-advance">
-        <div class="intro-text-container">
-            <p>หลังผ่านเทศกาลประกายธาตุ เหล่าศิษย์<br>จะกลายเป็นศิษย์ของดินแดนมู่คาและ<br>ต้องเรียนรู้คุณธรรมผ่าน "แก่นแท้แห่งมู่คา"</p>
+        <!-- Intro 7 -->
+        <div id="intro7" class="game-screen bg-intro7 intro-auto-advance">
+            <div class="intro-text-container">
+                <p>หลังผ่านเทศกาลประกายธาตุ<br>เหล่าศิษย์จะกลายเป็นศิษย์ของดินแดนมู่คา</p>
+                <p>และต้องเรียนรู้คุณธรรม<br>ผ่าน "แก่นแท้แห่งมู่คา"</p>
+            </div>
         </div>
-    </div>
 
-    <!-- Intro 8 -->
-    <div id="intro8" class="game-screen bg-intro8 intro-auto-advance">
-        <div class="intro-text-container">
-            <p>หลังศึกษา ฝึกฝนและเข้าใจ "แก่นแท้แห่งมู่คา"<br>
-            ถึงเวลาเฉลิมฉลองยินดีกับเหล่าศิษย์<br>
-            ในงานเลี้ยงพิเศษนี้</p>
+        <!-- Intro 8 -->
+        <div id="intro8" class="game-screen bg-intro8 intro-auto-advance">
+            <div class="intro-text-container">
+                <p>หลังศึกษา ฝึกฝน<br>และเข้าใจ "แก่นแท้แห่งมู่คา"</p>
+                <p>ถึงเวลาเฉลิมฉลองยินดีกับเหล่าศิษย์<br>ในงานเลี้ยงพิเศษนี้</p>
+            </div>
         </div>
-    </div>
 
-    <!-- Intro 9 -->
-    <div id="intro9" class="game-screen bg-intro9 intro-auto-advance">
-        <div class="intro-text-container">
-            <p>งานเลี้ยงส่งนี้ไม่ใช่ครั้งสุดท้ายที่เราจะได้เจอกัน<br>
-            แต่คือจุดเริ่มต้นศิษย์ทุกคนจะได้ออกไป<br>
-            ผจญภัยในโลกยุทธภพ เป็นจอมยุทธ์เปี่ยมคุณธรรม</p>
+        <!-- Intro 9 -->
+        <div id="intro9" class="game-screen bg-intro9 intro-auto-advance">
+            <div class="intro-text-container">
+                <p>งานเลี้ยงส่งนี้ไม่ใช่ครั้งสุดท้าย<br>ที่เราจะได้เจอกัน</p>
+                <p>แต่คือจุดเริ่มต้นที่ศิษย์ทุกคน<br>จะได้ออกไปผจญภัยในโลกยุทธภพ</p>
+                <p>เป็นจอมยุทธ์เปี่ยมคุณธรรม</p>
+            </div>
         </div>
-    </div>
 
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="game-screen bg-loading">
-        <div class="loading-content">
-            <p>กำลังถักทอเส้นใยแห่งโชคชะตา...<br>เพื่อเปิดเผยธาตุที่ซ่อนเร้นในตัวท่าน</p>
-            <div class="hourglass-emoji">⏳</div>
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="game-screen bg-loading">
+            <div class="loading-content">
+                <p>กำลังถักทอเส้นใยแห่งโชคชะตา...<br>เพื่อเปิดเผยธาตุที่ซ่อนเร้นในตัวท่าน</p>
+                <div class="hourglass-emoji">⏳</div>
+            </div>
         </div>
-    </div>
 
-    <!-- Result Screen -->
-    <div id="resultScreen" class="game-screen bg-result">
-        <div id="resultDisplay" class="mt-4 text-gray-700"></div>
-        <button id="playAgainButton" class="mt-4 answer-button hidden">เล่นใหม่อีกครั้ง</button>
+        <!-- Result Screen -->
+        <div id="resultScreen" class="game-screen bg-result">
+            <div id="resultDisplay" class="mt-4 text-gray-700"></div>
+            <button id="playAgainButton" class="mt-4 answer-button hidden">เล่นใหม่อีกครั้ง</button>
+        </div>
     </div>
 
 
@@ -669,7 +711,7 @@
                 background: 'linear-gradient(135deg, #FDFDFD, #FDFDFD, #FFFFFF)' // almost white faded to white
             },
             'ไฟ': {
-                icon: '�', // Alternative: '🔆', '💥', '🌞', '🌋' (ภูเขาไฟ)
+                icon: '🔥', // Alternative: '🔆', '💥', '🌞', '🌋' (ภูเขาไฟ)
                 description: 'ท่านเป็นเหมือน เปลวเพลิงอันลุกโชน ดุจดวงอาทิตย์ที่แผดจ้า ท่านมี พลังงานล้นเหลือ เปี่ยมด้วยความ กระตือรือร้น เป็น ผู้นำ โดยธรรมชาติ กล้าหาญ ไม่เกรงกลัว มีความ มุ่งมั่น ดุจไฟที่เผาผลาญทุกสิ่งจนกว่าจะบรรลุเป้าหมาย แต่ไฟก็มีสองคมเช่นกัน หากขาดการควบคุมก็จะกลายเป็นเพลิงกัลป์ และนำมาซึ่งความ ใจร้อน หุนหันพลันแล่น ไม่ยั้งคิด',
                 keywords: ['พลังงานสูง', 'มุ่งมั่น', 'ผู้นำ', 'กล้าหาญ', 'หุนหันพลันแล่น'],
                 strengths: ['มีพลังงานและความกระตือรือร้นสูง: เต็มไปด้วยไฟในการใช้ชีวิต', 'เป็นผู้นำและกล้าหาญ: กล้าตัดสินใจและพร้อมที่จะเผชิญหน้า'],
@@ -1118,12 +1160,12 @@
 
             let resultHtml = `
                 <div class="bg-result-card rounded-xl shadow-2xl result-card-container mx-auto text-center border border-gray-200">
-                    <h1 class="text-xl font-extrabold text-gray-800 mb-3">
+                    <h1 class="font-extrabold text-gray-800 mb-3">
                         ธาตุ${dominantElement}
                     </h1>
                     <div class="flex flex-col items-center mb-3">
                         <span class="element-icon mb-1">${data.icon}</span>
-                        <h2 class="text-lg font-bold text-gray-800 mb-2"></h2>
+                        <h2 class="font-bold text-gray-800 mb-2"></h2>
                         <p class="text-base text-gray-700 max-w-xs mx-auto mb-2">${data.description}</p>
                         <div class="flex flex-wrap justify-center gap-1">
                             ${data.keywords.map(k => `<span class="px-1.5 py-0.5 bg-gray-100 rounded-md border border-gray-300 text-sm text-gray-700 italic">${k}</span>`).join('')}
@@ -1159,7 +1201,7 @@
                         </div>
                     </div>
 
-                    <p class="text-base text-gray-800 font-semibold mb-4">
+                    <p class="font-semibold mb-4 text-gray-800">
                         ขอให้การค้นพบธาตุที่แท้จริงในตัวท่านนี้ นำพาซึ่งความเข้าใจตนเองและพลังอันยิ่งใหญ่<br>
                         เพื่อนำทางสู่ความรุ่งโรจน์ในทุกเส้นทางชีวิตของท่าน!
                     </p>
